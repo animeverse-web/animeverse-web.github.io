@@ -3,10 +3,6 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1" name="viewport"/>
-    <meta property="og:title" content="Animeverse | Premium Hindi Dubbed Anime">
-<meta property="og:description" content="Watch the latest Anime in HD Hindi Dubbed for free!">
-<meta property="og:image" content="./Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
-<meta property="og:url" content="https://animeverse-web.github.io/">
     <title>Animeverse | Premium HD Hindi Dubbed</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Quicksand:wght@300;500&display=swap" rel="stylesheet">
     
@@ -22,7 +18,7 @@
             color: #fff; 
             margin: 0; 
             padding: 0; 
-            padding-top: 85px; /* Fixed Header aur Search ke liye space */
+            padding-top: 85px; 
             overflow-x: hidden; 
             scroll-behavior: smooth; 
         }
@@ -98,7 +94,6 @@
         .anime-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); }
         @media (min-width: 768px) { .anime-grid { grid-template-columns: repeat(6, 1fr); } }
 
-        /* --- CLICK & BLUR EFFECT --- */
         .anime-card { 
             background: rgba(15,15,15,0.95); 
             border-radius: 8px; 
@@ -107,7 +102,7 @@
             color: white; 
             border: 1px solid rgba(255,255,255,0.1); 
             position: relative; 
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; 
+            transition: transform 0.2s, box-shadow 0.2s; 
             -webkit-tap-highlight-color: transparent;
         }
         .badge-hd { position: absolute; top: 5px; left: 5px; background: var(--primary-color); font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5; }
@@ -115,6 +110,7 @@
         .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; transition: filter 0.3s ease; }
         .anime-title { padding: 6px 4px; font-size: 0.7rem; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* --- CLICK & BLUR EFFECT --- */
         .anime-card::after {
             content: '▶';
             position: absolute;
@@ -127,15 +123,28 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-
         .anime-card.clicked { transform: scale(0.95); border-color: #0088cc !important; box-shadow: 0 0 20px rgba(0, 136, 204, 0.6); }
         .anime-card.clicked img { filter: brightness(0.5) sepia(1) hue-rotate(190deg) saturate(2) blur(3px); }
         .anime-card.clicked::after { transform: translate(-50%, -50%) scale(1); filter: none !important; }
 
-        /* --- OTHER UI --- */
         footer { background: #000; padding: 40px 20px 100px; text-align: center; border-top: 1px solid #1a1a1a; margin-top: 40px; }
         .bottom-actions { position: fixed; bottom: 0; width: 100%; display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.95); z-index: 1001; box-sizing: border-box; }
         .btn-action { flex: 1; padding: 13px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #fff; font-size: 0.75rem; }
+
+        /* Modal Background Blur */
+        #comingSoonModal {
+            display:none; 
+            position:fixed; 
+            z-index:9999; 
+            left:0; top:0; 
+            width:100%; height:100%; 
+            background:rgba(0,0,0,0.85); 
+            backdrop-filter: blur(8px); 
+            align-items:center; 
+            justify-content:center; 
+            padding: 15px; 
+            box-sizing: border-box;
+        }
 
         .skeleton { background: #1a1a1a; background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 8px; }
         @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -147,7 +156,7 @@
 <header>
     <button class="menu-btn" onclick="document.getElementById('sideNav').classList.add('open')">☰</button>
     <div class="logo-container">
-        <img src="./Gemini_Generated_Image_u4n26yu4n26yu4n2.png" alt="Animeverse Logo">
+        <img src="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png" alt="Animeverse Logo">
     </div>
     <button class="search-trigger" onclick="toggleSearch()">🔍</button>
 </header>
@@ -155,8 +164,8 @@
 <nav id="sideNav">
     <div class="close-btn" onclick="document.getElementById('sideNav').classList.remove('open')">✕</div>
     <a href="./index.html">🏠 Home</a>
-    <a href="./adventure.html" onclick="smartCheck(event, this)">⚔️ Adventure</a>
-    <a href="./action.html" onclick="smartCheck(event, this)">🥊 Action</a>
+    <a href="#" onclick="showComingSoon(); return false;">⚔️ Adventure</a>
+    <a href="#" onclick="showComingSoon(); return false;">🥊 Action</a>
     <a href="./about us.html">ℹ️ About Us</a>
     <a href="./contact us.html">📞 Contact Us</a>
     <a href="schedule.html" class="schedule-btn">📅 Schedule</a>
@@ -207,13 +216,13 @@
     </section>
 </div>
 
-<div id="comingSoonModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; box-sizing: border-box;">
+<div id="comingSoonModal">
     <div style="background:#111; border:2px solid var(--primary-color); padding:30px 20px 20px; border-radius:20px; text-align:center; width:100%; max-width:350px; box-shadow: var(--accent-glow); position: relative;">
         <div onclick="closeModal()" style="position: absolute; top: 10px; right: 15px; color: #888; font-size: 20px; cursor: pointer;">&times;</div>
         <div style="font-size: 50px;">⏳</div>
-        <h2 style="color:var(--primary-color); border:none;">COMING SOON</h2>
-        <p style="font-size:13px; color:#eee;">Processing Hindi Dubbed episodes shortly!</p>
-        <a href="https://t.me/animeverse648" target="_blank" class="hero-btn" style="width:100%; box-sizing:border-box;">REQUEST ON TELEGRAM</a>
+        <h2 style="color:var(--primary-color); border:none; margin-bottom: 10px;">COMING SOON</h2>
+        <p style="font-size:13px; color:#eee; margin-bottom: 20px;">We're processing Hindi Dubbed episodes shortly!</p>
+        <a href="https://t.me/animeverse648" target="_blank" class="hero-btn" style="width:100%; box-sizing:border-box; display: block;">REQUEST ON TELEGRAM</a>
     </div>
 </div>
 
@@ -228,10 +237,6 @@
 </div>
 
 <script>
-const firebaseConfig = { apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", projectId: "animeverse-9eada", appId: "1:296666771306:web:df732df90b1e5e9108ff13" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
 const TMDB_API_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMG_PATH = 'https://image.tmdb.org/t/p/w500';
@@ -245,10 +250,15 @@ const clearBtn = document.getElementById('clearSearch');
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvGZARZP6Mg8n9IzHbyJbA0IFLl-R092WC4j4iNEuoMix0WFs5am5XTElypkz-Fo77IpAhNFssDwZ4/pub?output=csv';
 let animeData = [];
 
+// Initialize Firebase (Check if values exist)
+const firebaseConfig = { apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", projectId: "animeverse-9eada", appId: "1:296666771306:web:df732df90b1e5e9108ff13" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 async function loadDataFromSheet() {
-    const memoryData = sessionStorage.getItem('myAnimeData');
-    if (memoryData) {
-        animeData = JSON.parse(memoryData);
+    const cachedData = sessionStorage.getItem('animeDataCache');
+    if (cachedData) {
+        animeData = JSON.parse(cachedData);
         window.allTitles = animeData.map(a => a.title);
         renderGrids(true);
         loadHero();
@@ -267,7 +277,7 @@ async function loadDataFromSheet() {
                 isNew: cols[3]?.replace(/"/g, '').trim().toLowerCase() === 'yes'
             };
         }).filter(item => item.title);
-        sessionStorage.setItem('myAnimeData', JSON.stringify(animeData));
+        sessionStorage.setItem('animeDataCache', JSON.stringify(animeData));
         window.allTitles = animeData.map(a => a.title);
         renderGrids();
         loadHero();
@@ -297,55 +307,23 @@ async function fetchKitsu(title) {
     } catch (e) { return null; }
 }
 
-function showComingSoon() { document.getElementById('comingSoonModal').style.display = 'flex'; }
-function closeModal() { document.getElementById('comingSoonModal').style.display = 'none'; }
-
-function toggleSearch() { 
-    searchContainer.classList.toggle('active'); 
-    if(searchContainer.classList.contains('active')) { window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => searchInput.focus(), 400); }
-}
-
-function triggerSearch() { const val = searchInput.value.trim(); if(val) selectSearch(val); }
-
-window.selectSearch = function(term) {
-    const matches = animeData.filter(t => t.title.toLowerCase().includes(term.toLowerCase()));
-    if (matches.length === 0 && term !== "") { alert("Not found."); return; }
-    searchInput.value = term;
-    suggestionsBox.style.display = 'none';
-    clearBtn.style.display = 'block';
-    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => document.getElementById(id).style.display = 'none');
-    document.getElementById('popularHeading').textContent = `Results for "${term}"`;
-    renderSearchGrid(matches);
-};
-
-async function renderSearchGrid(matches) {
-    const container = document.getElementById('popularContainer');
-    container.innerHTML = 'Searching...';
-    const cards = [];
-    for (const a of matches) {
-        const details = await fetchAnimeData(a.title);
-        if(details) cards.push(createCard({...a, details}));
-    }
-    container.innerHTML = '';
-    cards.forEach(c => container.appendChild(c));
-}
-
-function resetUI() {
-    suggestionsBox.style.display = 'none';
-    clearBtn.style.display = 'none';
-    document.getElementById('popularHeading').textContent = "Popular Anime";
-    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => document.getElementById(id).style.display = 'block');
-    renderGrids(true);
-}
-
 function createCard(anime) {
     const card = document.createElement('a');
     card.className = 'anime-card';
-    const hasLink = anime.link && anime.link !== "" && anime.link !== "null";
+    
+    // YAHAN FIX HAI: Link check logic ko aur majboot kiya hai
+    const rawLink = String(anime.link).trim().toLowerCase();
+    const hasLink = (rawLink && rawLink !== "" && rawLink !== "null" && rawLink !== "undefined" && rawLink !== "#");
+    
     card.href = hasLink ? anime.link : "javascript:void(0)";
     card.innerHTML = `<span class="badge-hd">HD | HINDI</span>${anime.isNew ? '<span style="position: absolute; top: 5px; right: 5px; background: #0088cc; font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5;">NEW</span>' : ''}<img src="${anime.details.poster}" loading="lazy"><div class="card-info">⭐ ${anime.details.rating} Rating</div><div class="anime-title">${anime.title}</div>`;
+    
     card.addEventListener('click', function(e) {
-        if (!hasLink) { e.preventDefault(); showComingSoon(); return; }
+        if (!hasLink) {
+            e.preventDefault();
+            showComingSoon();
+            return;
+        }
         this.classList.add('clicked');
         e.preventDefault();
         setTimeout(() => window.location.href = this.href, 400);
@@ -360,7 +338,45 @@ async function renderGrids(isCached = false) {
     }
     const results = await Promise.all(animeData.map(async (a) => { const d = await fetchAnimeData(a.title); return { ...a, details: d }; }));
     Object.values(sections).forEach(s => { if(s) s.innerHTML = ''; });
-    results.forEach(a => { if(a.details) { const c = createCard(a); (sections[a.category] || sections['latest']).appendChild(c); } });
+    results.forEach(a => { 
+        if(a.details) {
+            if(a.category === 'suggestion') return;
+            const c = createCard(a); 
+            (sections[a.category] || sections['latest']).appendChild(c); 
+        } 
+    });
+}
+
+function toggleSearch() { 
+    searchContainer.classList.toggle('active'); 
+    if(searchContainer.classList.contains('active')) { window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => searchInput.focus(), 400); }
+}
+
+function triggerSearch() { const val = searchInput.value.trim(); if(val) selectSearch(val); }
+
+window.selectSearch = function(term) {
+    const matches = animeData.filter(t => t.title.toLowerCase().includes(term.toLowerCase()));
+    if (matches.length === 0 && term !== "") { alert("Not found."); return; }
+    searchInput.value = term;
+    suggestionsBox.style.display = 'none';
+    clearBtn.style.display = 'block';
+    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.style.display = 'none';
+    });
+    document.getElementById('popularHeading').textContent = `Results for "${term}"`;
+    renderSearchGrid(matches);
+};
+
+async function renderSearchGrid(matches) {
+    const container = document.getElementById('popularContainer');
+    container.innerHTML = '<div style="width:100%; text-align:center; padding:20px;">Searching...</div>';
+    const cards = [];
+    for (const a of matches) {
+        const details = await fetchAnimeData(a.title);
+        if(details) cards.push(createCard({...a, details}));
+    }
+    container.innerHTML = '';
+    cards.forEach(c => container.appendChild(c));
 }
 
 searchInput.addEventListener('input', (e) => {
@@ -374,6 +390,16 @@ searchInput.addEventListener('input', (e) => {
 
 clearBtn.addEventListener('click', () => { searchInput.value = ''; resetUI(); searchInput.focus(); });
 
+function resetUI() {
+    suggestionsBox.style.display = 'none';
+    clearBtn.style.display = 'none';
+    document.getElementById('popularHeading').textContent = "Popular Anime";
+    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.style.display = 'block';
+    });
+    renderGrids(true);
+}
+
 async function loadHero() {
     db.ref('global_clicks').orderByValue().limitToLast(1).once('value', async (snap) => {
         let top = "Solo Leveling"; snap.forEach(c => { top = c.key.replace(/_/g, ' '); });
@@ -382,9 +408,15 @@ async function loadHero() {
             document.getElementById('heroTitle').innerText = top.toUpperCase();
             document.getElementById('heroDesc').innerText = item.overview.substring(0, 150) + "...";
             document.getElementById('heroCard').style.backgroundImage = `url('${item.banner || item.poster}')`;
+            // Hero watch button fix
+            const btn = document.getElementById('heroBtn');
+            btn.onclick = (e) => { e.preventDefault(); showComingSoon(); };
         }
     });
 }
+
+function showComingSoon() { document.getElementById('comingSoonModal').style.display = 'flex'; }
+function closeModal() { document.getElementById('comingSoonModal').style.display = 'none'; }
 
 loadDataFromSheet();
 </script>
