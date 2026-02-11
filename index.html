@@ -18,7 +18,7 @@
             color: #fff; 
             margin: 0; 
             padding: 0; 
-            padding-top: 85px; 
+            padding-top: 140px; 
             overflow-x: hidden; 
             scroll-behavior: smooth; 
         }
@@ -372,4 +372,46 @@ async function renderSearchGrid(matches) {
 searchInput.addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase().trim();
     clearBtn.style.display = val ? 'block' : 'none';
-    if (!val) { resetUI
+    if (!val) { resetUI(); return; }
+    const matches = window.allTitles.filter(t => t.toLowerCase().includes(val));
+    suggestionsBox.innerHTML = matches.length ? matches.map(m => `<div onclick="selectSearch('${m}')">🔍 ${m}</div>`).join('') : '<div style="padding:10px;color:#888;">No results</div>';
+    suggestionsBox.style.display = 'block';
+});
+
+clearBtn.addEventListener('click', () => { searchInput.value = ''; resetUI(); searchInput.focus(); });
+
+function resetUI() {
+    suggestionsBox.style.display = 'none';
+    clearBtn.style.display = 'none';
+    document.getElementById('popularHeading').textContent = "Popular Anime";
+    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.style.display = 'block';
+    });
+    renderGrids(true);
+}
+
+async function loadHero() {
+    db.ref('global_clicks').orderByValue().limitToLast(1).once('value', async (snap) => {
+        let top = "Solo Leveling"; snap.forEach(c => { top = c.key.replace(/_/g, ' '); });
+        const item = await fetchKitsu(top);
+        if(item) {
+            document.getElementById('heroTitle').innerText = top.toUpperCase();
+            document.getElementById('heroDesc').innerText = item.overview.substring(0, 150) + "...";
+            document.getElementById('heroCard').style.backgroundImage = `url('${item.banner || item.poster}')`;
+            const btn = document.getElementById('heroBtn');
+            btn.onclick = (e) => { 
+                trackClick(top);
+                e.preventDefault(); 
+                showComingSoon(); 
+            };
+        }
+    });
+}
+
+function showComingSoon() { document.getElementById('comingSoonModal').style.display = 'flex'; }
+function closeModal() { document.getElementById('comingSoonModal').style.display = 'none'; }
+
+loadDataFromSheet();
+</script>
+</body>
+</html>
