@@ -131,19 +131,8 @@
         .bottom-actions { position: fixed; bottom: 0; width: 100%; display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.95); z-index: 1001; box-sizing: border-box; }
         .btn-action { flex: 1; padding: 13px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #fff; font-size: 0.75rem; }
 
-        /* Modal Background Blur */
         #comingSoonModal {
-            display:none; 
-            position:fixed; 
-            z-index:9999; 
-            left:0; top:0; 
-            width:100%; height:100%; 
-            background:rgba(0,0,0,0.85); 
-            backdrop-filter: blur(8px); 
-            align-items:center; 
-            justify-content:center; 
-            padding: 15px; 
-            box-sizing: border-box;
+            display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; box-sizing: border-box;
         }
 
         .skeleton { background: #1a1a1a; background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 8px; }
@@ -237,23 +226,25 @@
 </div>
 
 <script>
+const firebaseConfig = { apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", projectId: "animeverse-9eada", appId: "1:296666771306:web:df732df90b1e5e9108ff13" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 const TMDB_API_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BG_PATH = 'https://image.tmdb.org/t/p/original';
 
-const searchInput = document.getElementById('searchInput');
-const suggestionsBox = document.getElementById('suggestions');
-const searchContainer = document.getElementById('searchContainer');
-const clearBtn = document.getElementById('clearSearch');
-
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvGZARZP6Mg8n9IzHbyJbA0IFLl-R092WC4j4iNEuoMix0WFs5am5XTElypkz-Fo77IpAhNFssDwZ4/pub?output=csv';
 let animeData = [];
 
-// Initialize Firebase (Check if values exist)
-const firebaseConfig = { apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", projectId: "animeverse-9eada", appId: "1:296666771306:web:df732df90b1e5e9108ff13" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+// 🔥 CLICK TRACKING FUNCTION
+function trackClick(title) {
+    if (!db) return;
+    const safeTitle = title.replace(/[.#$[\]]/g, "_");
+    const ref = db.ref('global_clicks/' + safeTitle);
+    ref.transaction(currentClicks => (currentClicks || 0) + 1);
+}
 
 async function loadDataFromSheet() {
     const cachedData = sessionStorage.getItem('animeDataCache');
@@ -310,20 +301,14 @@ async function fetchKitsu(title) {
 function createCard(anime) {
     const card = document.createElement('a');
     card.className = 'anime-card';
-    
-    // YAHAN FIX HAI: Link check logic ko aur majboot kiya hai
     const rawLink = String(anime.link).trim().toLowerCase();
     const hasLink = (rawLink && rawLink !== "" && rawLink !== "null" && rawLink !== "undefined" && rawLink !== "#");
-    
     card.href = hasLink ? anime.link : "javascript:void(0)";
     card.innerHTML = `<span class="badge-hd">HD | HINDI</span>${anime.isNew ? '<span style="position: absolute; top: 5px; right: 5px; background: #0088cc; font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5;">NEW</span>' : ''}<img src="${anime.details.poster}" loading="lazy"><div class="card-info">⭐ ${anime.details.rating} Rating</div><div class="anime-title">${anime.title}</div>`;
     
     card.addEventListener('click', function(e) {
-        if (!hasLink) {
-            e.preventDefault();
-            showComingSoon();
-            return;
-        }
+        trackClick(anime.title); // CLICK UPDATE
+        if (!hasLink) { e.preventDefault(); showComingSoon(); return; }
         this.classList.add('clicked');
         e.preventDefault();
         setTimeout(() => window.location.href = this.href, 400);
@@ -340,7 +325,7 @@ async function renderGrids(isCached = false) {
     Object.values(sections).forEach(s => { if(s) s.innerHTML = ''; });
     results.forEach(a => { 
         if(a.details) {
-            if(a.category === 'suggestion') return;
+            if(a.category === 'suggestion') return; // SUGGESTION FILTER
             const c = createCard(a); 
             (sections[a.category] || sections['latest']).appendChild(c); 
         } 
@@ -351,6 +336,11 @@ function toggleSearch() {
     searchContainer.classList.toggle('active'); 
     if(searchContainer.classList.contains('active')) { window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => searchInput.focus(), 400); }
 }
+
+const searchInput = document.getElementById('searchInput');
+const suggestionsBox = document.getElementById('suggestions');
+const searchContainer = document.getElementById('searchContainer');
+const clearBtn = document.getElementById('clearSearch');
 
 function triggerSearch() { const val = searchInput.value.trim(); if(val) selectSearch(val); }
 
@@ -382,43 +372,4 @@ async function renderSearchGrid(matches) {
 searchInput.addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase().trim();
     clearBtn.style.display = val ? 'block' : 'none';
-    if (!val) { resetUI(); return; }
-    const matches = window.allTitles.filter(t => t.toLowerCase().includes(val));
-    suggestionsBox.innerHTML = matches.length ? matches.map(m => `<div onclick="selectSearch('${m}')">🔍 ${m}</div>`).join('') : '<div style="padding:10px;color:#888;">No results</div>';
-    suggestionsBox.style.display = 'block';
-});
-
-clearBtn.addEventListener('click', () => { searchInput.value = ''; resetUI(); searchInput.focus(); });
-
-function resetUI() {
-    suggestionsBox.style.display = 'none';
-    clearBtn.style.display = 'none';
-    document.getElementById('popularHeading').textContent = "Popular Anime";
-    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => {
-        const el = document.getElementById(id); if(el) el.style.display = 'block';
-    });
-    renderGrids(true);
-}
-
-async function loadHero() {
-    db.ref('global_clicks').orderByValue().limitToLast(1).once('value', async (snap) => {
-        let top = "Solo Leveling"; snap.forEach(c => { top = c.key.replace(/_/g, ' '); });
-        const item = await fetchKitsu(top);
-        if(item) {
-            document.getElementById('heroTitle').innerText = top.toUpperCase();
-            document.getElementById('heroDesc').innerText = item.overview.substring(0, 150) + "...";
-            document.getElementById('heroCard').style.backgroundImage = `url('${item.banner || item.poster}')`;
-            // Hero watch button fix
-            const btn = document.getElementById('heroBtn');
-            btn.onclick = (e) => { e.preventDefault(); showComingSoon(); };
-        }
-    });
-}
-
-function showComingSoon() { document.getElementById('comingSoonModal').style.display = 'flex'; }
-function closeModal() { document.getElementById('comingSoonModal').style.display = 'none'; }
-
-loadDataFromSheet();
-</script>
-</body>
-</html>
+    if (!val) { resetUI
