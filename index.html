@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -193,6 +192,11 @@
 </div>
 
 <div class="container">
+    <section id="newlySection" style="display:none;">
+        <h2 style="color: #00d2ff; border-left-color: #00d2ff;">✨ Newly Episode Added</h2>
+        <div class="anime-grid" id="newlyContainer"></div>
+    </section>
+
     <section id="latestSection">
         <h2>Latest series</h2>
         <div class="anime-grid" id="latestContainer"></div>
@@ -235,6 +239,7 @@
 </div>
 
 <script>
+// --- FIREBASE CONFIG (SAME AS YOURS) ---
 const firebaseConfig = { apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", projectId: "animeverse-9eada", appId: "1:296666771306:web:df732df90b1e5e9108ff13" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -325,6 +330,42 @@ function createCard(anime) {
     return card;
 }
 
+// 🔥 --- NEWLY ADDED REAL-TIME LISTENER ---
+db.ref('newly_added_section').on('value', async (snap) => {
+    const container = document.getElementById('newlyContainer');
+    const section = document.getElementById('newlySection');
+    container.innerHTML = ''; 
+    let count = 0;
+    const now = Date.now();
+
+    const updates = [];
+    snap.forEach((child) => {
+        const data = child.val();
+        // Raat 12 baje hatne ka logic
+        if (now > data.expiry) {
+            child.ref.remove(); 
+        } else {
+            updates.push(data);
+            count++;
+        }
+    });
+
+    if (count > 0) {
+        section.style.display = 'block';
+        for(let item of updates) {
+            const details = await fetchAnimeData(item.name);
+            if(details) {
+                const card = createCard({ title: item.name, link: `player.html?id=${item.slug}`, isNew: false, details: details });
+                // Newly section style modification: Show Episode No
+                card.querySelector('.badge-hd').innerText = `EPISODE ${item.ep}`;
+                container.appendChild(card);
+            }
+        }
+    } else {
+        section.style.display = 'none';
+    }
+});
+
 async function renderGrids(isCached = false) {
     const sections = { 'latest': document.getElementById('latestContainer'), 'popular': document.getElementById('popularContainer'), 'trending': document.getElementById('trendingContainer'), 'movies': document.getElementById('movieContainer') };
     if (!isCached) {
@@ -359,7 +400,7 @@ window.selectSearch = function(term) {
     searchInput.value = term;
     suggestionsBox.style.display = 'none';
     clearBtn.style.display = 'block';
-    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => {
+    ['latestSection','trendingSection','movieSection','heroSection','newlySection'].forEach(id => {
         const el = document.getElementById(id); if(el) el.style.display = 'none';
     });
     document.getElementById('popularHeading').textContent = `Results for "${term}"`;
@@ -393,7 +434,7 @@ function resetUI() {
     suggestionsBox.style.display = 'none';
     clearBtn.style.display = 'none';
     document.getElementById('popularHeading').textContent = "Popular Anime";
-    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => {
+    ['latestSection','trendingSection','movieSection','heroSection','newlySection'].forEach(id => {
         const el = document.getElementById(id); if(el) el.style.display = 'block';
     });
     renderGrids(true);
