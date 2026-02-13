@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
+
   gtag('config', 'G-6XVHNP2C9G');
 </script>
     <meta charset="utf-8"/>
@@ -30,26 +32,63 @@
             scroll-behavior: smooth; 
         }
 
-        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0, 0, 0, 0.95); border-bottom: 2px solid var(--primary-color); position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; box-sizing: border-box; }
+        /* --- HEADER (FIXED) --- */
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px 15px; 
+            background: rgba(0, 0, 0, 0.95); 
+            border-bottom: 2px solid var(--primary-color); 
+            position: fixed; 
+            top: 0; 
+            left: 0;
+            width: 100%; 
+            z-index: 2000; 
+            box-sizing: border-box;
+        }
         .logo-container img { height: 40px; border-radius: 8px; filter: drop-shadow(var(--accent-glow)); }
         .menu-btn, .search-trigger { font-size: 1.6rem; cursor: pointer; color: #fff; background: none; border: none; outline: none; transition: 0.3s; }
 
+        /* --- SIDEBAR MENU --- */
         #sideNav { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: #0a0a0a; z-index: 3000; padding: 30px 20px; transform: translateX(-100%); transition: 0.4s; box-sizing: border-box; }
         #sideNav.open { transform: translateX(0); box-shadow: 10px 0 50px #000; }
         #sideNav a { display: block; color: #eee; padding: 12px; text-decoration: none; font-size: 15px; border-radius: 8px; margin-bottom: 5px; }
         #sideNav a:hover { background: var(--primary-color); color: white; }
         .close-btn { text-align: right; font-size: 1.5rem; cursor: pointer; color: var(--primary-color); margin-bottom: 20px; }
 
-        .search-section { position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-20px); width: 100%; max-width: 600px; z-index: 1500; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 0 15px; box-sizing: border-box; }
-        .search-section.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); max-height: 120px; padding: 15px 15px; }
+        /* --- SEARCH SECTION (FIXED) --- */
+        .search-section { 
+            position: fixed; 
+            top: 60px; 
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            width: 100%;
+            max-width: 600px; 
+            z-index: 1500;
+            opacity: 0; 
+            visibility: hidden; 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            padding: 0 15px; 
+            box-sizing: border-box;
+        }
+        .search-section.active { 
+            opacity: 1; 
+            visibility: visible; 
+            transform: translateX(-50%) translateY(0); 
+            max-height: 120px; 
+            padding: 15px 15px; 
+        }
         .search-box { display: flex; background: #111; border: 2px solid var(--primary-color); border-radius: 30px; overflow: hidden; box-shadow: 0 0 15px rgba(244, 126, 33, 0.5); }
         .search-box input { flex: 1; background: transparent; border: none; color: #fff; padding: 12px 40px 12px 20px; outline: none; font-size: 14px; width: 100%; }
         .go-btn { background: var(--primary-color); border: none; color: white; padding: 0 20px; font-weight: 800; cursor: pointer; }
 
+        /* --- SUGGESTIONS --- */
         #suggestions { position: absolute; top: 100%; left: 15px; right: 15px; background: rgba(15, 15, 15, 0.98); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid var(--primary-color); max-height: 250px; overflow-y: auto; display: none; margin-top: 10px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         #suggestions div { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; transition: 0.2s; color: #eee; }
         #suggestions div:hover { background: var(--primary-color); color: white; padding-left: 25px; }
 
+        /* --- GRIDS & CARDS --- */
         .hero { padding: 15px; width: 100%; box-sizing: border-box; }
         .hero-card { background: #111; background-size: cover; background-position: center; height: 170px; border-radius: 12px; border: 1px solid var(--primary-color); display: flex; align-items: center; padding: 15px 20px; position: relative; overflow: hidden; }
         .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.95) 45%, transparent); z-index: 1; }
@@ -64,13 +103,35 @@
         .anime-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); }
         @media (min-width: 768px) { .anime-grid { grid-template-columns: repeat(6, 1fr); } }
 
-        .anime-card { background: rgba(15,15,15,0.95); border-radius: 8px; overflow: hidden; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); position: relative; transition: transform 0.2s, box-shadow 0.2s; -webkit-tap-highlight-color: transparent; }
+        .anime-card { 
+            background: rgba(15,15,15,0.95); 
+            border-radius: 8px; 
+            overflow: hidden; 
+            text-decoration: none; 
+            color: white; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            position: relative; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            -webkit-tap-highlight-color: transparent;
+        }
         .badge-hd { position: absolute; top: 5px; left: 5px; background: var(--primary-color); font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5; }
         .card-info { position: absolute; bottom: 35px; left: 0; right: 0; background: rgba(0,0,0,0.8); font-size: 8px; padding: 4px; text-align: center; color: var(--primary-color); font-weight: bold; }
         .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; transition: filter 0.3s ease; }
         .anime-title { padding: 6px 4px; font-size: 0.7rem; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .anime-card::after { content: '▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 40px; color: white; z-index: 10; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        /* --- CLICK & BLUR EFFECT --- */
+        .anime-card::after {
+            content: '▶';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 40px;
+            color: white;
+            z-index: 10;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
         .anime-card.clicked { transform: scale(0.95); border-color: #0088cc !important; box-shadow: 0 0 20px rgba(0, 136, 204, 0.6); }
         .anime-card.clicked img { filter: brightness(0.5) sepia(1) hue-rotate(190deg) saturate(2) blur(3px); }
         .anime-card.clicked::after { transform: translate(-50%, -50%) scale(1); filter: none !important; }
@@ -79,7 +140,9 @@
         .bottom-actions { position: fixed; bottom: 0; width: 100%; display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.95); z-index: 1001; box-sizing: border-box; }
         .btn-action { flex: 1; padding: 13px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #fff; font-size: 0.75rem; }
 
-        #comingSoonModal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; box-sizing: border-box; }
+        #comingSoonModal {
+            display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; box-sizing: border-box;
+        }
 
         .skeleton { background: #1a1a1a; background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 8px; }
         @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -122,7 +185,7 @@
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <span class="hero-tag">🔥 Trending Globally</span>
-            <h1 id="heroTitle">Animeverse</h1>
+            <h1 id="heroTitle">Solo Leveling</h1>
             <p id="heroDesc">Loading world's most popular anime...</p>
             <a href="#" id="heroBtn" class="hero-btn">WATCH HD</a>
         </div>
@@ -130,11 +193,6 @@
 </div>
 
 <div class="container">
-    <section id="firebaseSection" style="display:none;">
-        <h2 style="color:#f47e21; border-left-color:#f47e21;">🔥 Newly Added (Real-time)</h2>
-        <div class="anime-grid" id="firebaseContainer"></div>
-    </section>
-
     <section id="latestSection">
         <h2>Latest series</h2>
         <div class="anime-grid" id="latestContainer"></div>
@@ -177,7 +235,6 @@
 </div>
 
 <script>
-// CONFIG
 const firebaseConfig = { apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", projectId: "animeverse-9eada", appId: "1:296666771306:web:df732df90b1e5e9108ff13" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -187,59 +244,15 @@ const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BG_PATH = 'https://image.tmdb.org/t/p/original';
 
-// SOURCE SHEET (1VLcid...)
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvGZARZP6Mg8n9IzHbyJbA0IFLl-R092WC4j4iNEuoMix0WFs5am5XTElypkz-Fo77IpAhNFssDwZ4/pub?output=csv';
-// PLAYER LINK SHEET (1oou9u...)
-const PLAYER_DB_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS2CzQ-WMXqOj2FWpIeTM4krbFeUX1QGsj8r7afyouspDSdTEsvYEl4-NwqABcvtblqDDsMvWXziqIB/pub?output=csv';
-
 let animeData = [];
 
+// 🔥 CLICK TRACKING FUNCTION
 function trackClick(title) {
     if (!db) return;
     const safeTitle = title.replace(/[.#$[\]]/g, "_");
     const ref = db.ref('global_clicks/' + safeTitle);
     ref.transaction(currentClicks => (currentClicks || 0) + 1);
-}
-
-// REAL-TIME FIREBASE LOADER WITH EXTERNAL LINK FETCHING
-async function loadNewlyAddedFromFirebase() {
-    const container = document.getElementById('firebaseContainer');
-    const section = document.getElementById('firebaseSection');
-
-    try {
-        // Fetch Sheet 2 (Player Links) first
-        const response = await fetch(PLAYER_DB_CSV);
-        const csvData = await response.text();
-        const playerRows = csvData.split(/\r?\n/).map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-
-        db.ref('anime_list').on('value', async (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                section.style.display = 'block';
-                container.innerHTML = ''; 
-                
-                const items = Object.values(data).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-                
-                for (const anime of items) {
-                    let playerPath = "javascript:showComingSoon()";
-                    // Search latest link from Sheet 2
-                    for (let i = playerRows.length - 1; i >= 0; i--) {
-                        let nameInSheet = playerRows[i][0] ? playerRows[i][0].replace(/"/g, '').trim().toLowerCase() : "";
-                        if (nameInSheet === anime.title.toLowerCase().trim()) {
-                            playerPath = playerRows[i][1].replace(/"/g, '').trim();
-                            break;
-                        }
-                    }
-
-                    const details = await fetchAnimeData(anime.title);
-                    if (details) {
-                        const card = createCard({ ...anime, link: playerPath, details });
-                        container.appendChild(card);
-                    }
-                }
-            }
-        });
-    } catch (e) { console.error("Firebase Link Fetch Error:", e); }
 }
 
 async function loadDataFromSheet() {
@@ -298,12 +311,12 @@ function createCard(anime) {
     const card = document.createElement('a');
     card.className = 'anime-card';
     const rawLink = String(anime.link).trim().toLowerCase();
-    const hasLink = (rawLink && rawLink !== "" && rawLink !== "null" && rawLink !== "undefined" && rawLink !== "#" && !rawLink.includes("javascript"));
+    const hasLink = (rawLink && rawLink !== "" && rawLink !== "null" && rawLink !== "undefined" && rawLink !== "#");
     card.href = hasLink ? anime.link : "javascript:void(0)";
     card.innerHTML = `<span class="badge-hd">HD | HINDI</span>${anime.isNew ? '<span style="position: absolute; top: 5px; right: 5px; background: #0088cc; font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5;">NEW</span>' : ''}<img src="${anime.details.poster}" loading="lazy"><div class="card-info">⭐ ${anime.details.rating} Rating</div><div class="anime-title">${anime.title}</div>`;
     
     card.addEventListener('click', function(e) {
-        trackClick(anime.title);
+        trackClick(anime.title); // CLICK UPDATE
         if (!hasLink) { e.preventDefault(); showComingSoon(); return; }
         this.classList.add('clicked');
         e.preventDefault();
@@ -321,7 +334,7 @@ async function renderGrids(isCached = false) {
     Object.values(sections).forEach(s => { if(s) s.innerHTML = ''; });
     results.forEach(a => { 
         if(a.details) {
-            if(a.category === 'suggestion') return; 
+            if(a.category === 'suggestion') return; // SUGGESTION FILTER
             const c = createCard(a); 
             (sections[a.category] || sections['latest']).appendChild(c); 
         } 
@@ -346,7 +359,7 @@ window.selectSearch = function(term) {
     searchInput.value = term;
     suggestionsBox.style.display = 'none';
     clearBtn.style.display = 'block';
-    ['latestSection','trendingSection','movieSection','heroSection', 'firebaseSection'].forEach(id => {
+    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => {
         const el = document.getElementById(id); if(el) el.style.display = 'none';
     });
     document.getElementById('popularHeading').textContent = `Results for "${term}"`;
@@ -380,7 +393,7 @@ function resetUI() {
     suggestionsBox.style.display = 'none';
     clearBtn.style.display = 'none';
     document.getElementById('popularHeading').textContent = "Popular Anime";
-    ['latestSection','trendingSection','movieSection','heroSection', 'firebaseSection'].forEach(id => {
+    ['latestSection','trendingSection','movieSection','heroSection'].forEach(id => {
         const el = document.getElementById(id); if(el) el.style.display = 'block';
     });
     renderGrids(true);
@@ -395,7 +408,11 @@ async function loadHero() {
             document.getElementById('heroDesc').innerText = item.overview.substring(0, 150) + "...";
             document.getElementById('heroCard').style.backgroundImage = `url('${item.banner || item.poster}')`;
             const btn = document.getElementById('heroBtn');
-            btn.onclick = (e) => { trackClick(top); e.preventDefault(); showComingSoon(); };
+            btn.onclick = (e) => { 
+                trackClick(top);
+                e.preventDefault(); 
+                showComingSoon(); 
+            };
         }
     });
 }
@@ -403,9 +420,7 @@ async function loadHero() {
 function showComingSoon() { document.getElementById('comingSoonModal').style.display = 'flex'; }
 function closeModal() { document.getElementById('comingSoonModal').style.display = 'none'; }
 
-// INITIALIZE
 loadDataFromSheet();
-loadNewlyAddedFromFirebase();
 </script>
 </body>
 </html>
