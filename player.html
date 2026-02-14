@@ -1,17 +1,6 @@
-</body>
-</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-6XVHNP2C9G');
-</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AnimeVerse | Final UI</title>
@@ -61,6 +50,7 @@
             border-radius: 12px; font-weight: 700; font-size: 12px;
             text-transform: uppercase; border: 1px solid #2a2e38; text-align: center;
         }
+        .nav-btn:active { transform: scale(0.95); }
         .btn-dl { background: var(--neon); color: #000; border: none; }
 
         .ep-grid { 
@@ -96,14 +86,14 @@
     </div>
 
     <div class="header-card">
-        <img id="poster" src="" class="poster-img">
+        <img id="poster" src="https://via.placeholder.com/110x165/181c25/FF7B00?text=..." class="poster-img">
         <div class="flex-1">
             <h1 id="title" class="text-lg font-bold uppercase leading-tight mb-2">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
                 <span class="badge-info">Hindi / Sub</span>
-                <span id="year" class="text-xs text-gray-400 font-bold">2024</span>
+                <span id="year" class="text-xs text-gray-400 font-bold">----</span>
             </div>
-            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">...</p>
+            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Please wait, fetching anime details...</p>
         </div>
     </div>
 
@@ -132,7 +122,6 @@
     </footer>
 
     <script>
-        // ... (Same script as before remains here) ...
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
         
@@ -144,37 +133,69 @@
         let tmdbId = ""; 
         let mainPosterURL = "";
 
+        async function fetchBackupKitsu(animeName) {
+            try {
+                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(animeName)}&page[limit]=1`);
+                const data = await res.json();
+                if (data.data && data.data.length > 0) {
+                    const attr = data.data[0].attributes;
+                    document.getElementById('title').innerText = attr.canonicalTitle;
+                    document.getElementById('poster').src = attr.posterImage.small;
+                    mainPosterURL = attr.posterImage.small;
+                    document.getElementById('year').innerText = attr.startDate ? attr.startDate.split('-')[0] : 'N/A';
+                    document.getElementById('desc').innerText = attr.synopsis;
+                }
+            } catch (e) { console.log("Backup API Failed"); }
+        }
+
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const animeId = params.get('id');
             if(!animeId) return;
 
+            const cleanName = animeId.replace(/-/g,' ');
+
+            // Try TMDB First
             try {
-                const tmRes = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${tmdbKey}&query=${animeId.replace(/-/g,' ')}`);
+                const tmRes = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
                 const tmData = await tmRes.json();
-                if(tmData.results[0]) {
+                
+                if(tmData.results && tmData.results.length > 0) {
                     const r = tmData.results[0];
                     tmdbId = r.id;
-                    mainPosterURL = "https://image.tmdb.org/t/p/w500" + r.poster_path;
+                    mainPosterURL = r.poster_path ? "https://image.tmdb.org/t/p/w500" + r.poster_path : "";
                     document.getElementById('title').innerText = r.name;
-                    document.getElementById('poster').src = mainPosterURL;
-                    document.getElementById('year').innerText = r.first_air_date?.split('-')[0];
-                    document.getElementById('desc').innerText = r.overview;
+                    if(mainPosterURL) document.getElementById('poster').src = mainPosterURL;
+                    document.getElementById('year').innerText = r.first_air_date ? r.first_air_date.split('-')[0] : '----';
+                    document.getElementById('desc').innerText = r.overview || "No description available.";
+                } else {
+                    // Fail over to Kitsu
+                    await fetchBackupKitsu(cleanName);
                 }
-            } catch(e){}
+            } catch(e) {
+                await fetchBackupKitsu(cleanName);
+            }
 
-            const res = await fetch(csvURL);
-            const text = await res.text();
-            const rows = text.split('\n').slice(1);
-            allData = rows.map(r => {
-                const c = r.split(',');
-                return { id: c[0]?.trim(), name: c[1]?.trim(), url: c[2]?.trim(), bot: c[3]?.trim() };
-            }).filter(x => x.id === animeId);
+            // Fetch Sheet Data
+            try {
+                const res = await fetch(csvURL);
+                const text = await res.text();
+                const rows = text.split('\n').slice(1);
+                allData = rows.map(r => {
+                    const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Better CSV split
+                    return { id: c[0]?.replace(/"/g, '').trim(), name: c[1]?.replace(/"/g, '').trim(), url: c[2]?.replace(/"/g, '').trim(), bot: c[3]?.replace(/"/g, '').trim() };
+                }).filter(x => x.id === animeId);
 
-            seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
-            document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}">${s.replace('S','Season ')}</option>`).join('');
-            
-            if(seasons.length > 0) loadSeason(seasons[0]);
+                if(allData.length === 0) {
+                    document.getElementById('title').innerText = "Anime Not Found";
+                    return;
+                }
+
+                seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
+                document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}">${s.replace('S','Season ')}</option>`).join('');
+                
+                if(seasons.length > 0) loadSeason(seasons[0]);
+            } catch(e) { console.error("Sheet Error", e); }
         }
 
         async function loadSeason(sName) {
@@ -191,12 +212,13 @@
                 card.id = `card-${i}`;
                 card.innerHTML = `
                     <div class="badge-count">${sNum}x${epNum}</div>
-                    <img id="img-${sNum}-${epNum}" src="${mainPosterURL}" class="ep-img">
+                    <img id="img-${sNum}-${epNum}" src="${mainPosterURL || 'https://via.placeholder.com/300x169/181c25/FF7B00?text=Episode'}" class="ep-img">
                     <p class="text-[9px] font-bold p-2 truncate" id="name-${sNum}-${epNum}">Episode ${epNum}</p>
                 `;
                 card.onclick = () => selectEpisode(i);
                 grid.appendChild(card);
 
+                // Fetch Episode Stills if TMDB exists
                 if(tmdbId) {
                     fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${sNum}/episode/${epNum}?api_key=${tmdbKey}`)
                     .then(r => r.json()).then(d => {
@@ -211,6 +233,7 @@
         function selectEpisode(index) {
             currentIndex = index;
             const ep = filteredEpisodes[index];
+            if(!ep) return;
             document.getElementById('main-player').src = ep.url;
             document.getElementById('dl-link').href = `https://t.me/verse1_8bot?start=${ep.bot}`;
 
