@@ -13,7 +13,6 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
 
-        /* BACK BUTTON STYLE */
         .back-btn {
             background: #1c1f26;
             border: 1px solid #2a2e38;
@@ -28,51 +27,124 @@
         .back-btn:active { transform: scale(0.9); background: #2a2e38; }
 
         .header-card {
-            background: var(--card-bg); margin: 15px; padding: 15px;
-            border-radius: 20px; display: flex; gap: 15px; align-items: flex-start;
+            background: var(--card-bg);
+            margin: 15px;
+            padding: 15px;
+            border-radius: 20px;
+            display: flex;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; }
-        
+
+        .poster-img {
+            width: 110px;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+
         .badge-info {
-            background: #2a2e38; color: var(--neon); font-size: 10px;
-            font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase;
+            background: #2a2e38;
+            color: var(--neon);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .video-box {
-            margin: 0 15px; position: relative; width: calc(100% - 30px);
-            aspect-ratio: 16/9; background: #000; border-radius: 20px;
-            overflow: hidden; border: 1px solid #222;
+            margin: 0 15px;
+            position: relative;
+            width: calc(100% - 30px);
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #222;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
         }
-        #main-player { position: absolute; width: 100%; height: 100%; border: none; }
+
+        #main-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
 
         .nav-btn {
-            flex: 1; background: #1c1f26; color: #fff; padding: 12px;
-            border-radius: 12px; font-weight: 700; font-size: 12px;
-            text-transform: uppercase; border: 1px solid #2a2e38; text-align: center;
+            flex: 1;
+            background: #1c1f26;
+            color: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid #2a2e38;
+            text-align: center;
+            transition: 0.2s;
         }
-        .nav-btn:active { transform: scale(0.95); }
+        .nav-btn:active { transform: translateY(2px); background: #2a2e38; }
         .btn-dl { background: var(--neon); color: #000; border: none; }
+        .btn-dl:active { background: #e66e00; }
 
-        .ep-grid { 
-            display: grid; grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; max-height: 350px; overflow-y: auto; padding: 15px;
+        .ep-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 15px;
         }
-        .ep-card { 
-            background: #181c25; border-radius: 12px; overflow: hidden; 
-            border: 2px solid transparent; transition: 0.3s; cursor: pointer; 
-            position: relative; opacity: 0.4;
+
+        .ep-card {
+            background: #181c25;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: 0.3s;
+            cursor: pointer;
+            position: relative;
+            opacity: 0.4;
         }
-        .ep-card.active { opacity: 1 !important; border-color: var(--neon); }
-        .ep-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-        
+
+        .ep-card.active {
+            opacity: 1 !important;
+            border-color: var(--neon);
+            transform: scale(0.95);
+        }
+
+        .ep-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+
         .badge-count {
-            position: absolute; top: 4px; left: 4px; background: var(--neon); 
-            color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px;
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: var(--neon);
+            color: #000;
+            font-size: 8px;
+            font-weight: 900;
+            padding: 2px 5px;
+            border-radius: 4px;
+            z-index: 10;
         }
 
         footer {
-            margin-top: 20px; padding: 20px; text-align: center;
-            border-top: 1px solid #1a1a24; background: #0a0a0f;
+            margin-top: 20px;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #1a1a24;
+            background: #0a0a0f;
         }
     </style>
 </head>
@@ -82,18 +154,18 @@
         <button class="back-btn" onclick="window.history.back()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
-        <div class="text-2xl font-black italic tracking-tighter">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
+        <div class="text-2xl font-black italic tracking-tighter uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
     </div>
 
     <div class="header-card">
-        <img id="poster" src="https://via.placeholder.com/110x165/181c25/FF7B00?text=..." class="poster-img">
+        <img id="poster" src="https://via.placeholder.com/150x225" class="poster-img">
         <div class="flex-1">
-            <h1 id="title" class="text-lg font-bold uppercase leading-tight mb-2">Loading...</h1>
+            <h1 id="title" class="text-lg font-bold uppercase leading-tight mb-2 line-clamp-2">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
                 <span class="badge-info">Hindi / Sub</span>
-                <span id="year" class="text-xs text-gray-400 font-bold">----</span>
+                <span id="year" class="text-xs text-gray-400 font-bold">2024</span>
             </div>
-            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Please wait, fetching anime details...</p>
+            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Fetch data from sheet...</p>
         </div>
     </div>
 
@@ -101,24 +173,23 @@
         <iframe id="main-player" src="" allowfullscreen></iframe>
     </div>
 
-    <div class="flex gap-2 px-[15px] mb-6">
+    <div class="flex gap-2 px-[15px] mb-5">
         <button class="nav-btn" onclick="smartChange(-1)">Prev</button>
-        <a id="dl-link" href="#" target="_blank" class="nav-btn btn-dl flex items-center justify-center">Download</a>
+        <a id="dl-link" href="#" target="_blank" class="nav-btn btn-dl flex items-center justify-center">Download Ep</a>
         <button class="nav-btn" onclick="smartChange(1)">Next</button>
     </div>
 
     <div class="px-[15px]">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500">Episodes</h3>
-            <select id="season-select" onchange="loadSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none"></select>
+            <select id="season-select" onchange="loadSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none cursor-pointer">
+            </select>
         </div>
         <div id="ep-grid" class="ep-grid"></div>
     </div>
 
     <footer>
-        <div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase">
-            © 2026 AnimeVerse • Made with ❤️
-        </div>
+        <div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase">© 2026 AnimeVerse • Stream & Download</div>
     </footer>
 
     <script>
@@ -130,72 +201,41 @@
         let seasons = [];
         let currentSeasonName = "";
         let currentIndex = 0;
-        let tmdbId = ""; 
         let mainPosterURL = "";
-
-        async function fetchBackupKitsu(animeName) {
-            try {
-                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(animeName)}&page[limit]=1`);
-                const data = await res.json();
-                if (data.data && data.data.length > 0) {
-                    const attr = data.data[0].attributes;
-                    document.getElementById('title').innerText = attr.canonicalTitle;
-                    document.getElementById('poster').src = attr.posterImage.small;
-                    mainPosterURL = attr.posterImage.small;
-                    document.getElementById('year').innerText = attr.startDate ? attr.startDate.split('-')[0] : 'N/A';
-                    document.getElementById('desc').innerText = attr.synopsis;
-                }
-            } catch (e) { console.log("Backup API Failed"); }
-        }
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const animeId = params.get('id');
             if(!animeId) return;
 
-            const cleanName = animeId.replace(/-/g,' ');
-
-            // Try TMDB First
+            // TMDB Fetching
             try {
+                const cleanName = animeId.replace(/-/g,' ');
                 const tmRes = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
                 const tmData = await tmRes.json();
-                
-                if(tmData.results && tmData.results.length > 0) {
+                if(tmData.results[0]) {
                     const r = tmData.results[0];
-                    tmdbId = r.id;
-                    mainPosterURL = r.poster_path ? "https://image.tmdb.org/t/p/w500" + r.poster_path : "";
+                    mainPosterURL = "https://image.tmdb.org/t/p/w500" + r.poster_path;
                     document.getElementById('title').innerText = r.name;
-                    if(mainPosterURL) document.getElementById('poster').src = mainPosterURL;
-                    document.getElementById('year').innerText = r.first_air_date ? r.first_air_date.split('-')[0] : '----';
-                    document.getElementById('desc').innerText = r.overview || "No description available.";
-                } else {
-                    // Fail over to Kitsu
-                    await fetchBackupKitsu(cleanName);
+                    document.getElementById('poster').src = mainPosterURL;
+                    document.getElementById('year').innerText = r.first_air_date?.split('-')[0];
+                    document.getElementById('desc').innerText = r.overview;
                 }
-            } catch(e) {
-                await fetchBackupKitsu(cleanName);
-            }
+            } catch(e) { console.error("TMDB Error"); }
 
-            // Fetch Sheet Data
-            try {
-                const res = await fetch(csvURL);
-                const text = await res.text();
-                const rows = text.split('\n').slice(1);
-                allData = rows.map(r => {
-                    const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/); // Better CSV split
-                    return { id: c[0]?.replace(/"/g, '').trim(), name: c[1]?.replace(/"/g, '').trim(), url: c[2]?.replace(/"/g, '').trim(), bot: c[3]?.replace(/"/g, '').trim() };
-                }).filter(x => x.id === animeId);
+            // Sheet Data
+            const res = await fetch(csvURL);
+            const text = await res.text();
+            const rows = text.split('\n').slice(1);
+            allData = rows.map(r => {
+                const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                return { id: c[0]?.trim(), name: c[1]?.trim(), url: c[2]?.trim(), bot: c[3]?.trim() };
+            }).filter(x => x.id === animeId);
 
-                if(allData.length === 0) {
-                    document.getElementById('title').innerText = "Anime Not Found";
-                    return;
-                }
-
-                seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
-                document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}">${s.replace('S','Season ')}</option>`).join('');
-                
-                if(seasons.length > 0) loadSeason(seasons[0]);
-            } catch(e) { console.error("Sheet Error", e); }
+            seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
+            document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}">${s.replace('S','Season ')}</option>`).join('');
+            
+            if(seasons.length > 0) loadSeason(seasons[0]);
         }
 
         async function loadSeason(sName) {
@@ -212,20 +252,11 @@
                 card.id = `card-${i}`;
                 card.innerHTML = `
                     <div class="badge-count">${sNum}x${epNum}</div>
-                    <img id="img-${sNum}-${epNum}" src="${mainPosterURL || 'https://via.placeholder.com/300x169/181c25/FF7B00?text=Episode'}" class="ep-img">
+                    <img id="img-${sNum}-${epNum}" src="${mainPosterURL || 'https://via.placeholder.com/300x169'}" class="ep-img">
                     <p class="text-[9px] font-bold p-2 truncate" id="name-${sNum}-${epNum}">Episode ${epNum}</p>
                 `;
                 card.onclick = () => selectEpisode(i);
                 grid.appendChild(card);
-
-                // Fetch Episode Stills if TMDB exists
-                if(tmdbId) {
-                    fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${sNum}/episode/${epNum}?api_key=${tmdbKey}`)
-                    .then(r => r.json()).then(d => {
-                        if(d.still_path) document.getElementById(`img-${sNum}-${epNum}`).src = "https://image.tmdb.org/t/p/w300" + d.still_path;
-                        if(d.name) document.getElementById(`name-${sNum}-${epNum}`).innerText = d.name;
-                    }).catch(()=>{});
-                }
             });
             selectEpisode(0);
         }
@@ -234,8 +265,16 @@
             currentIndex = index;
             const ep = filteredEpisodes[index];
             if(!ep) return;
+
             document.getElementById('main-player').src = ep.url;
-            document.getElementById('dl-link').href = `https://t.me/verse1_8bot?start=${ep.bot}`;
+
+            // --- SMART LOGIC: LINK vs BOT CODE (REPLACED) ---
+            const botValue = ep.bot.trim();
+            if (botValue.startsWith("http")) {
+                document.getElementById('dl-link').href = botValue;
+            } else {
+                document.getElementById('dl-link').href = `https://t.me/verse1_8bot?start=${botValue}`;
+            }
 
             document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
             const activeCard = document.getElementById(`card-${index}`);
@@ -252,8 +291,11 @@
             } else {
                 let sIdx = seasons.indexOf(currentSeasonName) + dir;
                 if (sIdx >= 0 && sIdx < seasons.length) {
-                    document.getElementById('season-select').value = seasons[sIdx];
-                    loadSeason(seasons[sIdx]).then(() => selectEpisode(dir === 1 ? 0 : filteredEpisodes.length - 1));
+                    const nextSeason = seasons[sIdx];
+                    document.getElementById('season-select').value = nextSeason;
+                    loadSeason(nextSeason).then(() => {
+                        selectEpisode(dir === 1 ? 0 : filteredEpisodes.length - 1);
+                    });
                 }
             }
         }
