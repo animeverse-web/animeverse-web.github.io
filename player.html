@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnimeVerse | Final UI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>AnimeVerse | Stream & Download</title>
+    
+    <meta property="og:type" content="video.other">
+    <meta id="og-title" property="og:title" content="AnimeVerse - Watch Online">
+    <meta id="og-desc" property="og:description" content="Stream and Download your favorite anime in Hindi/Sub.">
+    <meta id="og-image" property="og:image" content="https://i.ibb.co/mF0pYxT/animeverse-logo.png"> <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #FF7B00; --bg: #0D0D12; --card-bg: #181c25; }
@@ -13,139 +17,27 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
 
-        .back-btn {
-            background: #1c1f26;
-            border: 1px solid #2a2e38;
-            border-radius: 10px;
-            padding: 8px 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-        }
+        .back-btn { background: #1c1f26; border: 1px solid #2a2e38; border-radius: 10px; padding: 8px 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .back-btn:active { transform: scale(0.9); background: #2a2e38; }
 
-        .header-card {
-            background: var(--card-bg);
-            margin: 15px;
-            padding: 15px;
-            border-radius: 20px;
-            display: flex;
-            gap: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        .header-card { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 20px; display: flex; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
 
-        .poster-img {
-            width: 110px;
-            aspect-ratio: 2/3;
-            object-fit: cover;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-        }
+        .badge-info { background: #2a2e38; color: var(--neon); font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; }
+        
+        .video-box { margin: 0 15px; position: relative; width: calc(100% - 30px); aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        #main-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        .badge-info {
-            background: #2a2e38;
-            color: var(--neon);
-            font-size: 10px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .video-box {
-            margin: 0 15px;
-            position: relative;
-            width: calc(100% - 30px);
-            aspect-ratio: 16/9;
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid #222;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        }
-
-        #main-player {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        .nav-btn {
-            flex: 1;
-            background: #1c1f26;
-            color: #fff;
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 1px solid #2a2e38;
-            text-align: center;
-            transition: 0.2s;
-        }
-        .nav-btn:active { transform: translateY(2px); background: #2a2e38; }
+        .nav-btn { flex: 1; background: #1c1f26; color: #fff; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: 1px solid #2a2e38; text-align: center; text-decoration: none; cursor: pointer; }
         .btn-dl { background: var(--neon); color: #000; border: none; }
-        .btn-dl:active { background: #e66e00; }
 
-        .ep-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            max-height: 350px;
-            overflow-y: auto;
-            padding: 15px;
-        }
+        .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 400px; overflow-y: auto; padding: 15px; }
+        .ep-card { background: #181c25; border-radius: 12px; overflow: hidden; border: 2px solid transparent; transition: 0.3s; cursor: pointer; position: relative; opacity: 0.4; }
+        .ep-card.active { opacity: 1 !important; border-color: var(--neon); transform: scale(0.96); }
+        .ep-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+        .badge-count { position: absolute; top: 4px; left: 4px; background: var(--neon); color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; z-index: 10; }
 
-        .ep-card {
-            background: #181c25;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 2px solid transparent;
-            transition: 0.3s;
-            cursor: pointer;
-            position: relative;
-            opacity: 0.4;
-        }
-
-        .ep-card.active {
-            opacity: 1 !important;
-            border-color: var(--neon);
-            transform: scale(0.95);
-        }
-
-        .ep-img {
-            width: 100%;
-            aspect-ratio: 16/9;
-            object-fit: cover;
-        }
-
-        .badge-count {
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            background: var(--neon);
-            color: #000;
-            font-size: 8px;
-            font-weight: 900;
-            padding: 2px 5px;
-            border-radius: 4px;
-            z-index: 10;
-        }
-
-        footer {
-            margin-top: 20px;
-            padding: 20px;
-            text-align: center;
-            border-top: 1px solid #1a1a24;
-            background: #0a0a0f;
-        }
+        footer { margin-top: 20px; padding: 20px; text-align: center; background: #0a0a0f; border-top: 1px solid #1a1a24; }
     </style>
 </head>
 <body>
@@ -158,14 +50,13 @@
     </div>
 
     <div class="header-card">
-        <img id="poster" src="https://via.placeholder.com/150x225" class="poster-img">
-        <div class="flex-1">
+        <img id="poster" src="./Gemini_Generated_Image_u4n26yu4n26yu4n2.png" class="poster-img"> <div class="flex-1">
             <h1 id="title" class="text-lg font-bold uppercase leading-tight mb-2 line-clamp-2">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
                 <span class="badge-info">Hindi / Sub</span>
-                <span id="year" class="text-xs text-gray-400 font-bold">2024</span>
+                <span id="year" class="text-xs text-gray-400 font-bold">----</span>
             </div>
-            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Fetch data from sheet...</p>
+            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Fetching anime details from API...</p>
         </div>
     </div>
 
@@ -182,48 +73,53 @@
     <div class="px-[15px]">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500">Episodes</h3>
-            <select id="season-select" onchange="loadSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none cursor-pointer">
-            </select>
+            <select id="season-select" onchange="loadSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none cursor-pointer"></select>
         </div>
         <div id="ep-grid" class="ep-grid"></div>
     </div>
 
-    <footer>
-        <div class="text-[10px] text-gray-500 font-bold tracking-widest uppercase">© 2026 AnimeVerse • Stream & Download</div>
-    </footer>
+    <footer><div class="text-[10px] text-gray-500 font-bold uppercase">© 2026 AnimeVerse • Stream & Download</div></footer>
 
     <script>
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
-        
+        const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png"; // REPLACE THIS
+
         let allData = [];
         let filteredEpisodes = [];
         let seasons = [];
         let currentSeasonName = "";
         let currentIndex = 0;
-        let mainPosterURL = "";
+        let mainPosterURL = defaultLogo;
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const animeId = params.get('id');
             if(!animeId) return;
 
-            // TMDB Fetching
+            // --- TMDB FETCHING & OG TAG UPDATE ---
             try {
                 const cleanName = animeId.replace(/-/g,' ');
-                const tmRes = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
+                const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
                 const tmData = await tmRes.json();
-                if(tmData.results[0]) {
+                
+                if(tmData.results && tmData.results[0]) {
                     const r = tmData.results[0];
-                    mainPosterURL = "https://image.tmdb.org/t/p/w500" + r.poster_path;
-                    document.getElementById('title').innerText = r.name;
+                    mainPosterURL = r.poster_path ? "https://image.tmdb.org/t/p/w500" + r.poster_path : defaultLogo;
+                    
+                    document.getElementById('title').innerText = r.name || r.title;
                     document.getElementById('poster').src = mainPosterURL;
-                    document.getElementById('year').innerText = r.first_air_date?.split('-')[0];
+                    document.getElementById('year').innerText = (r.first_air_date || r.release_date || "").split('-')[0];
                     document.getElementById('desc').innerText = r.overview;
-                }
-            } catch(e) { console.error("TMDB Error"); }
 
-            // Sheet Data
+                    // Update Social Preview Tags
+                    document.getElementById('og-title').content = r.name || r.title;
+                    document.getElementById('og-desc').content = r.overview.substring(0,150) + "...";
+                    document.getElementById('og-image').content = mainPosterURL;
+                }
+            } catch(e) { console.log("API Error"); }
+
+            // --- SHEET FETCHING ---
             const res = await fetch(csvURL);
             const text = await res.text();
             const rows = text.split('\n').slice(1);
@@ -248,12 +144,11 @@
             filteredEpisodes.forEach((ep, i) => {
                 const epNum = i + 1;
                 const card = document.createElement('div');
-                card.className = "ep-card";
-                card.id = `card-${i}`;
+                card.className = "ep-card"; card.id = `card-${i}`;
                 card.innerHTML = `
                     <div class="badge-count">${sNum}x${epNum}</div>
-                    <img id="img-${sNum}-${epNum}" src="${mainPosterURL || 'https://via.placeholder.com/300x169'}" class="ep-img">
-                    <p class="text-[9px] font-bold p-2 truncate" id="name-${sNum}-${epNum}">Episode ${epNum}</p>
+                    <img src="${mainPosterURL}" class="ep-img">
+                    <p class="text-[9px] font-bold p-2 truncate">Episode ${epNum}</p>
                 `;
                 card.onclick = () => selectEpisode(i);
                 grid.appendChild(card);
@@ -268,20 +163,16 @@
 
             document.getElementById('main-player').src = ep.url;
 
-            // --- SMART LOGIC: LINK vs BOT CODE (REPLACED) ---
-            const botValue = ep.bot.trim();
-            if (botValue.startsWith("http")) {
-                document.getElementById('dl-link').href = botValue;
+            // --- SMART DOWNLOAD LOGIC ---
+            const botVal = ep.bot.trim();
+            if(botVal.startsWith("http")) {
+                document.getElementById('dl-link').href = botVal;
             } else {
-                document.getElementById('dl-link').href = `https://t.me/verse1_8bot?start=${botValue}`;
+                document.getElementById('dl-link').href = `https://t.me/verse1_8bot?start=${botVal}`;
             }
 
             document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-            const activeCard = document.getElementById(`card-${index}`);
-            if(activeCard) {
-                activeCard.classList.add('active');
-                activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
+            document.getElementById(`card-${index}`).classList.add('active');
         }
 
         function smartChange(dir) {
@@ -291,11 +182,7 @@
             } else {
                 let sIdx = seasons.indexOf(currentSeasonName) + dir;
                 if (sIdx >= 0 && sIdx < seasons.length) {
-                    const nextSeason = seasons[sIdx];
-                    document.getElementById('season-select').value = nextSeason;
-                    loadSeason(nextSeason).then(() => {
-                        selectEpisode(dir === 1 ? 0 : filteredEpisodes.length - 1);
-                    });
+                    loadSeason(seasons[sIdx]).then(() => selectEpisode(dir === 1 ? 0 : filteredEpisodes.length - 1));
                 }
             }
         }
