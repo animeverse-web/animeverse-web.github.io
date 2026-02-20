@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Center | AnimeVerse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #FF7B00; --bg: #0D0D12; --card-bg: #181c25; }
+        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        .glass-card { background: var(--card-bg); border: 1px solid #2a2e38; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        .quality-btn {
+            background: #1c1f26;
+            border: 1px solid #2a2e38;
+            border-radius: 16px;
+            padding: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .quality-btn:hover {
+            border-color: var(--neon);
+            transform: scale(1.02);
+            background: #232832;
+        }
+
+        .icon-box {
+            background: var(--neon);
+            color: #000;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, #181c25 0%, #2a2e38 50%, #181c25 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+        .error-state { display: none; text-align: center; padding: 40px 20px; }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="py-6 text-center">
+        <div class="text-3xl font-black italic tracking-tighter uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
+        <p class="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase mt-1">Premium Cloud Download</p>
+    </div>
+
+    <main class="flex-grow flex items-center justify-center">
+        <div class="glass-card w-full max-w-md p-6 relative overflow-hidden">
+            
+            <div id="loader">
+                <div class="flex flex-col items-center py-10">
+                    <div class="w-12 h-12 border-4 border-[#FF7B00] border-t-transparent rounded-full animate-spin"></div>
+                    <p class="mt-4 text-sm text-gray-400 font-medium">Fetching secure links...</p>
+                </div>
+            </div>
+
+            <div id="content" class="hidden">
+                <div class="mb-6 text-center">
+                    <span class="bg-[#FF7B0015] text-[#FF7B00] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Links Ready</span>
+                    <h2 id="ep-title" class="text-xl font-bold mt-3 uppercase tracking-tight">Episode Title</h2>
+                </div>
+
+                <div id="links-container">
+                    </div>
+            </div>
+
+            <div id="error-view" class="error-state">
+                <div class="text-5xl mb-4">🛸</div>
+                <h2 class="text-lg font-bold">EPISODE NOT FOUND</h2>
+                <p class="text-sm text-gray-500 mt-2">Maaf kijiye, ye episode abhi hamare servers par available nahi hai.</p>
+                <button onclick="window.history.back()" class="mt-6 text-[#FF7B00] font-bold text-sm uppercase border-b-2 border-[#FF7B00]">Go Back</button>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="mt-10 max-w-2xl mx-auto text-center">
+        <div class="bg-[#181c25] p-5 rounded-2xl border border-dashed border-[#2a2e38] mb-6">
+            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 italic">Disclaimer</h4>
+            <p class="text-[9px] text-gray-500 leading-relaxed uppercase">
+                AnimeVerse does not store any files on its server. All contents are provided by non-affiliated third parties. 
+                We encourage users to support the official creators. This link is for personal backup only.
+            </p>
+        </div>
+        <div class="text-[10px] text-gray-600 font-bold uppercase tracking-widest pb-6">
+            © 2026 ANIMEVERSE • MADE WITH ❤️ FOR ANIME FANS
+        </div>
+    </footer>
+
+    <script>
+        const sheetURL = "https://docs.google.com/spreadsheets/d/1hQ60uPpZ7v6kHpfUMK8IzE8V7EdT1U4OrFTIIsb8yFk/export?format=csv";
+        
+        async function loadLinks() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            
+            if(!id) {
+                showError();
+                return;
+            }
+
+            try {
+                const res = await fetch(sheetURL);
+                const text = await res.text();
+                const rows = text.split('\n').slice(1);
+                
+                let foundData = null;
+                for(let row of rows) {
+                    const col = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if(col[0]?.replace(/"/g, '').trim() === id) {
+                        foundData = {
+                            p480: col[1]?.replace(/"/g, '').trim(),
+                            p720: col[2]?.replace(/"/g, '').trim(),
+                            p1080: col[3]?.replace(/"/g, '').trim()
+                        };
+                        break;
+                    }
+                }
+
+                if(foundData) {
+                    renderButtons(foundData, id);
+                } else {
+                    showError();
+                }
+            } catch (e) {
+                showError();
+            }
+        }
+
+        function renderButtons(links, id) {
+            const container = document.getElementById('links-container');
+            document.getElementById('ep-title').innerText = id.replace(/_/g, ' ');
+            
+            const qualities = [
+                { key: 'p480', label: 'Standard Quality', res: '480P', icon: 'SD' },
+                { key: 'p720', label: 'High Definition', res: '720P', icon: 'HD' },
+                { key: 'p1080', label: 'Ultra Full HD', res: '1080P', icon: '4K' }
+            ];
+
+            qualities.forEach(q => {
+                if(links[q.key] && links[q.key] !== "" && links[q.key] !== "#") {
+                    container.innerHTML += `
+                        <button onclick="window.location.href='${links[q.key]}'" class="quality-btn">
+                            <div class="flex items-center gap-4 text-left">
+                                <div class="icon-box">${q.icon}</div>
+                                <div>
+                                    <div class="text-sm font-bold">${q.res} Version</div>
+                                    <div class="text-[9px] text-gray-500 font-bold uppercase">${q.label}</div>
+                                </div>
+                            </div>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7B00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13l5 5 5-5M12 18V6"/></svg>
+                        </button>
+                    `;
+                }
+            });
+
+            if(container.innerHTML === "") { showError(); return; }
+
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+        }
+
+        function showError() {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('content').classList.add('hidden');
+            document.getElementById('error-view').style.display = 'block';
+        }
+
+        loadLinks();
+    </script>
+</body>
+</html>
