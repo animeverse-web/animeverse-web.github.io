@@ -66,7 +66,7 @@
 
     <div class="flex gap-2 px-[15px] mb-5">
         <button class="nav-btn" onclick="smartChange(-1)">Prev</button>
-        <a id="dl-link" href="#" target="_blank" class="nav-btn btn-dl flex items-center justify-center">Download Ep</a>
+        <button id="dl-button" class="nav-btn btn-dl flex items-center justify-center">Download Ep</button>
         <button class="nav-btn" onclick="smartChange(1)">Next</button>
     </div>
 
@@ -83,7 +83,7 @@
     <script>
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
-        const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png"; // REPLACE THIS
+        const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png";
 
         let allData = [];
         let filteredEpisodes = [];
@@ -97,7 +97,6 @@
             const animeId = params.get('id');
             if(!animeId) return;
 
-            // --- TMDB FETCHING & OG TAG UPDATE ---
             try {
                 const cleanName = animeId.replace(/-/g,' ');
                 const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
@@ -112,20 +111,25 @@
                     document.getElementById('year').innerText = (r.first_air_date || r.release_date || "").split('-')[0];
                     document.getElementById('desc').innerText = r.overview;
 
-                    // Update Social Preview Tags
                     document.getElementById('og-title').content = r.name || r.title;
                     document.getElementById('og-desc').content = r.overview.substring(0,150) + "...";
                     document.getElementById('og-image').content = mainPosterURL;
                 }
             } catch(e) { console.log("API Error"); }
 
-            // --- SHEET FETCHING ---
             const res = await fetch(csvURL);
             const text = await res.text();
             const rows = text.split('\n').slice(1);
+            
+            // Fixed splitting to handle potential commas inside names
             allData = rows.map(r => {
                 const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                return { id: c[0]?.trim(), name: c[1]?.trim(), url: c[2]?.trim(), bot: c[3]?.trim() };
+                return { 
+                    id: c[0]?.replace(/"/g, '').trim(), 
+                    name: c[1]?.replace(/"/g, '').trim(), 
+                    url: c[2]?.replace(/"/g, '').trim(), 
+                    bot: c[3]?.replace(/"/g, '').trim() 
+                };
             }).filter(x => x.id === animeId);
 
             seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
@@ -163,16 +167,30 @@
 
             document.getElementById('main-player').src = ep.url;
 
-            // --- SMART DOWNLOAD LOGIC ---
-            const botVal = ep.bot.trim();
-            if(botVal.startsWith("http")) {
-                document.getElementById('dl-link').href = botVal;
-            } else {
-                document.getElementById('dl-link').href = `https://t.me/verse1_8bot?start=${botVal}`;
-            }
+            // --- SMART DOWNLOAD LOGIC UPDATE ---
+            const botVal = ep.bot ? ep.bot.trim() : "";
+            const dlBtn = document.getElementById('dl-button');
+            
+            // Episode specific ID for quality sheet (animename_season_ep)
+            const sNum = currentSeasonName.replace(/\D/g, '');
+            const epNum = index + 1;
+            const qualityId = `${ep.id}_s${sNum}_e${epNum}`;
+
+            dlBtn.onclick = () => {
+                if(botVal && botVal !== "") {
+                    // Bot Code exists -> Go to Telegram
+                    let finalUrl = botVal.startsWith("http") ? botVal : `https://t.me/verse1_8bot?start=${botVal}`;
+                    window.open(finalUrl, '_blank');
+                } else {
+                    // Bot Code is Empty -> Go to New Download Page
+                    window.location.href = `download.html?id=${qualityId}`;
+                }
+            };
 
             document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-            document.getElementById(`card-${index}`).classList.add('active');
+            if(document.getElementById(`card-${index}`)) {
+                document.getElementById(`card-${index}`).classList.add('active');
+            }
         }
 
         function smartChange(dir) {
