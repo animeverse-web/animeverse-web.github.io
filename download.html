@@ -3,125 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download Center | AnimeVerse</title>
+    <title>Download Center | AnimeVerse Neon</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #FF7B00; --bg: #0D0D12; --card-bg: #181c25; }
-        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+        :root { --neon: #00D4FF; --bg: #020508; }
         
-        .glass-card { background: var(--card-bg); border: 1px solid #2a2e38; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Outfit', sans-serif; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            background-size: cover;
+            background-position: center 20%; /* Image ka face upar dikhega */
+            background-attachment: fixed;
+            transition: background 1s ease;
+        }
+
+        /* Improved Visibility Overlay: Kam blur aur zyada glow */
+        .glacier-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            /* Blue tint jo image ko chamkayega */
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.1) 0%, rgba(2, 5, 8, 0.85) 100%);
+            backdrop-filter: blur(8px); /* Blur kam kiya taaki image dikhe */
+            -webkit-backdrop-filter: blur(8px);
+            z-index: -1;
+        }
         
+        .glass-card { 
+            background: rgba(7, 15, 25, 0.85); 
+            border: 2px solid rgba(0, 212, 255, 0.3); 
+            border-radius: 35px; 
+            /* Outer Glow */
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.2);
+            backdrop-filter: blur(20px);
+        }
+
+        /* Timer with Glow */
+        .timer-circle {
+            position: relative;
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: conic-gradient(var(--neon) var(--progress, 0%), transparent 0deg);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+        .timer-circle::before {
+            content: attr(data-sec);
+            position: absolute;
+            width: 80px; height: 80px;
+            background: #0a141e;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 900; color: var(--neon);
+            text-shadow: 0 0 10px var(--neon);
+        }
+
         .quality-btn {
-            background: #1c1f26;
-            border: 1px solid #2a2e38;
-            border-radius: 16px;
-            padding: 16px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            padding: 18px;
+            transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: space-between;
             margin-bottom: 12px;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeIn 0.6s forwards;
         }
 
         .quality-btn:hover {
+            background: rgba(0, 212, 255, 0.15);
             border-color: var(--neon);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
             transform: scale(1.02);
-            background: #232832;
         }
 
         .icon-box {
             background: var(--neon);
             color: #000;
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
             font-weight: 900;
-            font-size: 14px;
+            box-shadow: 0 0 15px var(--neon);
         }
 
-        .shimmer {
-            background: linear-gradient(90deg, #181c25 0%, #2a2e38 50%, #181c25 100%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-
-        .error-state { display: none; text-align: center; padding: 40px 20px; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="p-4">
+<body class="p-6">
+    <div class="glacier-overlay"></div>
 
-    <div class="py-6 text-center">
-        <div class="text-3xl font-black italic tracking-tighter uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
-        <p class="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase mt-1">Premium Cloud Download</p>
+    <div class="py-10 text-center">
+        <div class="text-4xl font-black italic tracking-tighter uppercase drop-shadow-[0_0_10px_rgba(0,212,255,0.5)]">ANIME<span class="text-[#00D4FF]">VERSE</span></div>
+        <p class="text-[11px] text-blue-300 font-bold tracking-[0.4em] uppercase mt-2">Premium Anime Website</p>
     </div>
 
     <main class="flex-grow flex items-center justify-center">
-        <div class="glass-card w-full max-w-md p-6 relative overflow-hidden">
+        <div class="glass-card w-full max-w-lg p-8 relative">
             
-            <div id="loader">
-                <div class="flex flex-col items-center py-10">
-                    <div class="w-12 h-12 border-4 border-[#FF7B00] border-t-transparent rounded-full animate-spin"></div>
-                    <p class="mt-4 text-sm text-gray-400 font-medium">Fetching secure links...</p>
-                </div>
+            <div id="timer-view" class="flex flex-col items-center py-10">
+                <div class="timer-circle" id="circle" data-sec="5"></div>
+                <p class="mt-8 text-sm text-blue-100 font-bold uppercase tracking-[0.2em] animate-pulse">Scanning Links...</p>
             </div>
 
             <div id="content" class="hidden">
-                <div class="mb-6 text-center">
-                    <span class="bg-[#FF7B0015] text-[#FF7B00] text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Links Ready</span>
-                    <h2 id="ep-title" class="text-xl font-bold mt-3 uppercase tracking-tight">Episode Title</h2>
+                <div class="mb-10 text-center">
+                    <span class="bg-[#00D4FF20] text-[#00D4FF] text-[10px] font-black px-6 py-2 rounded-full uppercase tracking-widest border border-[#00D4FF40] shadow-[0_0_15px_rgba(0,212,255,0.2)]">Links Authorized</span>
+                    <h2 id="ep-title" class="text-3xl font-black mt-6 uppercase tracking-tight text-white drop-shadow-md">Episode Title</h2>
                 </div>
-
-                <div id="links-container">
-                    </div>
+                <div id="links-container"></div>
             </div>
 
-            <div id="error-view" class="error-state">
-                <div class="text-5xl mb-4">🛸</div>
-                <h2 class="text-lg font-bold">EPISODE NOT FOUND</h2>
-                <p class="text-sm text-gray-500 mt-2">Maaf kijiye, ye episode abhi hamare servers par available nahi hai.</p>
-                <button onclick="window.history.back()" class="mt-6 text-[#FF7B00] font-bold text-sm uppercase border-b-2 border-[#FF7B00]">Go Back</button>
+            <div id="error-view" class="hidden text-center py-10">
+                <h2 class="text-xl font-bold text-red-400">SERVER OFFLINE</h2>
+                <button onclick="window.history.back()" class="mt-8 text-[#00D4FF] font-bold border-b-2 border-[#00D4FF]">Back</button>
             </div>
 
         </div>
     </main>
 
-    <footer class="mt-10 max-w-2xl mx-auto text-center">
-        <div class="bg-[#181c25] p-5 rounded-2xl border border-dashed border-[#2a2e38] mb-6">
-            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 italic">Disclaimer</h4>
-            <p class="text-[9px] text-gray-500 leading-relaxed uppercase">
-                AnimeVerse does not store any files on its server. All contents are provided by non-affiliated third parties. 
-                We encourage users to support the official creators. This link is for personal backup only.
-            </p>
-        </div>
-        <div class="text-[10px] text-gray-600 font-bold uppercase tracking-widest pb-6">
-            © 2026 ANIMEVERSE • MADE WITH ❤️ FOR ANIME FANS
-        </div>
+    <footer class="mt-12 pb-10 text-center">
+        <div class="text-[10px] text-blue-400/40 font-bold uppercase tracking-[0.5em]">© 2026 ANIMEVERSE MADE WITH LOVE ❤️</div>
     </footer>
 
     <script>
         const sheetURL = "https://docs.google.com/spreadsheets/d/1hQ60uPpZ7v6kHpfUMK8IzE8V7EdT1U4OrFTIIsb8yFk/export?format=csv";
-        
-        async function loadLinks() {
+        let countdown = 5;
+        let foundData = null;
+
+        async function fetchAnimeBackground(animeName) {
+            try {
+                const cleanName = animeName.split('_')[0].split(' ')[0];
+                const response = await fetch(`https://api.jikan.moe/v4/anime?q=${cleanName}&limit=1`);
+                const data = await response.json();
+                if (data.data && data.data[0]) {
+                    // HD Image set karna
+                    document.body.style.backgroundImage = `url('${data.data[0].images.jpg.large_image_url}')`;
+                }
+            } catch (err) { console.log("BG Error"); }
+        }
+
+        function startTimer() {
+            const circle = document.getElementById('circle');
+            const timerInterval = setInterval(() => {
+                countdown--;
+                circle.setAttribute('data-sec', countdown);
+                circle.style.setProperty('--progress', `${(5 - countdown) * 20}%`);
+                if (countdown <= 0) { clearInterval(timerInterval); showContent(); }
+            }, 1000);
+        }
+
+        function showContent() {
+            document.getElementById('timer-view').classList.add('hidden');
+            if (foundData) document.getElementById('content').classList.remove('hidden');
+            else document.getElementById('error-view').classList.remove('hidden');
+        }
+
+        async function init() {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
-            
-            if(!id) {
-                showError();
-                return;
-            }
-
+            if(!id) { showContent(); return; }
+            fetchAnimeBackground(id);
+            startTimer();
             try {
                 const res = await fetch(sheetURL);
                 const text = await res.text();
                 const rows = text.split('\n').slice(1);
-                
-                let foundData = null;
                 for(let row of rows) {
                     const col = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                     if(col[0]?.replace(/"/g, '').trim() === id) {
@@ -130,60 +182,41 @@
                             p720: col[2]?.replace(/"/g, '').trim(),
                             p1080: col[3]?.replace(/"/g, '').trim()
                         };
+                        renderButtons(foundData, id);
                         break;
                     }
                 }
-
-                if(foundData) {
-                    renderButtons(foundData, id);
-                } else {
-                    showError();
-                }
-            } catch (e) {
-                showError();
-            }
+            } catch (e) { console.log("Fetch Error"); }
         }
 
         function renderButtons(links, id) {
             const container = document.getElementById('links-container');
             document.getElementById('ep-title').innerText = id.replace(/_/g, ' ');
-            
             const qualities = [
-                { key: 'p480', label: 'Standard Quality', res: '480P', icon: 'SD' },
-                { key: 'p720', label: 'High Definition', res: '720P', icon: 'HD' },
-                { key: 'p1080', label: 'Ultra Full HD', res: '1080P', icon: '4K' }
+                { key: 'p480', label: 'Lite Stream', res: '480P', icon: 'SD' },
+                { key: 'p720', label: 'High Quality', res: '720P', icon: 'HD' },
+                { key: 'p1080', label: 'Master Grade', res: '1080P', icon: '4K' }
             ];
-
-            qualities.forEach(q => {
+            qualities.forEach((q, index) => {
                 if(links[q.key] && links[q.key] !== "" && links[q.key] !== "#") {
                     container.innerHTML += `
-                        <button onclick="window.location.href='${links[q.key]}'" class="quality-btn">
-                            <div class="flex items-center gap-4 text-left">
-                                <div class="icon-box">${q.icon}</div>
-                                <div>
-                                    <div class="text-sm font-bold">${q.res} Version</div>
-                                    <div class="text-[9px] text-gray-500 font-bold uppercase">${q.label}</div>
+                        <button onclick="window.location.href='${links[q.key]}'" class="quality-btn" style="animation-delay: ${index * 0.15}s">
+                            <div class="flex items-center gap-5">
+                                <div class="icon-box text-sm">${q.icon}</div>
+                                <div class="text-left">
+                                    <div class="text-base font-bold text-white">${q.res} Server</div>
+                                    <div class="text-[9px] text-[#00D4FF] font-black tracking-widest uppercase">${q.label}</div>
                                 </div>
                             </div>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7B00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13l5 5 5-5M12 18V6"/></svg>
-                        </button>
-                    `;
+                            <div class="bg-blue-500/10 p-2 rounded-full border border-blue-500/20">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="3" stroke-linecap="round"><path d="M7 13l5 5 5-5M12 18V6"/></svg>
+                            </div>
+                        </button>`;
                 }
             });
-
-            if(container.innerHTML === "") { showError(); return; }
-
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('content').classList.remove('hidden');
         }
-
-        function showError() {
-            document.getElementById('loader').classList.add('hidden');
-            document.getElementById('content').classList.add('hidden');
-            document.getElementById('error-view').style.display = 'block';
-        }
-
-        loadLinks();
+        init();
     </script>
 </body>
+<script src="https://pl28760096.effectivegatecpm.com/3a/c9/78/3ac978c92646e53248f4457f93f13bae.js"></script>
 </html>
