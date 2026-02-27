@@ -17,23 +17,32 @@
 
     <style>
         :root { --neon: #FF7B00; --bg: #0D0D12; --card-bg: #181c25; }
-        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; }
+        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; overflow-x: hidden; }
+        
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
+
         .back-btn { background: #1c1f26; border: 1px solid #2a2e38; border-radius: 10px; padding: 8px 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .back-btn:active { transform: scale(0.9); background: #2a2e38; }
+
         .header-card { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 20px; display: flex; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; }
+        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
+
         .badge-info { background: #2a2e38; color: var(--neon); font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; }
-        .video-box { margin: 0 15px; position: relative; width: calc(100% - 30px); aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; cursor: pointer; }
+        
+        .video-box { margin: 0 15px; position: relative; width: calc(100% - 30px); aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; box-shadow: 0 20px 40px rgba(0,0,0,0.6); cursor: pointer; }
         #main-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
-        .video-box.clicked #main-player { pointer-events: auto; }
+        .video-box.active-play #main-player { pointer-events: auto; }
+
         .nav-btn { flex: 1; background: #1c1f26; color: #fff; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: 1px solid #2a2e38; text-align: center; cursor: pointer; }
         .btn-dl { background: var(--neon); color: #000; border: none; }
+
         .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 400px; overflow-y: auto; padding: 15px; }
         .ep-card { background: #181c25; border-radius: 12px; overflow: hidden; border: 2px solid transparent; transition: 0.3s; cursor: pointer; position: relative; opacity: 0.4; }
         .ep-card.active { opacity: 1 !important; border-color: var(--neon); transform: scale(0.96); }
         .ep-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
         .badge-count { position: absolute; top: 4px; left: 4px; background: var(--neon); color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; z-index: 10; }
+
         footer { margin-top: 20px; padding: 20px; text-align: center; background: #0a0a0f; border-top: 1px solid #1a1a24; }
     </style>
 </head>
@@ -41,21 +50,21 @@
 
     <div class="p-5 flex items-center gap-4">
         <button class="back-btn" onclick="window.history.back()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
-        <div class="text-2xl font-black italic uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
+        <div class="text-2xl font-black italic tracking-tighter uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
     </div>
 
     <div class="header-card">
         <img id="poster" src="" class="poster-img"> 
         <div class="flex-1">
-            <h1 id="title" class="text-lg font-bold uppercase mb-2 line-clamp-2">Loading...</h1>
+            <h1 id="title" class="text-lg font-bold uppercase leading-tight mb-2 line-clamp-2">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
                 <span class="badge-info">Hindi / Sub</span>
                 <span id="year" class="text-xs text-gray-400 font-bold">----</span>
-                <span class="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400">👁️ <span id="ep-views">0</span> Views</span>
+                <span class="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 font-bold">👁️ <span id="ep-views">0</span> Views</span>
             </div>
-            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3">Fetching details...</p>
+            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Fetching details...</p>
         </div>
     </div>
 
@@ -65,18 +74,22 @@
 
     <div class="flex gap-2 px-[15px] mb-5">
         <button class="nav-btn" onclick="smartChange(-1)">Prev</button>
-        <button id="dl-button" class="nav-btn btn-dl">Download Ep</button>
+        <button id="dl-button" class="nav-btn btn-dl flex items-center justify-center">Download Ep</button>
         <button class="nav-btn" onclick="smartChange(1)">Next</button>
     </div>
 
     <div class="px-[15px]">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500">Episodes</h3>
+            <select id="season-select" onchange="loadSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none cursor-pointer"></select>
+        </div>
         <div id="ep-grid" class="ep-grid"></div>
     </div>
 
-    <footer><div class="text-[10px] text-gray-500 font-bold uppercase">© 2026 AnimeVerse</div></footer>
+    <footer><div class="text-[10px] text-gray-500 font-bold uppercase">© 2026 AnimeVerse • Stream & Download</div></footer>
 
     <script>
-        // Firebase Config (Aapki file se liya gaya)
+        // Firebase Config (Aapke index.html se exact match)
         const firebaseConfig = { 
             apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
             databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
@@ -88,19 +101,27 @@
 
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
-        let allData = [], filteredEpisodes = [], currentIndex = 0, mainPosterURL = "";
+        const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png";
+
+        let allData = [];
+        let filteredEpisodes = [];
+        let seasons = [];
+        let currentSeasonName = "";
+        let currentIndex = 0;
+        let mainPosterURL = defaultLogo;
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const animeId = params.get('id');
             if(!animeId) return;
 
+            // TMDB Fetch
             try {
                 const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(animeId.replace(/-/g,' '))}`);
                 const tmData = await tmRes.json();
                 if(tmData.results?.[0]) {
                     const r = tmData.results[0];
-                    mainPosterURL = "https://image.tmdb.org/t/p/w500" + r.poster_path;
+                    mainPosterURL = r.poster_path ? "https://image.tmdb.org/t/p/w500" + r.poster_path : defaultLogo;
                     document.getElementById('title').innerText = r.name || r.title;
                     document.getElementById('poster').src = mainPosterURL;
                     document.getElementById('year').innerText = (r.first_air_date || r.release_date || "").split('-')[0];
@@ -108,6 +129,7 @@
                 }
             } catch(e) { console.log("TMDB Error"); }
 
+            // Sheets Fetch
             const res = await fetch(csvURL);
             const text = await res.text();
             const rows = text.split('\n').slice(1);
@@ -121,17 +143,23 @@
                 };
             }).filter(x => x.id === animeId);
 
-            if(allData.length > 0) loadSeason(allData[0].name.split(' - ')[0]);
+            seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
+            document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}">${s.replace('S','Season ')}</option>`).join('');
+            
+            if(seasons.length > 0) loadSeason(seasons[0]);
         }
 
         function loadSeason(sName) {
+            currentSeasonName = sName;
             filteredEpisodes = allData.filter(x => x.name.startsWith(sName));
             const grid = document.getElementById('ep-grid');
             grid.innerHTML = "";
+            const sNum = sName.replace(/\D/g, '');
+
             filteredEpisodes.forEach((ep, i) => {
                 const card = document.createElement('div');
                 card.className = "ep-card"; card.id = `card-${i}`;
-                card.innerHTML = `<div class="badge-count">${i+1}</div><img src="${mainPosterURL}" class="ep-img"><p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>`;
+                card.innerHTML = `<div class="badge-count">${sNum}x${i+1}</div><img src="${mainPosterURL}" class="ep-img"><p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>`;
                 card.onclick = () => selectEpisode(i);
                 grid.appendChild(card);
             });
@@ -146,48 +174,62 @@
             const player = document.getElementById('main-player');
             const container = document.getElementById('video-container');
             player.src = ep.url;
-            container.classList.remove('clicked');
+            container.classList.remove('active-play'); // Reset pointer-events for new episode
 
-            const animeID = ep.id.replace(/[.#$[\]]/g, "_");
+            // Firebase Keys setup
+            const animeKey = ep.id.replace(/[.#$[\]]/g, "_");
             const epKey = `ep_${index + 1}`;
-            const sessionKey = `v_${animeID}_${epKey}`;
-            
-            // Current Date for Firebase (YYYY-MM-DD)
+            const sessionKey = `v_${animeKey}_${epKey}`;
             const today = new Date().toISOString().split('T')[0];
 
-            // --- CLICK LOGIC ---
+            // --- CLICK TRACKING ON VIDEO START ---
             container.onclick = () => {
                 if (!sessionStorage.getItem(sessionKey)) {
-                    // 1. Total Views (Lifetime)
-                    db.ref(`animeverse/${animeID}/${epKey}/total_clicks`).transaction(c => (c || 0) + 1);
-                    
-                    // 2. Daily Views (Firebase mein hidden tracking)
-                    db.ref(`animeverse/${animeID}/${epKey}/daily_stats/${today}`).transaction(c => (c || 0) + 1);
+                    // Update Total Clicks (Permanent)
+                    db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).transaction(c => (c || 0) + 1);
+                    // Update Daily Clicks (Hidden Tracking)
+                    db.ref(`animeverse/${animeKey}/${epKey}/daily_stats/${today}`).transaction(c => (c || 0) + 1);
                     
                     sessionStorage.setItem(sessionKey, "true");
                 }
-                container.classList.add('clicked');
+                container.classList.add('active-play'); // Enable iframe clicks
             };
 
-            // Player par sirf Lifetime Views dikhayenge
-            db.ref(`animeverse/${animeID}/${epKey}/total_clicks`).on('value', snap => {
+            // Display Lifetime Views
+            db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
+            // Download Logic
             const dlBtn = document.getElementById('dl-button');
+            const sNum = currentSeasonName.replace(/\D/g, '');
+            const qualityId = `${ep.id}_s${sNum}_e${index + 1}`;
             dlBtn.onclick = () => {
-                if(ep.bot) window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
-                else window.location.href = `download.html?id=${ep.id}_e${index+1}`;
+                if(ep.bot && ep.bot !== "") {
+                    let url = ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`;
+                    window.open(url, '_blank');
+                } else {
+                    window.location.href = `download.html?id=${qualityId}`;
+                }
             };
 
+            // Active UI
             document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
             document.getElementById(`card-${index}`)?.classList.add('active');
         }
 
         function smartChange(dir) {
             let nIdx = currentIndex + dir;
-            if (nIdx >= 0 && nIdx < filteredEpisodes.length) selectEpisode(nIdx);
+            if (nIdx >= 0 && nIdx < filteredEpisodes.length) {
+                selectEpisode(nIdx);
+            } else {
+                let sIdx = seasons.indexOf(currentSeasonName) + dir;
+                if (sIdx >= 0 && sIdx < seasons.length) {
+                    loadSeason(seasons[sIdx]).then(() => selectEpisode(dir === 1 ? 0 : filteredEpisodes.length - 1));
+                }
+            }
         }
+
         init();
     </script>
 </body>
