@@ -18,24 +18,18 @@
     <style>
         :root { --neon: #FF7B00; --bg: #0D0D12; --card-bg: #181c25; }
         body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; }
-        
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
 
         .back-btn { background: #1c1f26; border: 1px solid #2a2e38; border-radius: 10px; padding: 8px 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .back-btn:active { transform: scale(0.9); background: #2a2e38; }
-
         .header-card { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 20px; display: flex; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); }
-
-        .badge-info { background: #2a2e38; color: var(--neon); font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; }
+        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; }
         
-        .video-box { margin: 0 15px; position: relative; width: calc(100% - 30px); aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; box-shadow: 0 20px 40px rgba(0,0,0,0.6); cursor: pointer; }
+        .video-box { margin: 0 15px; position: relative; width: calc(100% - 30px); aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; cursor: pointer; }
         #main-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; }
-        /* Jab user click karega tabhi iframe active hoga */
         .video-box.active-play #main-player { pointer-events: auto; }
 
-        .nav-btn { flex: 1; background: #1c1f26; color: #fff; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: 1px solid #2a2e38; text-align: center; text-decoration: none; cursor: pointer; }
+        .nav-btn { flex: 1; background: #1c1f26; color: #fff; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: 1px solid #2a2e38; text-align: center; cursor: pointer; }
         .btn-dl { background: var(--neon); color: #000; border: none; }
 
         .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 400px; overflow-y: auto; padding: 15px; }
@@ -44,26 +38,37 @@
         .ep-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
         .badge-count { position: absolute; top: 4px; left: 4px; background: var(--neon); color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; z-index: 10; }
 
-        footer { margin-top: 20px; padding: 20px; text-align: center; background: #0a0a0f; border-top: 1px solid #1a1a24; }
+        /* Comment Section */
+        .comment-container { background: #181c25; margin: 15px; padding: 15px; border-radius: 20px; border: 1px solid #2a2e38; }
+        .comment-input { width: 100%; background: #0d0d12; border: 1px solid #2a2e38; border-radius: 12px; padding: 12px; color: #fff; font-size: 14px; outline: none; margin-bottom: 8px; }
+        .comment-btn { background: var(--neon); color: #000; font-weight: 800; padding: 10px 20px; border-radius: 10px; font-size: 12px; text-transform: uppercase; width: 100%; }
+        .comment-item { display: flex; gap: 12px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #222; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; background: var(--neon); color: #000; flex-shrink: 0; }
+
+        /* Modern Footer */
+        .footer-main { background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 40px 20px; margin-top: 40px; }
+        .footer-link { color: #666; font-size: 13px; text-decoration: none; transition: 0.2s; }
+        .footer-link:hover { color: var(--neon); }
+        .social-icon { background: #181c25; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #2a2e38; }
     </style>
 </head>
 <body>
 
     <div class="p-5 flex items-center gap-4">
         <button class="back-btn" onclick="window.history.back()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
-        <div class="text-2xl font-black italic tracking-tighter uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
+        <div class="text-2xl font-black italic uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
     </div>
 
     <div class="header-card">
-        <img id="poster" src="https://i.ibb.co/mF0pYxT/animeverse-logo.png" class="poster-img"> 
+        <img id="poster" src="" class="poster-img"> 
         <div class="flex-1">
-            <h1 id="title" class="text-lg font-bold uppercase leading-tight mb-2 line-clamp-2">Loading...</h1>
+            <h1 id="title" class="text-lg font-bold uppercase mb-2 line-clamp-2 italic">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
-                <span class="badge-info">Hindi / Sub</span>
-                <span id="year" class="text-xs text-gray-400 font-bold">----</span>
-                <span class="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 font-bold">👁️ <span id="ep-views">0</span> Views</span>
+                <span class="bg-[#2a2e38] text-[#FF7B00] text-[10px] font-bold px-2 py-1 rounded">Hindi / Sub</span>
+                <span id="year" class="text-xs text-gray-500 font-bold">----</span>
+                <span class="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 font-bold tracking-tight">👁️ <span id="ep-views">0</span> VIEWS</span>
             </div>
             <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Fetching details...</p>
         </div>
@@ -73,24 +78,55 @@
         <iframe id="main-player" src="" allowfullscreen></iframe>
     </div>
 
-    <div class="flex gap-2 px-[15px] mb-5">
+    <div class="flex gap-2 px-[15px] mb-6">
         <button class="nav-btn" onclick="smartChange(-1)">Prev</button>
-        <button id="dl-button" class="nav-btn btn-dl flex items-center justify-center">Download Ep</button>
+        <button id="dl-button" class="nav-btn btn-dl">Download Ep</button>
         <button class="nav-btn" onclick="smartChange(1)">Next</button>
     </div>
 
-    <div class="px-[15px]">
+    <div class="px-[15px] mb-8">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xs font-bold uppercase tracking-widest text-gray-500">Episodes</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-600">Episodes List</h3>
             <select id="season-select" onchange="loadSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none cursor-pointer"></select>
         </div>
         <div id="ep-grid" class="ep-grid"></div>
     </div>
 
-    <footer><div class="text-[10px] text-gray-500 font-bold uppercase">© 2026 AnimeVerse • Stream & Download</div></footer>
+    <div class="comment-container">
+        <h3 class="text-[10px] font-black uppercase tracking-[2px] text-gray-500 mb-4">Live Comments</h3>
+        <input type="text" id="user-name" placeholder="Name" class="comment-input">
+        <textarea id="comment-text" placeholder="Share your thoughts..." class="comment-input" rows="2"></textarea>
+        <button onclick="postComment()" class="comment-btn">Post Comment</button>
+        <div id="comment-list" class="mt-6 max-height-[400px] overflow-y-auto"></div>
+    </div>
+
+    <footer class="footer-main">
+        <div class="flex flex-col items-center text-center">
+            <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
+            <p class="text-[11px] text-gray-500 max-w-[250px] mb-6 font-medium">Watch and download your favorite anime in Hindi Dub and Subtitles for free.</p>
+            
+            <div class="flex gap-4 mb-8">
+                <a href="https://t.me/your_telegram" class="social-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                </a>
+              
+
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-8">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="#" class="footer-link">Movies</a>
+                <a href="#" class="footer-link">DMCA</a>
+                <a href="#" class="footer-link">Contact</a>
+            </div>
+
+            <div class="text-[9px] text-gray-700 font-bold uppercase tracking-widest">
+                © 2026 AnimeVerse • Made with ❤️ for Otakus
+            </div>
+        </div>
+    </footer>
 
     <script>
-        // Firebase Config from index (5).html
         const firebaseConfig = { 
             apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
             databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
@@ -102,14 +138,7 @@
 
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
-        const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png";
-
-        let allData = [];
-        let filteredEpisodes = [];
-        let seasons = [];
-        let currentSeasonName = "";
-        let currentIndex = 0;
-        let mainPosterURL = defaultLogo;
+        let allData = [], filteredEpisodes = [], seasons = [], currentIndex = 0, mainPosterURL = "";
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
@@ -117,51 +146,38 @@
             if(!animeId) return;
 
             try {
-                const cleanName = animeId.replace(/-/g,' ');
-                const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
+                const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(animeId.replace(/-/g,' '))}`);
                 const tmData = await tmRes.json();
-                
-                if(tmData.results && tmData.results[0]) {
+                if(tmData.results?.[0]) {
                     const r = tmData.results[0];
-                    mainPosterURL = r.poster_path ? "https://image.tmdb.org/t/p/w500" + r.poster_path : defaultLogo;
+                    mainPosterURL = "https://image.tmdb.org/t/p/w500" + r.poster_path;
                     document.getElementById('title').innerText = r.name || r.title;
                     document.getElementById('poster').src = mainPosterURL;
                     document.getElementById('year').innerText = (r.first_air_date || r.release_date || "").split('-')[0];
                     document.getElementById('desc').innerText = r.overview;
                 }
-            } catch(e) { console.log("API Error"); }
+            } catch(e) {}
 
             const res = await fetch(csvURL);
             const text = await res.text();
             const rows = text.split('\n').slice(1);
-            
             allData = rows.map(r => {
                 const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                return { 
-                    id: c[0]?.replace(/"/g, '').trim(), 
-                    name: c[1]?.replace(/"/g, '').trim(), 
-                    url: c[2]?.replace(/"/g, '').trim(), 
-                    bot: c[3]?.replace(/"/g, '').trim() 
-                };
+                return { id: c[0]?.trim(), name: c[1]?.trim(), url: c[2]?.trim(), bot: c[3]?.trim() };
             }).filter(x => x.id === animeId);
 
             seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
             document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}">${s.replace('S','Season ')}</option>`).join('');
-            
             if(seasons.length > 0) loadSeason(seasons[0]);
         }
 
-        async function loadSeason(sName) {
-            currentSeasonName = sName;
+        function loadSeason(sName) {
             filteredEpisodes = allData.filter(x => x.name.startsWith(sName));
-            const grid = document.getElementById('ep-grid');
-            grid.innerHTML = "";
-            const sNum = sName.replace(/\D/g, '');
-
+            const grid = document.getElementById('ep-grid'); grid.innerHTML = "";
             filteredEpisodes.forEach((ep, i) => {
                 const card = document.createElement('div');
                 card.className = "ep-card"; card.id = `card-${i}`;
-                card.innerHTML = `<div class="badge-count">${sNum}x${i+1}</div><img src="${mainPosterURL}" class="ep-img"><p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>`;
+                card.innerHTML = `<div class="badge-count">${i+1}</div><img src="${mainPosterURL}" class="ep-img"><p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>`;
                 card.onclick = () => selectEpisode(i);
                 grid.appendChild(card);
             });
@@ -171,69 +187,65 @@
         function selectEpisode(index) {
             currentIndex = index;
             const ep = filteredEpisodes[index];
-            if(!ep) return;
-
-            const player = document.getElementById('main-player');
-            const container = document.getElementById('video-container');
-            
-            player.src = ep.url;
-            container.classList.remove('active-play'); // Naye episode par click reset
-
-            // Tracking Logic
             const animeKey = ep.id.replace(/[.#$[\]]/g, "_");
             const epKey = `ep_${index + 1}`;
-            const sessionKey = `v_${animeKey}_${epKey}`;
             const today = new Date().toISOString().split('T')[0];
 
-            // Click hone par count badhega
+            document.getElementById('main-player').src = ep.url;
+            const container = document.getElementById('video-container');
+            container.classList.remove('active-play');
+            
             container.onclick = () => {
-                if (!sessionStorage.getItem(sessionKey)) {
-                    // Lifetime Total Update
+                if(!sessionStorage.getItem(`v_${animeKey}_${epKey}`)) {
                     db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).transaction(c => (c || 0) + 1);
-                    // Daily Stats (Hidden)
                     db.ref(`animeverse/${animeKey}/${epKey}/daily_stats/${today}`).transaction(c => (c || 0) + 1);
-                    
-                    sessionStorage.setItem(sessionKey, "true");
+                    sessionStorage.setItem(`v_${animeKey}_${epKey}`, "true");
                 }
                 container.classList.add('active-play');
             };
 
-            // Lifetime Views Display
             db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            // Smart Download Logic
-            const botVal = ep.bot ? ep.bot.trim() : "";
             const dlBtn = document.getElementById('dl-button');
-            const sNum = currentSeasonName.replace(/\D/g, '');
-            const qualityId = `${ep.id}_s${sNum}_e${index + 1}`;
-
             dlBtn.onclick = () => {
-                if(botVal && botVal !== "") {
-                    let finalUrl = botVal.startsWith("http") ? botVal : `https://t.me/verse1_8bot?start=${botVal}`;
-                    window.open(finalUrl, '_blank');
-                } else {
-                    window.location.href = `download.html?id=${qualityId}`;
-                }
+                if(ep.bot) window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
+                else window.location.href = `download.html?id=${ep.id}_e${index+1}`;
             };
 
+            listenToComments(animeKey, epKey);
             document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-            if(document.getElementById(`card-${index}`)) {
-                document.getElementById(`card-${index}`).classList.add('active');
-            }
+            document.getElementById(`card-${index}`)?.classList.add('active');
+        }
+
+        function postComment() {
+            const name = document.getElementById('user-name').value.trim() || "User";
+            const text = document.getElementById('comment-text').value.trim();
+            if(!text) return;
+            const ep = filteredEpisodes[currentIndex];
+            const animeKey = ep.id.replace(/[.#$[\]]/g, "_");
+            const epKey = `ep_${currentIndex + 1}`;
+            db.ref(`comments/${animeKey}/${epKey}`).push({ name, text, timestamp: Date.now() });
+            document.getElementById('comment-text').value = "";
+        }
+
+        function listenToComments(animeKey, epKey) {
+            db.ref(`comments/${animeKey}/${epKey}`).on('value', snap => {
+                const list = document.getElementById('comment-list'); list.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    Object.values(data).reverse().forEach(c => {
+                        const first = c.name.charAt(0).toUpperCase();
+                        list.innerHTML += `<div class="comment-item"><div class="user-avatar text-xs">${first}</div><div class="flex-1"><div class="flex justify-between items-center mb-1"><h4 class="text-[11px] font-bold text-gray-400">${c.name}</h4></div><p class="text-xs text-gray-500">${c.text}</p></div></div>`;
+                    });
+                }
+            });
         }
 
         function smartChange(dir) {
             let nIdx = currentIndex + dir;
-            if (nIdx >= 0 && nIdx < filteredEpisodes.length) {
-                selectEpisode(nIdx);
-            } else {
-                let sIdx = seasons.indexOf(currentSeasonName) + dir;
-                if (sIdx >= 0 && sIdx < seasons.length) {
-                    loadSeason(seasons[sIdx]).then(() => selectEpisode(dir === 1 ? 0 : filteredEpisodes.length - 1));
-                }
-            }
+            if (nIdx >= 0 && nIdx < filteredEpisodes.length) selectEpisode(nIdx);
         }
         init();
     </script>
