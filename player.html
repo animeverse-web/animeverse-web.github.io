@@ -38,17 +38,13 @@
         .ep-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
         .badge-count { position: absolute; top: 4px; left: 4px; background: var(--neon); color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; z-index: 10; }
 
-        /* Comment Section */
         .comment-container { background: #181c25; margin: 15px; padding: 15px; border-radius: 20px; border: 1px solid #2a2e38; }
         .comment-input { width: 100%; background: #0d0d12; border: 1px solid #2a2e38; border-radius: 12px; padding: 12px; color: #fff; font-size: 14px; outline: none; margin-bottom: 8px; }
         .comment-btn { background: var(--neon); color: #000; font-weight: 800; padding: 10px 20px; border-radius: 10px; font-size: 12px; text-transform: uppercase; width: 100%; }
         .comment-item { display: flex; gap: 12px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #222; }
         .user-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; background: var(--neon); color: #000; flex-shrink: 0; }
 
-        /* Footer */
         .footer-main { background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 40px 20px; margin-top: 40px; }
-        .footer-link { color: #666; font-size: 13px; text-decoration: none; transition: 0.2s; }
-        .footer-link:hover { color: var(--neon); }
         .social-icon { background: #181c25; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #2a2e38; }
     </style>
 </head>
@@ -74,7 +70,7 @@
         </div>
     </div>
 
-    <div class="video-box mb-4" id="video-container">
+    <div class="video-box mb-4 active-play" id="video-container">
         <iframe id="main-player" src="" allowfullscreen></iframe>
     </div>
 
@@ -126,8 +122,11 @@
         async function init() {
             const params = new URLSearchParams(window.location.search);
             currentAnimeId = params.get('id');
-            currentEpIndex = parseInt(params.get('ep')) || 0;
             currentSeason = params.get('s') || "";
+            
+            // Fix: Episode number from URL to array index
+            let epParam = parseInt(params.get('ep'));
+            currentEpIndex = epParam ? epParam - 1 : 0;
 
             if(!currentAnimeId) return;
 
@@ -137,9 +136,8 @@
                 const tmData = await tmRes.json();
                 if(tmData.results?.[0]) {
                     const r = tmData.results[0];
-                    const poster = "https://image.tmdb.org/t/p/w500" + r.poster_path;
                     document.getElementById('title').innerText = r.name || r.title;
-                    document.getElementById('poster').src = poster;
+                    document.getElementById('poster').src = "https://image.tmdb.org/t/p/w500" + r.poster_path;
                     document.getElementById('year').innerText = (r.first_air_date || r.release_date || "").split('-')[0];
                     document.getElementById('desc').innerText = r.overview;
                 }
@@ -172,7 +170,7 @@
                 card.className = `ep-card ${i === currentEpIndex ? 'active' : ''}`;
                 card.innerHTML = `<div class="badge-count">${i+1}</div><img src="${document.getElementById('poster').src}" class="ep-img"><p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>`;
                 card.onclick = () => {
-                    window.location.href = `?id=${currentAnimeId}&s=${currentSeason}&ep=${i}`;
+                    window.location.href = `?id=${currentAnimeId}&s=${currentSeason}&ep=${i+1}`;
                 };
                 grid.appendChild(card);
             });
@@ -183,26 +181,21 @@
             const ep = filtered[currentEpIndex];
             if(!ep) return;
 
-            document.getElementById('main-player').src = ep.url;
+            // Direct Play Fix
+            const player = document.getElementById('main-player');
+            player.src = ep.url;
+            player.style.pointerEvents = "auto";
             
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             const epKey = `s${currentSeason}_e${currentEpIndex + 1}`;
 
-            // View Tracking
-            const container = document.getElementById('video-container');
-            container.onclick = () => {
-                if(!sessionStorage.getItem(`v_${animeKey}_${epKey}`)) {
-                    db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).transaction(c => (c || 0) + 1);
-                    sessionStorage.setItem(`v_${animeKey}_${epKey}`, "true");
-                }
-                container.classList.add('active-play');
-            };
+            // Auto-click behavior
+            document.getElementById('video-container').classList.add('active-play');
 
             db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            // Download
             document.getElementById('dl-button').onclick = () => {
                 if(ep.bot) window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
                 else window.location.href = `download.html?id=${ep.id}_${epKey}`;
@@ -234,14 +227,14 @@
         }
 
         function changeSeason(s) {
-            window.location.href = `?id=${currentAnimeId}&s=${s}&ep=0`;
+            window.location.href = `?id=${currentAnimeId}&s=${s}&ep=1`;
         }
 
         function smartChange(dir) {
             const filtered = allData.filter(x => x.name.startsWith(currentSeason));
-            const newIdx = currentEpIndex + dir;
-            if(newIdx >= 0 && newIdx < filtered.length) {
-                window.location.href = `?id=${currentAnimeId}&s=${currentSeason}&ep=${newIdx}`;
+            const newEp = (currentEpIndex + 1) + dir;
+            if(newEp >= 1 && newEp <= filtered.length) {
+                window.location.href = `?id=${currentAnimeId}&s=${currentSeason}&ep=${newEp}`;
             }
         }
 
