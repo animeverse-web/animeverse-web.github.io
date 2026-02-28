@@ -51,7 +51,6 @@
             scroll-behavior: smooth; 
         }
 
-        /* --- HEADER (FIXED) --- */
         header { 
             display: flex; 
             justify-content: space-between; 
@@ -69,14 +68,12 @@
         .logo-container img { height: 40px; border-radius: 8px; filter: drop-shadow(var(--accent-glow)); }
         .menu-btn, .search-trigger { font-size: 1.6rem; cursor: pointer; color: #fff; background: none; border: none; outline: none; transition: 0.3s; }
 
-        /* --- SIDEBAR MENU --- */
         #sideNav { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: #0a0a0a; z-index: 3000; padding: 30px 20px; transform: translateX(-100%); transition: 0.4s; box-sizing: border-box; }
         #sideNav.open { transform: translateX(0); box-shadow: 10px 0 50px #000; }
         #sideNav a { display: block; color: #eee; padding: 12px; text-decoration: none; font-size: 15px; border-radius: 8px; margin-bottom: 5px; }
         #sideNav a:hover { background: var(--primary-color); color: white; }
         .close-btn { text-align: right; font-size: 1.5rem; cursor: pointer; color: var(--primary-color); margin-bottom: 20px; }
 
-        /* --- SEARCH SECTION (FIXED) --- */
         .search-section { 
             position: fixed; 
             top: 60px; 
@@ -91,23 +88,42 @@
             padding: 0 15px; 
             box-sizing: border-box;
         }
-        .search-section.active { 
-            opacity: 1; 
-            visibility: visible; 
-            transform: translateX(-50%) translateY(0); 
-            max-height: 120px; 
-            padding: 15px 15px; 
-        }
+        .search-section.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); max-height: 120px; padding: 15px 15px; }
         .search-box { display: flex; background: #111; border: 2px solid var(--primary-color); border-radius: 30px; overflow: hidden; box-shadow: 0 0 15px rgba(244, 126, 33, 0.5); }
         .search-box input { flex: 1; background: transparent; border: none; color: #fff; padding: 12px 40px 12px 20px; outline: none; font-size: 14px; width: 100%; }
         .go-btn { background: var(--primary-color); border: none; color: white; padding: 0 20px; font-weight: 800; cursor: pointer; }
 
-        /* --- SUGGESTIONS --- */
         #suggestions { position: absolute; top: 100%; left: 15px; right: 15px; background: rgba(15, 15, 15, 0.98); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid var(--primary-color); max-height: 250px; overflow-y: auto; display: none; margin-top: 10px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
         #suggestions div { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; transition: 0.2s; color: #eee; }
         #suggestions div:hover { background: var(--primary-color); color: white; padding-left: 25px; }
 
-        /* --- GRIDS & CARDS --- */
+        /* --- NEWLY ADDED HORIZONTAL STYLE --- */
+        #newlyContainer { 
+            display: flex; 
+            gap: 12px; 
+            overflow-x: auto; 
+            padding: 10px 5px; 
+            scroll-snap-type: x mandatory; 
+            -webkit-overflow-scrolling: touch; 
+        }
+        #newlyContainer::-webkit-scrollbar { display: none; }
+        
+        .ep-card { 
+            flex: 0 0 calc(55% - 10px); 
+            scroll-snap-align: start; 
+            background: rgba(15,15,15,0.95); 
+            border-radius: 10px; 
+            overflow: hidden; 
+            text-decoration: none; 
+            color: white; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            position: relative; 
+            transition: 0.3s;
+        }
+        .ep-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+        .ep-badge { position: absolute; top: 8px; left: 8px; background: var(--primary-color); font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 900; z-index: 10; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .ep-title { padding: 8px 5px; font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+
         .hero { padding: 15px; width: 100%; box-sizing: border-box; }
         .hero-card { background: #111; background-size: cover; background-position: center; height: 170px; border-radius: 12px; border: 1px solid var(--primary-color); display: flex; align-items: center; padding: 15px 20px; position: relative; overflow: hidden; }
         .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.95) 45%, transparent); z-index: 1; }
@@ -122,34 +138,13 @@
         .anime-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); }
         @media (min-width: 768px) { .anime-grid { grid-template-columns: repeat(6, 1fr); } }
 
-        .anime-card { 
-            background: rgba(15,15,15,0.95); 
-            border-radius: 8px; 
-            overflow: hidden; 
-            text-decoration: none; 
-            color: white; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            position: relative; 
-            transition: transform 0.2s, box-shadow 0.2s; 
-            -webkit-tap-highlight-color: transparent;
-        }
+        .anime-card { background: rgba(15,15,15,0.95); border-radius: 8px; overflow: hidden; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); position: relative; transition: transform 0.2s, box-shadow 0.2s; -webkit-tap-highlight-color: transparent; }
         .badge-hd { position: absolute; top: 5px; left: 5px; background: var(--primary-color); font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5; }
         .card-info { position: absolute; bottom: 35px; left: 0; right: 0; background: rgba(0,0,0,0.8); font-size: 8px; padding: 4px; text-align: center; color: var(--primary-color); font-weight: bold; }
         .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; transition: filter 0.3s ease; }
         .anime-title { padding: 6px 4px; font-size: 0.7rem; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .anime-card::after {
-            content: '▶';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            font-size: 40px;
-            color: white;
-            z-index: 10;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
+        .anime-card::after { content: '▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 40px; color: white; z-index: 10; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .anime-card.clicked { transform: scale(0.95); border-color: #0088cc !important; box-shadow: 0 0 20px rgba(0, 136, 204, 0.6); }
         .anime-card.clicked img { filter: brightness(0.5) sepia(1) hue-rotate(190deg) saturate(2) blur(3px); }
         .anime-card.clicked::after { transform: translate(-50%, -50%) scale(1); filter: none !important; }
@@ -158,10 +153,7 @@
         .bottom-actions { position: fixed; bottom: 0; width: 100%; display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.95); z-index: 1001; box-sizing: border-box; }
         .btn-action { flex: 1; padding: 13px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #fff; font-size: 0.75rem; }
 
-        #comingSoonModal {
-            display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; box-sizing: border-box;
-        }
-
+        #comingSoonModal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; box-sizing: border-box; }
         .skeleton { background: #1a1a1a; background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 8px; }
         @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .skeleton-card { width: 100%; aspect-ratio: 2/3; margin-bottom: 10px; }
@@ -213,7 +205,7 @@
 <div class="container">
     <section id="newlySection" style="display:none;">
         <h2 style="color: #00d2ff; border-left-color: #00d2ff;">✨ Newly Episode Added</h2>
-        <div class="anime-grid" id="newlyContainer"></div>
+        <div id="newlyContainer"></div>
     </section>
 
     <section id="latestSection">
@@ -266,8 +258,8 @@ const TMDB_API_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const TMDB_BG_PATH = 'https://image.tmdb.org/t/p/original';
-
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTvGZARZP6Mg8n9IzHbyJbA0IFLl-R092WC4j4iNEuoMix0WFs5am5XTElypkz-Fo77IpAhNFssDwZ4/pub?output=csv';
+
 let animeData = [];
 
 function trackClick(title) {
@@ -347,28 +339,37 @@ function createCard(anime) {
     return card;
 }
 
+// FIX: UPGRADED HORIZONTAL REALTIME LISTENER
 db.ref('newly_added_section').on('value', async (snap) => {
     const container = document.getElementById('newlyContainer');
     const section = document.getElementById('newlySection');
     container.innerHTML = ''; 
-    let count = 0;
-    const now = Date.now();
-    const updates = [];
-    snap.forEach((child) => {
-        const data = child.val();
-        if (now > data.expiry) { child.ref.remove(); } else { updates.push(data); count++; }
-    });
-    if (count > 0) {
+    
+    if (snap.exists()) {
         section.style.display = 'block';
-        for(let item of updates) {
-            const details = await fetchAnimeData(item.name);
-            if(details) {
-                const card = createCard({ title: item.name, link: `player.html?id=${item.slug}`, isNew: false, details: details });
-                card.querySelector('.badge-hd').innerText = `EPISODE ${item.ep}`;
-                container.appendChild(card);
-            }
-        }
-    } else { section.style.display = 'none'; }
+        const now = Date.now();
+        
+        snap.forEach((child) => {
+            const item = child.val();
+            if (now > item.expiry) { child.ref.remove(); return; }
+            
+            const card = document.createElement('a');
+            card.className = 'ep-card';
+            const sVal = item.season ? (item.season.toString().startsWith('S') ? item.season : 'S' + item.season) : 'S1';
+            card.href = `player.html?id=${item.slug}&s=${sVal}&ep=${item.ep}`;
+            
+            card.innerHTML = `
+                <div class="ep-badge">EPISODE ${item.ep}</div>
+                <img src="${item.image || 'https://via.placeholder.com/500x281'}" loading="lazy">
+                <div class="ep-title">${item.name}</div>
+            `;
+            
+            card.onclick = (e) => trackClick(item.name);
+            container.appendChild(card);
+        });
+    } else {
+        section.style.display = 'none';
+    }
 });
 
 async function renderGrids(isCached = false) {
