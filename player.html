@@ -45,7 +45,7 @@
         .comment-item { display: flex; gap: 12px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #222; }
         .user-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; background: var(--neon); color: #000; flex-shrink: 0; }
 
-        /* Modern Footer */
+        /* Footer */
         .footer-main { background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 40px 20px; margin-top: 40px; }
         .footer-link { color: #666; font-size: 13px; text-decoration: none; transition: 0.2s; }
         .footer-link:hover { color: var(--neon); }
@@ -64,11 +64,11 @@
     <div class="header-card">
         <img id="poster" src="" class="poster-img"> 
         <div class="flex-1">
-            <h1 id="title" class="text-lg font-bold uppercase mb-2 line-clamp-2 italic">Loading...</h1>
+            <h1 id="title" class="text-lg font-bold uppercase mb-2 line-clamp-2">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
                 <span class="bg-[#2a2e38] text-[#FF7B00] text-[10px] font-bold px-2 py-1 rounded">Hindi / Sub</span>
                 <span id="year" class="text-xs text-gray-500 font-bold">----</span>
-                <span class="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 font-bold tracking-tight">👁️ <span id="ep-views">0</span> VIEWS</span>
+                <span class="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 font-bold">👁️ <span id="ep-views">0</span> VIEWS</span>
             </div>
             <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Fetching details...</p>
         </div>
@@ -87,7 +87,7 @@
     <div class="px-[15px] mb-8">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-600">Episodes List</h3>
-            <select id="season-select" onchange="loadSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none cursor-pointer"></select>
+            <select id="season-select" onchange="changeSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none cursor-pointer"></select>
         </div>
         <div id="ep-grid" class="ep-grid"></div>
     </div>
@@ -97,33 +97,15 @@
         <input type="text" id="user-name" placeholder="Name" class="comment-input">
         <textarea id="comment-text" placeholder="Share your thoughts..." class="comment-input" rows="2"></textarea>
         <button onclick="postComment()" class="comment-btn">Post Comment</button>
-        <div id="comment-list" class="mt-6 max-height-[400px] overflow-y-auto"></div>
+        <div id="comment-list" class="mt-6"></div>
     </div>
 
-    <footer class="footer-main">
-        <div class="flex flex-col items-center text-center">
-            <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
-            <p class="text-[11px] text-gray-500 max-w-[250px] mb-6 font-medium">Watch and download your favorite anime in Hindi Dub and Subtitles for free.</p>
-            
-            <div class="flex gap-4 mb-8">
-                <a href="https://t.me/your_telegram" class="social-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-                </a>
-              
-
-            </div>
-
-            <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-8">
-                <a href="index.html" class="footer-link">Home</a>
-                <a href="#" class="footer-link">Movies</a>
-                <a href="#" class="footer-link">DMCA</a>
-                <a href="#" class="footer-link">Contact</a>
-            </div>
-
-            <div class="text-[9px] text-gray-700 font-bold uppercase tracking-widest">
-                © 2026 AnimeVerse • Made with ❤️ for Otakus
-            </div>
+    <footer class="footer-main text-center">
+        <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
+        <div class="flex justify-center gap-4 mb-8">
+            <a href="#" class="social-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg></a>
         </div>
+        <div class="text-[9px] text-gray-700 font-bold uppercase">© 2026 AnimeVerse</div>
     </footer>
 
     <script>
@@ -138,67 +120,79 @@
 
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
-        let allData = [], filteredEpisodes = [], seasons = [], currentIndex = 0, mainPosterURL = "";
+        
+        let allData = [], seasons = [], currentAnimeId = "", currentEpIndex = 0, currentSeason = "";
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
-            const animeId = params.get('id');
-            if(!animeId) return;
+            currentAnimeId = params.get('id');
+            currentEpIndex = parseInt(params.get('ep')) || 0;
+            currentSeason = params.get('s') || "";
 
+            if(!currentAnimeId) return;
+
+            // TMDB Meta
             try {
-                const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(animeId.replace(/-/g,' '))}`);
+                const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(currentAnimeId.replace(/-/g,' '))}`);
                 const tmData = await tmRes.json();
                 if(tmData.results?.[0]) {
                     const r = tmData.results[0];
-                    mainPosterURL = "https://image.tmdb.org/t/p/w500" + r.poster_path;
+                    const poster = "https://image.tmdb.org/t/p/w500" + r.poster_path;
                     document.getElementById('title').innerText = r.name || r.title;
-                    document.getElementById('poster').src = mainPosterURL;
+                    document.getElementById('poster').src = poster;
                     document.getElementById('year').innerText = (r.first_air_date || r.release_date || "").split('-')[0];
                     document.getElementById('desc').innerText = r.overview;
                 }
             } catch(e) {}
 
+            // Sheets Data
             const res = await fetch(csvURL);
             const text = await res.text();
             const rows = text.split('\n').slice(1);
             allData = rows.map(r => {
                 const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 return { id: c[0]?.trim(), name: c[1]?.trim(), url: c[2]?.trim(), bot: c[3]?.trim() };
-            }).filter(x => x.id === animeId);
+            }).filter(x => x.id === currentAnimeId);
 
             seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
-            document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}">${s.replace('S','Season ')}</option>`).join('');
-            if(seasons.length > 0) loadSeason(seasons[0]);
+            if(!currentSeason) currentSeason = seasons[0];
+
+            document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}" ${s===currentSeason?'selected':''}>${s.replace('S','Season ')}</option>`).join('');
+            
+            renderEpisodes();
+            loadEpisodeData();
         }
 
-        function loadSeason(sName) {
-            filteredEpisodes = allData.filter(x => x.name.startsWith(sName));
-            const grid = document.getElementById('ep-grid'); grid.innerHTML = "";
-            filteredEpisodes.forEach((ep, i) => {
+        function renderEpisodes() {
+            const filtered = allData.filter(x => x.name.startsWith(currentSeason));
+            const grid = document.getElementById('ep-grid');
+            grid.innerHTML = "";
+            filtered.forEach((ep, i) => {
                 const card = document.createElement('div');
-                card.className = "ep-card"; card.id = `card-${i}`;
-                card.innerHTML = `<div class="badge-count">${i+1}</div><img src="${mainPosterURL}" class="ep-img"><p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>`;
-                card.onclick = () => selectEpisode(i);
+                card.className = `ep-card ${i === currentEpIndex ? 'active' : ''}`;
+                card.innerHTML = `<div class="badge-count">${i+1}</div><img src="${document.getElementById('poster').src}" class="ep-img"><p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>`;
+                card.onclick = () => {
+                    window.location.href = `?id=${currentAnimeId}&s=${currentSeason}&ep=${i}`;
+                };
                 grid.appendChild(card);
             });
-            selectEpisode(0);
         }
 
-        function selectEpisode(index) {
-            currentIndex = index;
-            const ep = filteredEpisodes[index];
-            const animeKey = ep.id.replace(/[.#$[\]]/g, "_");
-            const epKey = `ep_${index + 1}`;
-            const today = new Date().toISOString().split('T')[0];
+        function loadEpisodeData() {
+            const filtered = allData.filter(x => x.name.startsWith(currentSeason));
+            const ep = filtered[currentEpIndex];
+            if(!ep) return;
 
             document.getElementById('main-player').src = ep.url;
-            const container = document.getElementById('video-container');
-            container.classList.remove('active-play');
             
+            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+            const epKey = `s${currentSeason}_e${currentEpIndex + 1}`;
+
+            // View Tracking
+            const container = document.getElementById('video-container');
             container.onclick = () => {
                 if(!sessionStorage.getItem(`v_${animeKey}_${epKey}`)) {
                     db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).transaction(c => (c || 0) + 1);
-                    db.ref(`animeverse/${animeKey}/${epKey}/daily_stats/${today}`).transaction(c => (c || 0) + 1);
                     sessionStorage.setItem(`v_${animeKey}_${epKey}`, "true");
                 }
                 container.classList.add('active-play');
@@ -208,24 +202,21 @@
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            const dlBtn = document.getElementById('dl-button');
-            dlBtn.onclick = () => {
+            // Download
+            document.getElementById('dl-button').onclick = () => {
                 if(ep.bot) window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
-                else window.location.href = `download.html?id=${ep.id}_e${index+1}`;
+                else window.location.href = `download.html?id=${ep.id}_${epKey}`;
             };
 
             listenToComments(animeKey, epKey);
-            document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-            document.getElementById(`card-${index}`)?.classList.add('active');
         }
 
         function postComment() {
             const name = document.getElementById('user-name').value.trim() || "User";
             const text = document.getElementById('comment-text').value.trim();
             if(!text) return;
-            const ep = filteredEpisodes[currentIndex];
-            const animeKey = ep.id.replace(/[.#$[\]]/g, "_");
-            const epKey = `ep_${currentIndex + 1}`;
+            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+            const epKey = `s${currentSeason}_e${currentEpIndex + 1}`;
             db.ref(`comments/${animeKey}/${epKey}`).push({ name, text, timestamp: Date.now() });
             document.getElementById('comment-text').value = "";
         }
@@ -236,17 +227,24 @@
                 const data = snap.val();
                 if(data) {
                     Object.values(data).reverse().forEach(c => {
-                        const first = c.name.charAt(0).toUpperCase();
-                        list.innerHTML += `<div class="comment-item"><div class="user-avatar text-xs">${first}</div><div class="flex-1"><div class="flex justify-between items-center mb-1"><h4 class="text-[11px] font-bold text-gray-400">${c.name}</h4></div><p class="text-xs text-gray-500">${c.text}</p></div></div>`;
+                        list.innerHTML += `<div class="comment-item"><div class="user-avatar text-xs">${c.name.charAt(0).toUpperCase()}</div><div class="flex-1"><h4 class="text-[11px] font-bold text-gray-400">${c.name}</h4><p class="text-xs text-gray-500">${c.text}</p></div></div>`;
                     });
                 }
             });
         }
 
-        function smartChange(dir) {
-            let nIdx = currentIndex + dir;
-            if (nIdx >= 0 && nIdx < filteredEpisodes.length) selectEpisode(nIdx);
+        function changeSeason(s) {
+            window.location.href = `?id=${currentAnimeId}&s=${s}&ep=0`;
         }
+
+        function smartChange(dir) {
+            const filtered = allData.filter(x => x.name.startsWith(currentSeason));
+            const newIdx = currentEpIndex + dir;
+            if(newIdx >= 0 && newIdx < filtered.length) {
+                window.location.href = `?id=${currentAnimeId}&s=${currentSeason}&ep=${newIdx}`;
+            }
+        }
+
         init();
     </script>
 </body>
