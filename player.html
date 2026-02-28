@@ -174,7 +174,7 @@ db.ref('newly_added_section').on('value', (snap) => {
             
             // Yahan badlav kiya gaya hai:
             let sNum = item.season.toString().toLowerCase().replace('s', ''); // Sirf number bachega
-            card.href = `player.html?id=${item.slug}&s=s${sNum}&ep=${item.ep}`;
+            card.href = `player.html?id=${item.slug}&s=${sNum}&ep=${item.ep}`;
             
             card.innerHTML = `
                 <div class="ep-badge">EPISODE ${item.ep}</div>
