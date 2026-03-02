@@ -489,6 +489,18 @@ function showComingSoon() { document.getElementById('comingSoonModal').style.dis
 function closeModal() { document.getElementById('comingSoonModal').style.display = 'none'; }
 
 loadDataFromSheet();
+// Firebase initialize hone ke baad ye code daalein
+const myPresenceRef = db.ref('presence').push();
+
+// Jab user online aaye
+myPresenceRef.set(true);
+
+// Jab user tab band kare ya internet jaye, counter se khud ko hata le
+myPresenceRef.onDisconnect().remove();
+// --- LIVE PRESENCE (Dashboard ke liye) ---
+const presenceRef = db.ref('presence').push();
+presenceRef.set(true);
+presenceRef.onDisconnect().remove();
 </script>
 </body>
 </html>
