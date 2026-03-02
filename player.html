@@ -46,31 +46,12 @@
         .footer-main { background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 40px 20px; margin-top: 40px; }
         .social-icon { background: #181c25; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #2a2e38; }
 
-
-        .disclaimer-box {
-    background: rgba(255, 123, 0, 0.05); /* Halki si orange jhalak */
-    border: 1px dashed rgba(255, 123, 0, 0.3); /* Dashed border professional lagti hai */
-    margin: 20px 15px;
-    padding: 15px;
-    border-radius: 15px;
-    text-align: center;
-}
-
-.disclaimer-title {
-    font-size: 10px;
-    font-weight: 900;
-    color: #FF7B00; /* Neon Orange */
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-}
-
-.disclaimer-text {
-    font-size: 10px;
-    color: #666; /* Gray color taaki zyada highlight na ho par dikhe */
-    line-height: 1.4;
-    font-weight: 500;
-}
+        .disclaimer-box { background: rgba(255, 123, 0, 0.05); border: 1px dashed rgba(255, 123, 0, 0.3); margin: 20px 15px; padding: 15px; border-radius: 15px; text-align: center; }
+        .disclaimer-title { font-size: 10px; font-weight: 900; color: #FF7B00; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+        .disclaimer-text { font-size: 10px; color: #666; line-height: 1.4; font-weight: 500; }
+        
+        /* New Style for Report Button */
+        .report-btn { font-size: 8px; color: #ff4444; border: 1px solid #ff4444; padding: 2px 8px; border-radius: 5px; text-transform: uppercase; font-weight: 900; margin-left: auto; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -80,6 +61,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
         <div class="text-2xl font-black italic uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
+        <button onclick="reportBrokenLink()" class="report-btn">🚨 Report Error</button>
     </div>
 
     <div class="header-card">
@@ -123,11 +105,11 @@
 
     <footer class="footer-main text-center">
         <div class="disclaimer-box">
-    <h4 class="disclaimer-title">Disclaimer</h4>
-    <p class="disclaimer-text">
-        AnimeVerse does not store any files on our server. All contents are provided by non-affiliated third parties. 
-        We do not host any copyrighted videos. Please contact the video hosting provider or the source site for any legal complaints.
-    </p>
+            <h4 class="disclaimer-title">Disclaimer</h4>
+            <p class="disclaimer-text">
+                AnimeVerse does not store any files on our server. All contents are provided by non-affiliated third parties. 
+                We do not host any copyrighted videos. Please contact the video hosting provider or the source site for any legal complaints.
+            </p>
         </div>
         <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
         <div class="flex justify-center gap-4 mb-8">
@@ -146,6 +128,11 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // --- NEW: LIVE PRESENCE ---
+        const presenceRef = db.ref('presence').push();
+        presenceRef.set(true);
+        presenceRef.onDisconnect().remove();
+
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
         
@@ -155,7 +142,6 @@
             const params = new URLSearchParams(window.location.search);
             currentAnimeId = params.get('id');
             
-            // Fix: Season clean up (remove extra 's' if exists)
             let sParam = params.get('s') || "";
             currentSeason = sParam.toLowerCase().startsWith('s') ? sParam.substring(1).toUpperCase() : sParam.toUpperCase();
             if(!currentSeason.startsWith('S')) currentSeason = 'S' + currentSeason;
@@ -165,7 +151,6 @@
 
             if(!currentAnimeId) return;
 
-            // Sheets Data
             const res = await fetch(csvURL);
             const text = await res.text();
             const rows = text.split('\n').slice(1);
@@ -179,7 +164,6 @@
 
             document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}" ${s===currentSeason?'selected':''}>${s.replace('S','Season ')}</option>`).join('');
             
-            // TMDB Meta
             try {
                 const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(currentAnimeId.replace(/-/g,' '))}`);
                 const tmData = await tmRes.json();
@@ -209,7 +193,6 @@
                 };
                 grid.appendChild(card);
             });
-            // Scroll into view
             setTimeout(() => {
                 const active = document.querySelector('.ep-card.active');
                 if(active) active.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -224,18 +207,18 @@
             document.getElementById('main-player').src = ep.url;
             
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            // Fix: Clean Season ID for Download link
             const cleanS = currentSeason.replace(/\D/g,''); 
             const epKey = `s${cleanS}_e${currentEpIndex + 1}`;
 
-            // Track Clicks
+            // --- NEW: TODAY'S TRENDING TRACKER ---
+            trackDailyView(currentAnimeId, epKey);
+
             const clickRef = db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`);
             clickRef.transaction(current => (current || 0) + 1);
             clickRef.on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            // Download Button Logic
             document.getElementById('dl-button').onclick = () => {
                 if(ep.bot && ep.bot !== "" && ep.bot !== "#") {
                     window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
@@ -245,6 +228,22 @@
             };
 
             listenToComments(animeKey, epKey);
+        }
+
+        // --- NEW: TRACKING FUNCTIONS ---
+        function trackDailyView(animeName, epKey) {
+            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            db.ref(`daily_stats/${today}/${animeName}_${epKey}`).transaction(v => (v || 0) + 1);
+        }
+
+        function reportBrokenLink() {
+            const info = `${currentAnimeId} | ${currentSeason} | Ep ${currentEpIndex + 1}`;
+            db.ref('reports').push({
+                anime: info,
+                time: new Date().toLocaleString(),
+                status: "Broken Link"
+            });
+            alert("Bhai, report bhej di hai! Admin jald check karega.");
         }
 
         function postComment() {
