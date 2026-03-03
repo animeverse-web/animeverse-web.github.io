@@ -50,7 +50,6 @@
         .disclaimer-title { font-size: 10px; font-weight: 900; color: #FF7B00; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
         .disclaimer-text { font-size: 10px; color: #666; line-height: 1.4; font-weight: 500; }
         
-        /* New Style for Report Button */
         .report-btn { font-size: 8px; color: #ff4444; border: 1px solid #ff4444; padding: 2px 8px; border-radius: 5px; text-transform: uppercase; font-weight: 900; margin-left: auto; cursor: pointer; }
     </style>
 </head>
@@ -128,7 +127,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- NEW: LIVE PRESENCE ---
         const presenceRef = db.ref('presence').push();
         presenceRef.set(true);
         presenceRef.onDisconnect().remove();
@@ -210,8 +208,8 @@
             const cleanS = currentSeason.replace(/\D/g,''); 
             const epKey = `s${cleanS}_e${currentEpIndex + 1}`;
 
-            // --- NEW: TODAY'S TRENDING TRACKER ---
-            trackDailyView(currentAnimeId, epKey);
+            // --- AUTO TRENDING LOGIC FOR DASHBOARD ---
+            updateTrendingToday(currentAnimeId, epKey);
 
             const clickRef = db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`);
             clickRef.transaction(current => (current || 0) + 1);
@@ -230,10 +228,25 @@
             listenToComments(animeKey, epKey);
         }
 
-        // --- NEW: TRACKING FUNCTIONS ---
-        function trackDailyView(animeName, epKey) {
-            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            db.ref(`daily_stats/${today}/${animeName}_${epKey}`).transaction(v => (v || 0) + 1);
+        // UPDATED: AUTO TRENDING FUNCTION
+        function updateTrendingToday(anime, ep) {
+            const trendId = btoa(anime + ep).substring(0, 10);
+            const trendRef = db.ref(`trending_today/${trendId}`);
+
+            trendRef.transaction((current) => {
+                if (current) {
+                    current.count = (current.count || 0) + 1;
+                    current.createdAt = Date.now();
+                    return current;
+                } else {
+                    return {
+                        animeName: anime.replace(/_/g, ' '),
+                        episode: ep.replace(/_/g, ' '),
+                        count: 1,
+                        createdAt: Date.now()
+                    };
+                }
+            });
         }
 
         function reportBrokenLink() {
@@ -284,4 +297,4 @@
         init();
     </script>
 </body>
-</html>
+                                                                                                                                     </html>
