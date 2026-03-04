@@ -197,6 +197,7 @@
             }, 500);
         }
 
+        // FIXED: Episode Loading with Unique Tracking
         function loadEpisodeData() {
             const filtered = allData.filter(x => x.name.startsWith(currentSeason));
             const ep = filtered[currentEpIndex];
@@ -205,10 +206,10 @@
             document.getElementById('main-player').src = ep.url;
             
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            const cleanS = currentSeason.replace(/\D/g,''); 
-            const epKey = `s${cleanS}_e${currentEpIndex + 1}`;
+            const cleanS = currentSeason.replace(/\D/g,'') || "1"; 
+            const epKey = `S${cleanS}_E${currentEpIndex + 1}`;
 
-            // --- AUTO TRENDING LOGIC FOR DASHBOARD ---
+            // AUTO TRENDING LOGIC FOR DASHBOARD
             updateTrendingToday(currentAnimeId, epKey);
 
             const clickRef = db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`);
@@ -228,9 +229,10 @@
             listenToComments(animeKey, epKey);
         }
 
-        // UPDATED: AUTO TRENDING FUNCTION
+        // FIXED: Trending Logic (Unique per Episode)
         function updateTrendingToday(anime, ep) {
-            const trendId = btoa(anime + ep).substring(0, 10);
+            // Har episode ke liye unique entry banayega: e.g., "solo-leveling-S1_E1"
+            const trendId = (anime + "-" + ep).replace(/[.#$[\]\s]/g, "_");
             const trendRef = db.ref(`trending_today/${trendId}`);
 
             trendRef.transaction((current) => {
@@ -240,7 +242,7 @@
                     return current;
                 } else {
                     return {
-                        animeName: anime.replace(/_/g, ' '),
+                        animeName: anime.replace(/-/g, ' ').toUpperCase(),
                         episode: ep.replace(/_/g, ' '),
                         count: 1,
                         createdAt: Date.now()
@@ -264,8 +266,8 @@
             const text = document.getElementById('comment-text').value.trim();
             if(!text) return;
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            const cleanS = currentSeason.replace(/\D/g,'');
-            const epKey = `s${cleanS}_e${currentEpIndex + 1}`;
+            const cleanS = currentSeason.replace(/\D/g,'') || "1";
+            const epKey = `S${cleanS}_E${currentEpIndex + 1}`;
             db.ref(`comments/${animeKey}/${epKey}`).push({ name, text, timestamp: Date.now() });
             document.getElementById('comment-text').value = "";
         }
@@ -297,4 +299,4 @@
         init();
     </script>
 </body>
-                                                                                                                                     </html>
+</html>
