@@ -19,7 +19,7 @@
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
         canvas { max-height: 200px !important; }
-        .rank-1 { color: #FF7B00; }
+        .hidden { display: none; }
     </style>
 </head>
 <body class="p-4 lg:p-8 custom-scroll">
@@ -31,7 +31,7 @@
         </div>
         <div class="flex gap-4">
             <div class="glass px-5 py-2 text-center">
-                <p class="text-[9px] text-gray-500 uppercase font-bold">Total Interactions</p>
+                <p class="text-[9px] text-gray-500 uppercase font-bold">Total Engagement</p>
                 <p id="total-engagement" class="text-xl font-bold text-[#FF7B00]">0</p>
             </div>
             <button onclick="location.reload()" class="glass px-6 py-2 hover:bg-[#FF7B00] hover:text-black transition font-bold text-xs uppercase">Refresh</button>
@@ -40,35 +40,35 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div class="lg:col-span-2 glass p-6">
-            <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">Engagement Chart (Global)</h3>
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">Global Clicks Velocity</h3>
             <canvas id="popularityChart"></canvas>
         </div>
         <div class="glass p-6 flex flex-col justify-center items-center text-center">
-            <div class="text-4xl mb-2">🚀</div>
-            <h3 class="text-xs font-bold uppercase text-gray-400">Current Status</h3>
-            <p class="text-green-400 font-bold text-sm mt-1 uppercase">Website Online</p>
-            <p class="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">Monitoring 10-20 active users</p>
+            <div class="text-4xl mb-2">🔥</div>
+            <h3 class="text-xs font-bold uppercase text-gray-400">System Status</h3>
+            <p class="text-green-400 font-bold text-sm mt-1 uppercase">Database Sync Active</p>
+            <p id="live-users" class="text-[10px] text-gray-600 mt-2 uppercase tracking-tighter">0 Users Online</p>
         </div>
     </div>
 
     <div class="flex flex-wrap gap-2 mb-6">
         <button onclick="openFolder('trending')" id="btn-trending" class="tab-btn active px-6 py-2 rounded-full text-[10px] font-black uppercase transition">🔥 Today's Top</button>
         <button onclick="openFolder('clicks')" id="btn-clicks" class="tab-btn px-6 py-2 rounded-full text-[10px] font-black uppercase transition">📊 Global Rank</button>
-        <button onclick="openFolder('episodes')" id="btn-episodes" class="tab-btn px-6 py-2 rounded-full text-[10px] font-black uppercase transition">📁 Anime Folders</button>
-        <button onclick="openFolder('comments')" id="btn-comments" class="tab-btn px-6 py-2 rounded-full text-[10px] font-black uppercase transition">💬 Moderation</button>
+        <button onclick="openFolder('episodes')" id="btn-episodes" class="tab-btn px-6 py-2 rounded-full text-[10px] font-black uppercase transition">📁 Folders</button>
+        <button onclick="openFolder('comments')" id="btn-comments" class="tab-btn px-6 py-2 rounded-full text-[10px] font-black uppercase transition">💬 Comments</button>
     </div>
 
     <div class="glass min-h-[450px] overflow-hidden mb-10">
         
         <div id="folder-trending" class="folder-content p-6">
-            <h3 class="text-sm font-bold text-[#FF7B00] uppercase mb-6 tracking-widest italic">Live Trending (Last 24 Hours)</h3>
+            <h3 class="text-sm font-bold text-[#FF7B00] uppercase mb-6 tracking-widest italic">Live Trending (Real-Time)</h3>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead class="text-[10px] text-gray-500 uppercase border-b border-[#2a2e38]">
                         <tr>
                             <th class="pb-4">Rank</th>
-                            <th class="pb-4">Anime Name & Episode</th>
-                            <th class="pb-4 text-right">Today's Views</th>
+                            <th class="pb-4">Anime & Episode</th>
+                            <th class="pb-4 text-right">Clicks</th>
                         </tr>
                     </thead>
                     <tbody id="trending-list-body" class="divide-y divide-[#1f232d]">
@@ -87,11 +87,11 @@
         </div>
 
         <div id="folder-episodes" class="folder-content hidden p-6">
-            <div id="anime-folders-container" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8"></div>
-            <div id="ep-details-container" class="hidden bg-[#0d0d12] p-6 rounded-2xl border border-[#2a2e38]">
+            <div id="anime-folders-container" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4"></div>
+            <div id="ep-details-container" class="hidden mt-8 bg-[#0d0d12] p-6 rounded-2xl border border-[#2a2e38]">
                 <div class="flex justify-between items-center mb-6">
                     <h3 id="selected-anime-name" class="text-lg font-black text-[#FF7B00] uppercase"></h3>
-                    <button onclick="closeEpDetails()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-white">Close X</button>
+                    <button onclick="closeEpDetails()" class="text-[10px] uppercase font-bold text-gray-500 hover:text-white">Back X</button>
                 </div>
                 <div id="ep-list-table" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
             </div>
@@ -120,38 +120,52 @@
             document.getElementById('btn-' + id).classList.add('active');
         }
 
-        // FEATURE 1: AUTOMATIC TRENDING LOGIC
+        // Live Presence
+        db.ref('presence').on('value', snap => {
+            document.getElementById('live-users').innerText = (snap.numChildren() || 0) + " Users Currently Online";
+        });
+
+        // ADJUSTED FEATURE: Fetching from 'trending_today'
         db.ref('trending_today').on('value', snap => {
             const tbody = document.getElementById('trending-list-body');
             tbody.innerHTML = "";
             let items = [];
-            const now = Date.now();
-            const expiry = 24 * 60 * 60 * 1000;
+
+            if (!snap.exists()) {
+                tbody.innerHTML = "<tr><td colspan='3' class='py-10 text-center text-gray-600 text-xs font-bold uppercase'>No Data in trending_today</td></tr>";
+                return;
+            }
 
             snap.forEach(child => {
                 const data = child.val();
-                if (now - data.createdAt > expiry) {
-                    db.ref(`trending_today/${child.key}`).remove();
-                } else {
-                    items.push(data);
-                }
+                // We use data.animeName and data.episode from your screenshot structure
+                items.push({
+                    name: (data.animeName || "Unknown").toUpperCase(),
+                    ep: (data.episode || "EP 0").toUpperCase(),
+                    count: data.count || 0,
+                    key: child.key
+                });
             });
 
+            // Sort by count (High to Low)
             items.sort((a, b) => b.count - a.count);
+
             items.forEach((item, index) => {
                 tbody.innerHTML += `
                     <tr>
-                        <td class="py-4 font-black text-xl opacity-30">#${index+1}</td>
+                        <td class="py-4 font-black text-xl opacity-20">#${index+1}</td>
                         <td class="py-4">
-                            <div class="font-bold text-sm uppercase ${index === 0 ? 'text-[#FF7B00]' : ''}">${item.animeName}</div>
-                            <div class="text-[9px] text-gray-500 uppercase">${item.episode}</div>
+                            <div class="font-bold text-xs sm:text-sm uppercase ${index === 0 ? 'text-[#FF7B00]' : 'text-gray-200'}">${item.name}</div>
+                            <div class="text-[9px] text-gray-500 uppercase font-bold mt-0.5">${item.ep.replace(/_/g, ' ')}</div>
                         </td>
-                        <td class="py-4 text-right font-mono font-bold text-orange-400">${item.count}</td>
+                        <td class="py-4 text-right">
+                            <span class="bg-[#FF7B00]/10 text-[#FF7B00] px-3 py-1 rounded-md font-mono font-bold text-xs">${item.count}</span>
+                        </td>
                     </tr>`;
             });
         });
 
-        // FEATURE 2: GLOBAL CLICKS
+        // Global Rank Logic
         db.ref('global_clicks').on('value', snap => {
             const tbody = document.getElementById('clicks-tbody');
             tbody.innerHTML = "";
@@ -166,7 +180,7 @@
             updateChart(l, c);
         });
 
-        // FEATURE 3: FOLDERS
+        // Anime Folders Logic
         db.ref('animeverse').on('value', snap => {
             const container = document.getElementById('anime-folders-container');
             container.innerHTML = "";
@@ -175,9 +189,9 @@
                 anime.forEach(ep => { views += (ep.val().total_clicks || 0); });
                 container.innerHTML += `
                     <div onclick="showAnimeEps('${anime.key}')" class="glass p-4 cursor-pointer hover:border-[#FF7B00] transition group text-center">
-                        <div class="text-xl mb-2">📁</div>
+                        <div class="text-xl mb-1">📁</div>
                         <h4 class="font-bold text-[9px] uppercase truncate group-hover:text-[#FF7B00]">${anime.key.replace(/_/g, ' ')}</h4>
-                        <p class="text-[8px] text-gray-600 mt-1 uppercase tracking-tighter">${views} Total Views</p>
+                        <p class="text-[8px] text-gray-600 mt-1 uppercase">${views} Views</p>
                     </div>`;
             });
         });
@@ -197,7 +211,7 @@
         }
         function closeEpDetails() { document.getElementById('ep-details-container').classList.add('hidden'); }
 
-        // FEATURE 4: MODERATION
+        // Moderation Logic
         db.ref('comments').on('value', snap => {
             const list = document.getElementById('comments-list');
             list.innerHTML = "";
@@ -208,7 +222,7 @@
                         list.innerHTML = `
                             <div class="glass p-4 flex justify-between items-center border-l-2 border-orange-500">
                                 <div class="text-xs">
-                                    <span class="text-orange-500 font-bold uppercase">${m.name}</span> <span class="text-[9px] text-gray-600 uppercase tracking-tighter italic">on ${anime.key}</span>
+                                    <span class="text-orange-500 font-bold uppercase">${m.name}</span> <span class="text-[9px] text-gray-600 uppercase italic">on ${anime.key}</span>
                                     <p class="mt-1 text-gray-300">"${m.text}"</p>
                                 </div>
                                 <button onclick="db.ref('comments/${anime.key}/${ep.key}/${msg.key}').remove()" class="text-red-500 font-bold hover:bg-red-500/10 px-3 py-1 rounded text-[10px]">DELETE</button>
