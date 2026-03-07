@@ -39,32 +39,9 @@
 
     <style>
         :root { --primary-color: #f47e21; --secondary-color: #ff0000; --accent-glow: 0 0 15px rgba(244, 126, 33, 0.4); }
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: #000 url('./IMG_20250528_184959.jpg') no-repeat center center fixed; 
-            background-size: cover; 
-            color: #fff; 
-            margin: 0; 
-            padding: 0; 
-            padding-top: 85px; 
-            overflow-x: hidden; 
-            scroll-behavior: smooth; 
-        }
+        body { font-family: 'Poppins', sans-serif; background: #000 url('./IMG_20250528_184959.jpg') no-repeat center center fixed; background-size: cover; color: #fff; margin: 0; padding: 0; padding-top: 85px; overflow-x: hidden; scroll-behavior: smooth; }
 
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 10px 15px; 
-            background: rgba(0, 0, 0, 0.95); 
-            border-bottom: 2px solid var(--primary-color); 
-            position: fixed; 
-            top: 0; 
-            left: 0;
-            width: 100%; 
-            z-index: 2000; 
-            box-sizing: border-box;
-        }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0, 0, 0, 0.95); border-bottom: 2px solid var(--primary-color); position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; box-sizing: border-box; }
         .logo-container img { height: 40px; border-radius: 8px; filter: drop-shadow(var(--accent-glow)); }
         .menu-btn, .search-trigger { font-size: 1.6rem; cursor: pointer; color: #fff; background: none; border: none; outline: none; transition: 0.3s; }
 
@@ -74,51 +51,20 @@
         #sideNav a:hover { background: var(--primary-color); color: white; }
         .close-btn { text-align: right; font-size: 1.5rem; cursor: pointer; color: var(--primary-color); margin-bottom: 20px; }
 
-        .search-section { 
-            position: fixed; 
-            top: 60px; 
-            left: 50%;
-            transform: translateX(-50%) translateY(-20px);
-            width: 100%;
-            max-width: 600px; 
-            z-index: 1500;
-            opacity: 0; 
-            visibility: hidden; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-            padding: 0 15px; 
-            box-sizing: border-box;
-        }
+        .search-section { position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-20px); width: 100%; max-width: 600px; z-index: 1500; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 0 15px; box-sizing: border-box; }
         .search-section.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); max-height: 120px; padding: 15px 15px; }
         .search-box { display: flex; background: #111; border: 2px solid var(--primary-color); border-radius: 30px; overflow: hidden; box-shadow: 0 0 15px rgba(244, 126, 33, 0.5); }
         .search-box input { flex: 1; background: transparent; border: none; color: #fff; padding: 12px 40px 12px 20px; outline: none; font-size: 14px; width: 100%; }
         .go-btn { background: var(--primary-color); border: none; color: white; padding: 0 20px; font-weight: 800; cursor: pointer; }
 
         #suggestions { position: absolute; top: 100%; left: 15px; right: 15px; background: rgba(15, 15, 15, 0.98); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid var(--primary-color); max-height: 250px; overflow-y: auto; display: none; margin-top: 10px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        #suggestions div { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; transition: 0.2s; color: #eee; }
+        #suggestions div { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: #eee; transition: 0.2s; }
         #suggestions div:hover { background: var(--primary-color); color: white; padding-left: 25px; }
 
-        #newlyContainer { 
-            display: flex; 
-            gap: 12px; 
-            overflow-x: auto; 
-            padding: 10px 5px; 
-            scroll-snap-type: x mandatory; 
-            -webkit-overflow-scrolling: touch; 
-        }
+        #newlyContainer { display: flex; gap: 12px; overflow-x: auto; padding: 10px 5px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
         #newlyContainer::-webkit-scrollbar { display: none; }
         
-        .ep-card { 
-            flex: 0 0 calc(55% - 10px); 
-            scroll-snap-align: start; 
-            background: rgba(15,15,15,0.95); 
-            border-radius: 10px; 
-            overflow: hidden; 
-            text-decoration: none; 
-            color: white; 
-            border: 1px solid rgba(255,255,255,0.1); 
-            position: relative; 
-            transition: 0.3s;
-        }
+        .ep-card { flex: 0 0 calc(55% - 10px); scroll-snap-align: start; background: rgba(15,15,15,0.95); border-radius: 10px; overflow: hidden; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); position: relative; transition: 0.3s; }
         .ep-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
         .ep-badge { position: absolute; top: 8px; left: 8px; background: var(--primary-color); font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 900; z-index: 10; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         .ep-title { padding: 8px 5px; font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
@@ -140,19 +86,9 @@
         .anime-card { background: rgba(15,15,15,0.95); border-radius: 8px; overflow: hidden; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); position: relative; transition: transform 0.2s, box-shadow 0.2s; -webkit-tap-highlight-color: transparent; }
         .badge-hd { position: absolute; top: 5px; left: 5px; background: var(--primary-color); font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5; }
         .card-info { position: absolute; bottom: 35px; left: 0; right: 0; background: rgba(0,0,0,0.8); font-size: 8px; padding: 4px; text-align: center; color: var(--primary-color); font-weight: bold; }
-        .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; transition: filter 0.3s ease; }
+        .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
         .anime-title { padding: 6px 4px; font-size: 0.7rem; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .anime-card::after { content: '▶'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); font-size: 40px; color: white; z-index: 10; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .anime-card.clicked { transform: scale(0.95); border-color: #0088cc !important; box-shadow: 0 0 20px rgba(0, 136, 204, 0.6); }
-        .anime-card.clicked img { filter: brightness(0.5) sepia(1) hue-rotate(190deg) saturate(2) blur(3px); }
-        .anime-card.clicked::after { transform: translate(-50%, -50%) scale(1); filter: none !important; }
-
-        footer { background: #000; padding: 40px 20px 100px; text-align: center; border-top: 1px solid #1a1a1a; margin-top: 40px; }
-        .bottom-actions { position: fixed; bottom: 0; width: 100%; display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.95); z-index: 1001; box-sizing: border-box; }
-        .btn-action { flex: 1; padding: 13px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #fff; font-size: 0.75rem; }
-
-        #comingSoonModal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; box-sizing: border-box; }
         .skeleton { background: #1a1a1a; background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 8px; }
         @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .skeleton-card { width: 100%; aspect-ratio: 2/3; margin-bottom: 10px; }
@@ -160,15 +96,19 @@
         .disclaimer-box { background: rgba(255, 123, 0, 0.05); border: 1px dashed rgba(255, 123, 0, 0.3); margin: 20px 15px; padding: 15px; border-radius: 15px; text-align: center; }
         .disclaimer-title { font-size: 10px; font-weight: 900; color: #FF7B00; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
         .disclaimer-text { font-size: 10px; color: #666; line-height: 1.4; font-weight: 500; }
+
+        footer { background: #000; padding: 40px 20px 100px; text-align: center; border-top: 1px solid #1a1a1a; margin-top: 40px; }
+        .bottom-actions { position: fixed; bottom: 0; width: 100%; display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.95); z-index: 1001; box-sizing: border-box; }
+        .btn-action { flex: 1; padding: 13px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #fff; font-size: 0.75rem; }
+
+        #comingSoonModal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; }
     </style>
 </head>
 <body>
 
 <header>
     <button class="menu-btn" onclick="document.getElementById('sideNav').classList.add('open')">☰</button>
-    <div class="logo-container">
-        <img src="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png" alt="Animeverse Logo">
-    </div>
+    <div class="logo-container"><img src="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png" alt="Animeverse Logo"></div>
     <button class="search-trigger" onclick="toggleSearch()">🔍</button>
 </header>
 
@@ -179,15 +119,12 @@
     <a href="#" onclick="showComingSoon(); return false;">🥊 Action</a>
     <a href="./about us.html">ℹ️ About Us</a>
     <a href="./contact us.html">📞 Contact Us</a>
-    <a href="schedule.html" class="schedule-btn">📅 Schedule</a>
+    <a href="schedule.html">📅 Schedule</a>
 </nav>
 
 <div class="search-section" id="searchContainer">
     <div class="search-box">
-        <div style="position: relative; flex: 1; display: flex; align-items: center;">
-            <input type="text" id="searchInput" placeholder="Search anime..." autocomplete="off">
-            <span id="clearSearch" style="display: none; position: absolute; right: 12px; cursor: pointer; color: #888; font-size: 22px; font-weight: bold;">&times;</span>
-        </div>
+        <input type="text" id="searchInput" placeholder="Search anime..." autocomplete="off">
         <button class="go-btn" onclick="triggerSearch()">GO</button>
     </div>
     <div id="suggestions"></div>
@@ -199,7 +136,7 @@
         <div class="hero-content">
             <span class="hero-tag">🔥 Trending Globally</span>
             <h1 id="heroTitle">Solo Leveling</h1>
-            <p id="heroDesc">Loading world's most popular anime...</p>
+            <p id="heroDesc">Loading...</p>
             <a href="#" id="heroBtn" class="hero-btn">WATCH HD</a>
         </div>
     </div>
@@ -211,34 +148,17 @@
         <div id="newlyContainer"></div>
     </section>
 
-    <section id="latestSection">
-        <h2>Latest series</h2>
-        <div class="anime-grid" id="latestContainer"></div>
-    </section>
-    
-    <section id="popularSection">
-        <h2 id="popularHeading">Popular Anime</h2>
-        <div class="anime-grid" id="popularContainer"></div>
-    </section>
-
-    <section id="trendingSection">
-        <h2>Trending Anime</h2>
-        <div class="anime-grid" id="trendingContainer"></div>
-    </section>
-
-    <section id="movieSection">
-        <h2>Movies</h2>
-        <div class="anime-grid" id="movieContainer"></div>
-    </section>
+    <section id="latestSection"><h2>Latest series</h2><div class="anime-grid" id="latestContainer"></div></section>
+    <section id="popularSection"><h2 id="popularHeading">Popular Anime</h2><div class="anime-grid" id="popularContainer"></div></section>
+    <section id="trendingSection"><h2>Trending Anime</h2><div class="anime-grid" id="trendingContainer"></div></section>
+    <section id="movieSection"><h2>Movies</h2><div class="anime-grid" id="movieContainer"></div></section>
 </div>
 
 <div id="comingSoonModal">
-    <div style="background:#111; border:2px solid var(--primary-color); padding:30px 20px 20px; border-radius:20px; text-align:center; width:100%; max-width:350px; box-shadow: var(--accent-glow); position: relative;">
-        <div onclick="closeModal()" style="position: absolute; top: 10px; right: 15px; color: #888; font-size: 20px; cursor: pointer;">&times;</div>
-        <div style="font-size: 50px;">⏳</div>
-        <h2 style="color:var(--primary-color); border:none; margin-bottom: 10px;">COMING SOON</h2>
-        <p style="font-size:13px; color:#eee; margin-bottom: 20px;">We're processing Hindi Dubbed episodes shortly!</p>
-        <a href="https://t.me/animeverse648" target="_blank" class="hero-btn" style="width:100%; box-sizing:border-box; display: block;">REQUEST ON TELEGRAM</a>
+    <div style="background:#111; border:2px solid var(--primary-color); padding:30px; border-radius:20px; text-align:center;">
+        <h2 style="color:var(--primary-color); border:none;">COMING SOON</h2>
+        <p style="color:#eee;"> Hindi Dubbed episodes shortly!</p>
+        <button onclick="closeModal()" class="hero-btn">CLOSE</button>
     </div>
 </div>
 
@@ -246,8 +166,7 @@
     <div style="font-size: 2rem; font-weight: 800; color: var(--primary-color); letter-spacing: 4px;">ANIMEVERSE</div>
     <p style="font-size: 10px; color: #444;">&copy; | 2026 ANIMEVERSE |</p>
     <div class="disclaimer-box">
-        <h4 class="disclaimer-title">Disclaimer</h4>
-        <p class="disclaimer-text">AnimeVerse does not store any files on our server. All contents are provided by non-affiliated third parties. We do not host any copyrighted videos.</p>
+        <p class="disclaimer-text">AnimeVerse does not store any files. All contents are provided by non-affiliated third parties.</p>
     </div>
 </footer>
 
@@ -257,7 +176,6 @@
 </div>
 
 <script>
-// --- FIREBASE CONFIG ---
 const firebaseConfig = { 
     apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
     databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
@@ -266,299 +184,129 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-
 const TMDB_API_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const TMDB_IMG_PATH = 'https://image.tmdb.org/t/p/w500';
-const TMDB_BG_PATH = 'https://image.tmdb.org/t/p/original';
 
 let animeData = [];
 window.allTitles = [];
 
-// --- CORE FUNCTIONS ---
-function trackClick(title) {
-    if (!db) return;
-    const safeTitle = title.replace(/[.#$[\]]/g, "_");
-    db.ref('global_clicks/' + safeTitle).transaction(c => (c || 0) + 1);
-}
-
-// REALTIME LISTENER FOR FIREBASE DATA
-// --- 1. Sabse Pehle Load Function Ko Edit Karo ---
+// --- FIREBASE DATA LOAD ---
 function loadDataFromFirebase() {
-    // Page load hote hi turant Skeleton dikhao
-    renderGrids(false);
+    renderGrids(false); // First, show Skeletons
     
+    // Newly Added Section Listener
+    db.ref('newly_added_section').on('value', (snap) => {
+        const container = document.getElementById('newlyContainer');
+        const section = document.getElementById('newlySection');
+        if (!snap.exists()) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+        container.innerHTML = '';
+        Object.values(snap.val()).reverse().forEach(item => {
+            const card = document.createElement('a');
+            card.className = 'ep-card';
+            card.href = item.slug || '#';
+            card.innerHTML = `
+                <div class="ep-badge">EP ${item.ep}</div>
+                <img src="${item.image || item.thumbnail}" loading="lazy">
+                <div class="ep-title">${item.name}</div>`;
+            container.appendChild(card);
+        });
+    });
+
+    // Main Anime Grid Listener
     db.ref('all_anime').on('value', async (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
-        
-        animeData = [];
-        Object.keys(data).forEach(key => {
-            animeData.push({ ...data[key] });
-        });
+        animeData = Object.values(data);
         window.allTitles = animeData.map(a => a.title);
-        
-        // Ek chhota sa delay (500ms) taaki skeleton animation aankhon ko dikhe
-        setTimeout(() => {
-            renderGrids(true);
-            loadHero();
-        }, 500);
+        setTimeout(() => { renderGrids(true); loadHero(); }, 500);
     });
 }
 
-// --- 2. Ab Render Function Ko Isse Replace Karo ---
-async function renderGrids(hasData = false) {
-    const sections = {
-        'latest': document.getElementById('latestContainer'),
-        'popular': document.getElementById('popularContainer'),
-        'trending': document.getElementById('trendingContainer'),
-        'movies': document.getElementById('movieContainer')
-    };
+// --- RENDER FUNCTION ---
+async function renderGrids(isCached = false) {
+    const sections = { 'latest': 'latestContainer', 'popular': 'popularContainer', 'trending': 'trendingContainer', 'movies': 'movieContainer' };
     
-    // AGAR DATA LOAD HO RAHA HAI: Skeleton dikhao aur yahan se laut jao
-    if (!hasData) {
-        Object.values(sections).forEach(s => {
-            if (s) {
-                s.innerHTML = Array(6).fill(`
-                    <div class="anime-card" style="border:none">
-                        <div class="skeleton skeleton-card"></div>
-                        <div class="skeleton" style="height:12px; width:80%; margin:8px auto; border-radius:4px;"></div>
-                    </div>
-                `).join('');
-            }
+    if (!isCached) {
+        Object.values(sections).forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.innerHTML = Array(6).fill('<div class="anime-card" style="border:none"><div class="skeleton skeleton-card"></div><div class="skeleton" style="height:10px; width:80%; margin:5px auto; border-radius:4px;"></div></div>').join('');
         });
         return;
     }
-    
-    // AGAR DATA AA GAYA HAI: Cards ko memory mein taiyaar karo
+
     const fragments = { 'latest': [], 'popular': [], 'trending': [], 'movies': [] };
-    
     for (const a of animeData) {
-        if (a.category === 'suggestion') continue;
-        
-        // Poster check
         if (!a.poster) {
-            const details = await fetchAnimeData(a.title);
-            a.poster = details.poster;
-            a.rating = details.rating;
+            const d = await fetchAnimeData(a.title);
+            a.poster = d.poster; a.rating = d.rating;
         }
-        
         const card = createCard(a);
         const cat = a.category || 'latest';
         if (fragments[cat]) fragments[cat].push(card);
     }
-    
-    // FINAL SWAP: Ab skeleton hatakar cards daalo
+
     Object.keys(sections).forEach(key => {
-        const container = sections[key];
+        const container = document.getElementById(sections[key]);
         if (container && fragments[key].length > 0) {
-            container.innerHTML = ''; // Skeleton ab yahan delete hoga
+            container.innerHTML = '';
             fragments[key].forEach(card => container.appendChild(card));
         }
     });
 }
 
-// HORIZONTAL NEWLY ADDED LISTENER
-db.ref('newly_added_section').on('value', (snap) => {
-    const container = document.getElementById('newlyContainer');
-    const section = document.getElementById('newlySection');
-    container.innerHTML = '';
-    
-    if (snap.exists()) {
-        section.style.display = 'block';
-        let items = [];
-        snap.forEach(c => items.push(c.val()));
-        
-        items.reverse().forEach((item) => {
-            const thumb = item.thumbnail || 'https://via.placeholder.com/500x281';
-            const sVal = item.season ? (item.season.toString().startsWith('S') ? item.season : 'S' + item.season) : 'S1';
-            container.innerHTML += `
-                <a href="player.html?id=${item.slug}&s=${sVal}&ep=${item.ep}" class="ep-card">
-                    <div class="ep-badge">${sVal} EP${item.ep}</div>
-                    <img src="${thumb}" loading="lazy">
-                    <div class="ep-title">${item.name}</div>
-                </a>`;
-        });
-    } else { section.style.display = 'none'; }
-});
-
-async function renderGrids(isCached = false) {
-    const sections = {
-        'latest': document.getElementById('latestContainer'),
-        'popular': document.getElementById('popularContainer'),
-        'trending': document.getElementById('trendingContainer'),
-        'movies': document.getElementById('movieContainer')
-    };
-    
-    // 1. Agar data cache nahi hai, toh Skeleton Loaders dikhao (With Title Skeleton)
-    if (!isCached) {
-        Object.values(sections).forEach(s => {
-            if (s) {
-                s.innerHTML = Array(6).fill(`
-                    <div class="anime-card" style="border:none">
-                        <div class="skeleton skeleton-card"></div>
-                        <div class="skeleton" style="height:12px; width:80%; margin:8px auto; border-radius:4px;"></div>
-                    </div>
-                `).join('');
-            }
-        });
-    }
-    
-    // 2. Data process karne se pehle ye check karein ki data hai ya nahi
-    if (animeData.length === 0) return;
-    
-    // 3. Ek temporary object banayein taaki cards ko pehle assemble kar sakein
-    const fragmentMap = { 'latest': [], 'popular': [], 'trending': [], 'movies': [] };
-    
-    for (const a of animeData) {
-        if (a.category === 'suggestion') continue;
-        
-        // Agar poster database mein nahi hai, tabhi API call karein
-        if (!a.poster) {
-            const details = await fetchAnimeData(a.title);
-            a.poster = details.poster;
-            a.rating = details.rating;
-        }
-        
-        const card = createCard(a);
-        const cat = a.category || 'latest';
-        if (fragmentMap[cat]) fragmentMap[cat].push(card);
-        else fragmentMap['latest'].push(card);
-    }
-    
-    // 4. Final Render: Skeleton hatakar real cards daalein
-    Object.keys(sections).forEach(key => {
-        const container = sections[key];
-        if (container && fragmentMap[key].length > 0) {
-            container.innerHTML = ''; // Ab yahan skeleton saaf hoga
-            fragmentMap[key].forEach(card => container.appendChild(card));
-        }
-    });
-}
-
-async function fetchAnimeData(title) {
-    try {
-        const res = await fetch(`${TMDB_BASE_URL}/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`);
-        const data = await res.json();
-        if (data.results?.length > 0) {
-            const a = data.results[0];
-            return { poster: TMDB_IMG_PATH + a.poster_path, rating: a.vote_average?.toFixed(1) || '8.5' };
-        }
-        return await fetchKitsu(title);
-    } catch (e) { return await fetchKitsu(title); }
-}
-
-async function fetchKitsu(title) {
-    try {
-        const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1`);
-        const data = await res.json();
-        if (data.data?.length > 0) {
-            const a = data.data[0].attributes;
-            return { poster: a.posterImage.small, rating: a.averageRating ? (a.averageRating/10).toFixed(1) : '8.5', overview: a.synopsis, banner: a.coverImage?.large || a.posterImage.large };
-        }
-    } catch (e) { return { poster: 'https://via.placeholder.com/500x750', rating: '8.5' }; }
-}
-
 function createCard(anime) {
     const card = document.createElement('a');
     card.className = 'anime-card';
-    const hasLink = anime.link && anime.link !== "#";
-    card.href = hasLink ? anime.link : "javascript:void(0)";
-    
+    card.href = anime.link || "javascript:void(0)";
     card.innerHTML = `
         <span class="badge-hd">HD | HINDI</span>
-        ${anime.isNew ? '<span style="position: absolute; top: 5px; right: 5px; background: #0088cc; font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5;">NEW</span>' : ''}
         <img src="${anime.poster}" loading="lazy">
-        <div class="card-info">⭐ ${anime.rating} Rating</div>
+        <div class="card-info">⭐ ${anime.rating || '8.5'} Rating</div>
         <div class="anime-title">${anime.title}</div>`;
-    
-    card.addEventListener('click', function(e) {
-        trackClick(anime.title);
-        if (!hasLink) { e.preventDefault(); showComingSoon(); return; }
-        this.classList.add('clicked');
-        e.preventDefault();
-        setTimeout(() => window.location.href = this.href, 400);
-    });
+    card.onclick = () => trackClick(anime.title);
     return card;
 }
 
-// SEARCH LOGIC
-function toggleSearch() { 
-    searchContainer.classList.toggle('active'); 
-    if(searchContainer.classList.contains('active')) { window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => searchInput.focus(), 400); }
+// --- HELPERS & SEARCH ---
+async function fetchAnimeData(title) {
+    try {
+        const res = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`);
+        const d = await res.json();
+        if(d.results?.[0]) return { poster: 'https://image.tmdb.org/t/p/w500' + d.results[0].poster_path, rating: d.results[0].vote_average.toFixed(1) };
+        return { poster: 'https://via.placeholder.com/500x750', rating: '8.5' };
+    } catch { return { poster: 'https://via.placeholder.com/500x750', rating: '8.5' }; }
 }
 
-const searchInput = document.getElementById('searchInput');
-const suggestionsBox = document.getElementById('suggestions');
-const searchContainer = document.getElementById('searchContainer');
-const clearBtn = document.getElementById('clearSearch');
+function trackClick(title) { db.ref('global_clicks/' + title.replace(/[.#$[\]]/g, "_")).transaction(c => (c || 0) + 1); }
 
-function triggerSearch() { const val = searchInput.value.trim(); if(val) selectSearch(val); }
+function toggleSearch() { document.getElementById('searchContainer').classList.toggle('active'); }
 
-window.selectSearch = function(term) {
+function triggerSearch() {
+    const term = document.getElementById('searchInput').value;
     const matches = animeData.filter(t => t.title.toLowerCase().includes(term.toLowerCase()));
-    if (matches.length === 0 && term !== "") { alert("Not found."); return; }
-    searchInput.value = term;
-    suggestionsBox.style.display = 'none';
-    clearBtn.style.display = 'block';
-    ['latestSection','trendingSection','movieSection','heroSection','newlySection'].forEach(id => {
-        const el = document.getElementById(id); if(el) el.style.display = 'none';
-    });
+    if(!matches.length) return;
     document.getElementById('popularHeading').textContent = `Results for "${term}"`;
-    renderSearchGrid(matches);
-};
-
-async function renderSearchGrid(matches) {
     const container = document.getElementById('popularContainer');
     container.innerHTML = '';
     matches.forEach(a => container.appendChild(createCard(a)));
-}
-
-searchInput.addEventListener('input', (e) => {
-    const val = e.target.value.toLowerCase().trim();
-    clearBtn.style.display = val ? 'block' : 'none';
-    if (!val) { resetUI(); return; }
-    const matches = window.allTitles.filter(t => t.toLowerCase().includes(val));
-    suggestionsBox.innerHTML = matches.length ? matches.map(m => `<div onclick="selectSearch('${m}')">🔍 ${m}</div>`).join('') : '<div>No results</div>';
-    suggestionsBox.style.display = 'block';
-});
-
-clearBtn.addEventListener('click', () => { searchInput.value = ''; resetUI(); });
-
-function resetUI() {
-    suggestionsBox.style.display = 'none';
-    clearBtn.style.display = 'none';
-    document.getElementById('popularHeading').textContent = "Popular Anime";
-    ['latestSection','trendingSection','movieSection','heroSection','newlySection'].forEach(id => {
-        const el = document.getElementById(id); if(el) el.style.display = 'block';
-    });
-    renderGrids(true);
+    ['latestSection','trendingSection','movieSection','heroSection','newlySection'].forEach(id => document.getElementById(id).style.display = 'none');
 }
 
 async function loadHero() {
     db.ref('global_clicks').orderByValue().limitToLast(1).once('value', async (snap) => {
-        let top = "Solo Leveling"; snap.forEach(c => { top = c.key.replace(/_/g, ' '); });
-        const item = await fetchKitsu(top);
-        if(item) {
-            document.getElementById('heroTitle').innerText = top.toUpperCase();
-            document.getElementById('heroDesc').innerText = item.overview.substring(0, 150) + "...";
-            document.getElementById('heroCard').style.backgroundImage = `url('${item.banner || item.poster}')`;
-            document.getElementById('heroBtn').onclick = (e) => { trackClick(top); e.preventDefault(); window.location.href='#latestSection'; };
-        }
+        let top = "Solo Leveling"; snap.forEach(c => top = c.key.replace(/_/g, ' '));
+        document.getElementById('heroTitle').innerText = top.toUpperCase();
+        document.getElementById('heroDesc').innerText = "Premium Hindi Dubbed Streaming.";
     });
 }
 
 function showComingSoon() { document.getElementById('comingSoonModal').style.display = 'flex'; }
 function closeModal() { document.getElementById('comingSoonModal').style.display = 'none'; }
 
-// Start logic
 loadDataFromFirebase();
-
-// PRESENCE SYSTEM
 const presenceRef = db.ref('presence').push();
 presenceRef.set(true);
 presenceRef.onDisconnect().remove();
-
 </script>
 </body>
 </html>
