@@ -191,9 +191,9 @@ window.allTitles = [];
 
 // --- FIREBASE DATA LOAD ---
 function loadDataFromFirebase() {
-    renderGrids(false); // First, show Skeletons
+    renderGrids(false); 
     
-    // Newly Added Section Listener
+    // Newly Added Section (Updated Link Logic)
     db.ref('newly_added_section').on('value', (snap) => {
         const container = document.getElementById('newlyContainer');
         const section = document.getElementById('newlySection');
@@ -203,16 +203,22 @@ function loadDataFromFirebase() {
         Object.values(snap.val()).reverse().forEach(item => {
             const card = document.createElement('a');
             card.className = 'ep-card';
-            card.href = item.slug || '#';
+            
+            let sVal = item.season ? item.season.toString().toUpperCase() : "S1";
+            if (!sVal.startsWith('S')) sVal = 'S' + sVal;
+
+            card.href = `player.html?id=${item.slug}&s=${sVal}&ep=${item.ep}`;
+
             card.innerHTML = `
-                <div class="ep-badge">EP ${item.ep}</div>
-                <img src="${item.image || item.thumbnail}" loading="lazy">
+                <div class="ep-badge">${sVal} EP ${item.ep}</div>
+                <img src="${item.image || item.thumbnail || 'https://via.placeholder.com/500x281'}" loading="lazy">
                 <div class="ep-title">${item.name}</div>`;
+            
+            card.onclick = () => trackClick(item.name);
             container.appendChild(card);
         });
     });
 
-    // Main Anime Grid Listener
     db.ref('all_anime').on('value', async (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
@@ -257,7 +263,7 @@ async function renderGrids(isCached = false) {
 function createCard(anime) {
     const card = document.createElement('a');
     card.className = 'anime-card';
-    card.href = anime.link || "javascript:void(0)";
+    card.href = anime.link || `player.html?id=${anime.title.toLowerCase().replace(/ /g, '-')}`;
     card.innerHTML = `
         <span class="badge-hd">HD | HINDI</span>
         <img src="${anime.poster}" loading="lazy">
@@ -267,7 +273,6 @@ function createCard(anime) {
     return card;
 }
 
-// --- HELPERS & SEARCH ---
 async function fetchAnimeData(title) {
     try {
         const res = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`);
@@ -277,8 +282,55 @@ async function fetchAnimeData(title) {
     } catch { return { poster: 'https://via.placeholder.com/500x750', rating: '8.5' }; }
 }
 
-function trackClick(title) { db.ref('global_clicks/' + title.replace(/[.#$[\]]/g, "_")).transaction(c => (c || 0) + 1); }
+// --- HERO FIX: GRADIENT LEFT SIDE ONLY ---
+async function loadHero() {
+    db.ref('global_clicks').orderByValue().limitToLast(1).once('value', async (snap) => {
+        let top = "Solo Leveling"; 
+        snap.forEach(c => top = c.key.replace(/_/g, ' '));
+        
+        document.getElementById('heroTitle').innerText = top.toUpperCase();
+        document.getElementById('heroDesc').innerText = "Premium Hindi Dubbed Streaming. Watch " + top + " on AnimeVerse.";
 
+        let posterURL = "";
+        try {
+            const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(top)}`);
+            const tmData = await tmRes.json();
+            if(tmData.results?.[0]) {
+                const img = tmData.results[0].backdrop_path || tmData.results[0].poster_path;
+                if(img) posterURL = 'https://image.tmdb.org/t/p/original' + img;
+            }
+        } catch(e) {}
+
+        if (!posterURL) {
+            try {
+                const kRes = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(top)}`);
+                const kData = await kRes.json();
+                if(kData.data?.[0]) posterURL = kData.data[0].attributes.coverImage?.original || kData.data[0].attributes.posterImage?.original;
+            } catch(e) {}
+        }
+
+        const finalImg = posterURL || 'https://via.placeholder.com/1200x600';
+        const heroCard = document.getElementById('heroCard');
+        const overlay = document.querySelector('.hero-overlay');
+
+        if(heroCard) {
+            // Overlay ko hide kar rahe hain taaki poster dikhe
+            if(overlay) overlay.style.display = 'none'; 
+            
+            // Hero card par hi naya gradient laga rahe hain (Left to Right)
+            heroCard.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%), url('${finalImg}')`;
+            heroCard.style.backgroundSize = 'cover';
+            heroCard.style.backgroundPosition = 'center right';
+        }
+        
+        document.getElementById('heroBtn').onclick = () => { 
+            trackClick(top); 
+            window.location.href = 'player.html?id=' + top.toLowerCase().replace(/ /g,'-') + '&s=S1&ep=1'; 
+        };
+    });
+}
+
+function trackClick(title) { db.ref('global_clicks/' + title.replace(/[.#$[\]]/g, "_")).transaction(c => (c || 0) + 1); }
 function toggleSearch() { document.getElementById('searchContainer').classList.toggle('active'); }
 
 function triggerSearch() {
@@ -289,14 +341,8 @@ function triggerSearch() {
     const container = document.getElementById('popularContainer');
     container.innerHTML = '';
     matches.forEach(a => container.appendChild(createCard(a)));
-    ['latestSection','trendingSection','movieSection','heroSection','newlySection'].forEach(id => document.getElementById(id).style.display = 'none');
-}
-
-async function loadHero() {
-    db.ref('global_clicks').orderByValue().limitToLast(1).once('value', async (snap) => {
-        let top = "Solo Leveling"; snap.forEach(c => top = c.key.replace(/_/g, ' '));
-        document.getElementById('heroTitle').innerText = top.toUpperCase();
-        document.getElementById('heroDesc').innerText = "Premium Hindi Dubbed Streaming.";
+    ['latestSection','trendingSection','movieSection','heroSection','newlySection'].forEach(id => {
+        if(document.getElementById(id)) document.getElementById(id).style.display = 'none';
     });
 }
 
