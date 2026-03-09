@@ -1,19 +1,17 @@
-</body>
-</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AnimeVerse | Stream & Download</title>
     
     <meta property="og:type" content="video.other">
     <meta id="og-title" property="og:title" content="AnimeVerse - Watch Online">
     <meta id="og-desc" property="og:description" content="Stream and Download your favorite anime in Hindi/Sub.">
     <meta id="og-image" property="og:image" content="https://i.ibb.co/mF0pYxT/animeverse-logo.png"> 
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -21,7 +19,7 @@
 
     <style>
         :root { --neon: #FF7B00; --bg: #0D0D12; --card-bg: #181c25; }
-        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; }
+        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; touch-action: pan-x pan-y; overflow-x: hidden; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
 
@@ -29,7 +27,6 @@
         .header-card { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 20px; display: flex; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; }
         
-        /* Fixed Video Box for Both Players */
         .video-box { margin: 0 15px; position: relative; width: calc(100% - 30px); aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; }
         #main-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         .plyr { width: 100%; height: 100%; }
@@ -46,16 +43,12 @@
         .comment-container { background: #181c25; margin: 15px; padding: 15px; border-radius: 20px; border: 1px solid #2a2e38; }
         .comment-input { width: 100%; background: #0d0d12; border: 1px solid #2a2e38; border-radius: 12px; padding: 12px; color: #fff; font-size: 14px; outline: none; margin-bottom: 8px; }
         .comment-btn { background: var(--neon); color: #000; font-weight: 800; padding: 10px 20px; border-radius: 10px; font-size: 12px; text-transform: uppercase; width: 100%; }
-        .comment-item { display: flex; gap: 12px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #222; }
-        .user-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; background: var(--neon); color: #000; flex-shrink: 0; }
-
-        /* Plyr Orange Theme */
+        
         .plyr--full-ui input[type=range] { color: var(--neon); }
         .plyr__control--overlaid { background: var(--neon); }
         .plyr--video .plyr__control:hover { background: var(--neon); }
 
         .footer-main { background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 40px 20px; margin-top: 40px; }
-        .social-icon { background: #181c25; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #2a2e38; }
     </style>
 </head>
 <body>
@@ -65,7 +58,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
         <div class="text-2xl font-black italic uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
-        <button onclick="reportBrokenLink()" class="ml-auto text-[8px] color-[#ff4444] border border-[#ff4444] px-2 py-1 rounded uppercase font-black">🚨 Report Error</button>
+        <button onclick="reportBrokenLink()" class="ml-auto text-[8px] text-[#ff4444] border border-[#ff4444] px-2 py-1 rounded uppercase font-black">🚨 Report Error</button>
     </div>
 
     <div class="header-card">
@@ -124,10 +117,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Initialize Plyr
         const player = new Plyr('#plyr-player', {
-            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'],
-            settings: ['quality', 'speed']
+            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen']
         });
 
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
@@ -170,43 +161,57 @@
             loadEpisodeData();
         }
 
-        // SMART LOADING LOGIC
         function loadEpisodeData() {
             const filtered = allData.filter(x => x.name.startsWith(currentSeason));
             const ep = filtered[currentEpIndex];
             if(!ep) return;
 
-            const url = ep.url;
             const plyrEl = document.getElementById('plyr-player');
             const iframeEl = document.getElementById('main-player');
 
-            // Raretoons/Direct Link Check
-            if (url.includes('workers.dev') || url.includes('.mp4') || url.includes('.mkv')) {
+            if (ep.url.includes('workers.dev') || ep.url.includes('.mp4') || ep.url.includes('.mkv')) {
                 iframeEl.style.display = 'none';
                 plyrEl.style.display = 'block';
-                player.source = { type: 'video', sources: [{ src: url, type: 'video/mp4' }] };
+                player.source = { type: 'video', sources: [{ src: ep.url, type: 'video/mp4' }] };
             } else {
                 plyrEl.style.display = 'none';
                 iframeEl.style.display = 'block';
-                iframeEl.src = url;
+                iframeEl.src = ep.url;
             }
 
-            // Tracking & Clicks (As per original)
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            const epKey = `${currentSeason}_E${currentEpIndex + 1}`;
-            db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).transaction(c => (c || 0) + 1);
-            db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).on('value', snap => {
+            const cleanS = currentSeason.replace(/\D/g,'') || "1";
+            const epKey = `S${cleanS}_E${currentEpIndex + 1}`;
+
+            updateTrendingToday(currentAnimeId, epKey);
+
+            const clickRef = db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`);
+            clickRef.transaction(c => (c || 0) + 1);
+            clickRef.on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
+            // FIXED DOWNLOAD LOGIC
             document.getElementById('dl-button').onclick = () => {
-                if(ep.bot && ep.bot !== "#") window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
+                if(ep.bot && ep.bot !== "" && ep.bot !== "#") {
+                    window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
+                } else {
+                    window.location.href = `download.html?id=${currentAnimeId}_s${cleanS}_e${currentEpIndex + 1}`;
+                }
             };
 
             listenToComments(animeKey, epKey);
         }
 
-        // Rest of your original functions (renderEpisodes, Comments, etc.)
+        function updateTrendingToday(anime, ep) {
+            const trendId = (anime + "-" + ep).replace(/[.#$[\]\s]/g, "_");
+            const trendRef = db.ref(`trending_today/${trendId}`);
+            trendRef.transaction((curr) => {
+                if (curr) { curr.count++; curr.createdAt = Date.now(); return curr; }
+                return { animeName: anime.replace(/-/g, ' ').toUpperCase(), episode: ep, count: 1, createdAt: Date.now() };
+            });
+        }
+
         function renderEpisodes() {
             const filtered = allData.filter(x => x.name.startsWith(currentSeason));
             const grid = document.getElementById('ep-grid');
@@ -223,8 +228,9 @@
             const name = document.getElementById('user-name').value.trim() || "User";
             const text = document.getElementById('comment-text').value.trim();
             if(!text) return;
-            const epKey = `${currentSeason}_E${currentEpIndex + 1}`;
-            db.ref(`comments/${currentAnimeId.replace(/[.#$[\]]/g, "_")}/${epKey}`).push({ name, text, timestamp: Date.now() });
+            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+            const epKey = `S${currentSeason.replace(/\D/g,'')}_E${currentEpIndex + 1}`;
+            db.ref(`comments/${animeKey}/${epKey}`).push({ name, text, timestamp: Date.now() });
             document.getElementById('comment-text').value = "";
         }
 
@@ -246,7 +252,12 @@
             const newEp = (currentEpIndex + 1) + dir;
             if(newEp >= 1 && newEp <= filtered.length) window.location.href = `?id=${currentAnimeId}&s=${currentSeason}&ep=${newEp}`;
         }
-        function reportBrokenLink() { alert("Report Sent!"); }
+
+        function reportBrokenLink() {
+            const info = `${currentAnimeId} | ${currentSeason} | Ep ${currentEpIndex + 1}`;
+            db.ref('reports').push({ anime: info, time: new Date().toLocaleString(), status: "Broken Link" });
+            alert("Bhai, report bhej di hai! Admin jald check karega.");
+        }
 
         init();
     </script>
