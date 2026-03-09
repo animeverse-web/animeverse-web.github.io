@@ -189,11 +189,30 @@ const TMDB_API_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
 let animeData = [];
 window.allTitles = [];
 
+// --- AUTO DELETE LOGIC (Global Clicks & Newly Added Section) ---
+function checkAndResetDailyData() {
+    const lastResetDate = localStorage.getItem('daily_reset_date');
+    const today = new Date().toDateString(); 
+    
+    if (lastResetDate !== today) {
+        // 1. Reset Global Clicks (Trending)
+        db.ref('global_clicks').remove();
+        
+        // 2. Reset Newly Added Section (Daily Clear)
+        db.ref('newly_added_section').remove()
+        .then(() => {
+            localStorage.setItem('daily_reset_date', today);
+            console.log("Daily Reset: Global Clicks & Newly Added Section Cleared.");
+        }).catch(err => console.error("Reset Error:", err));
+    }
+}
+
 // --- FIREBASE DATA LOAD ---
 function loadDataFromFirebase() {
+    checkAndResetDailyData(); // Reset function call yahan ho rahi hai
     renderGrids(false); 
     
-    // Newly Added Section (Updated Link Logic)
+    // Newly Added Section
     db.ref('newly_added_section').on('value', (snap) => {
         const container = document.getElementById('newlyContainer');
         const section = document.getElementById('newlySection');
@@ -282,7 +301,7 @@ async function fetchAnimeData(title) {
     } catch { return { poster: 'https://via.placeholder.com/500x750', rating: '8.5' }; }
 }
 
-// --- HERO FIX: GRADIENT LEFT SIDE ONLY ---
+// --- HERO LOGIC ---
 async function loadHero() {
     db.ref('global_clicks').orderByValue().limitToLast(1).once('value', async (snap) => {
         let top = "Solo Leveling"; 
@@ -301,23 +320,9 @@ async function loadHero() {
             }
         } catch(e) {}
 
-        if (!posterURL) {
-            try {
-                const kRes = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(top)}`);
-                const kData = await kRes.json();
-                if(kData.data?.[0]) posterURL = kData.data[0].attributes.coverImage?.original || kData.data[0].attributes.posterImage?.original;
-            } catch(e) {}
-        }
-
         const finalImg = posterURL || 'https://via.placeholder.com/1200x600';
         const heroCard = document.getElementById('heroCard');
-        const overlay = document.querySelector('.hero-overlay');
-
         if(heroCard) {
-            // Overlay ko hide kar rahe hain taaki poster dikhe
-            if(overlay) overlay.style.display = 'none'; 
-            
-            // Hero card par hi naya gradient laga rahe hain (Left to Right)
             heroCard.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%), url('${finalImg}')`;
             heroCard.style.backgroundSize = 'cover';
             heroCard.style.backgroundPosition = 'center right';
@@ -345,9 +350,6 @@ function triggerSearch() {
         if(document.getElementById(id)) document.getElementById(id).style.display = 'none';
     });
 }
-
-function showComingSoon() { document.getElementById('comingSoonModal').style.display = 'flex'; }
-function closeModal() { document.getElementById('comingSoonModal').style.display = 'none'; }
 
 loadDataFromFirebase();
 const presenceRef = db.ref('presence').push();
