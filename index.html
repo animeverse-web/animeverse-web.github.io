@@ -174,7 +174,6 @@
     <a href="https://youtube.com/@animia-g6q" class="btn-action" style="background:#ff0000;">YOUTUBE</a>
     <a href="https://t.me/animeverse648" class="btn-action" style="background:#0088cc;">TELEGRAM</a>
 </div>
-
 <script>
 const firebaseConfig = { 
     apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
@@ -189,30 +188,29 @@ const TMDB_API_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
 let animeData = [];
 window.allTitles = [];
 
-// --- AUTO DELETE LOGIC (Global Clicks & Newly Added Section) ---
+// --- AUTO DELETE LOGIC ---
 function checkAndResetDailyData() {
     const lastResetDate = localStorage.getItem('daily_reset_date');
     const today = new Date().toDateString(); 
     
     if (lastResetDate !== today) {
-        // 1. Reset Global Clicks (Trending)
+        // Sirf ye 3 cheezein raat 12 baje delete hongi
         db.ref('global_clicks').remove();
-        
-        // 2. Reset Newly Added Section (Daily Clear)
+        db.ref('trending_today').remove(); // Player page wala data
         db.ref('newly_added_section').remove()
         .then(() => {
             localStorage.setItem('daily_reset_date', today);
-            console.log("Daily Reset: Global Clicks & Newly Added Section Cleared.");
+            console.log("Daily Reset Success.");
         }).catch(err => console.error("Reset Error:", err));
     }
 }
 
 // --- FIREBASE DATA LOAD ---
 function loadDataFromFirebase() {
-    checkAndResetDailyData(); // Reset function call yahan ho rahi hai
+    checkAndResetDailyData(); // Reset call
     renderGrids(false); 
     
-    // Newly Added Section
+    // Newly Added Section Logic
     db.ref('newly_added_section').on('value', (snap) => {
         const container = document.getElementById('newlyContainer');
         const section = document.getElementById('newlySection');
@@ -350,6 +348,62 @@ function triggerSearch() {
         if(document.getElementById(id)) document.getElementById(id).style.display = 'none';
     });
 }
+
+// --- SEARCH SUGGESTIONS LOGIC ---
+const searchInput = document.getElementById('searchInput');
+const suggestionsBox = document.getElementById('suggestions');
+
+searchInput.addEventListener('input', () => {
+    const value = searchInput.value.toLowerCase();
+    suggestionsBox.innerHTML = '';
+    
+    if (value.length > 0) {
+        const matches = window.allTitles.filter(t => t.toLowerCase().includes(value)).slice(0, 5);
+        
+        if (matches.length > 0) {
+            suggestionsBox.style.display = 'block';
+            matches.forEach(match => {
+                const div = document.createElement('div');
+                div.innerText = match;
+                div.onclick = () => {
+                    searchInput.value = match;
+                    suggestionsBox.style.display = 'none';
+                    triggerSearch();
+                };
+                suggestionsBox.appendChild(div);
+            });
+        } else {
+            suggestionsBox.style.display = 'none';
+        }
+    } else {
+        suggestionsBox.style.display = 'none';
+    }
+});
+
+// Bahar click karne par suggestions band ho jayein
+document.addEventListener('click', (e) => {
+    if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+        suggestionsBox.style.display = 'none';
+    }
+});
+
+// --- AUTO DELETE LOGIC ---
+function checkAndResetDailyData() {
+    const lastResetDate = localStorage.getItem('daily_reset_date');
+    const today = new Date().toDateString(); 
+    
+    if (lastResetDate !== today) {
+        db.ref('global_clicks').remove();
+        db.ref('trending_today').remove();
+        db.ref('newly_added_section').remove()
+        .then(() => {
+            localStorage.setItem('daily_reset_date', today);
+            console.log("Daily Reset Success.");
+        }).catch(err => console.error("Reset Error:", err));
+    }
+}
+
+// ... baaki ka loadDataFromFirebase code waisa hi rahega
 
 loadDataFromFirebase();
 const presenceRef = db.ref('presence').push();
