@@ -1,5 +1,3 @@
-</body>
-</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +25,7 @@
 
         .back-btn { background: #1c1f26; border: 1px solid #2a2e38; border-radius: 10px; padding: 8px 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
         .header-card { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 20px; display: flex; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; }
+        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; background: #000; }
         
         .video-box { margin: 0 15px; position: relative; width: calc(100% - 30px); aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; }
         #main-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
@@ -70,7 +68,7 @@
     </div>
 
     <div class="header-card">
-        <img id="poster" src="./Gemini_Generated_Image_u4n26yu4n26yu4n2.png" class="poster-img"> 
+        <img id="poster" src="./Gemini_Generated_Image_u4n26yu4n26yu4n2.png" class="poster-img" onerror="this.src='https://i.ibb.co/mF0pYxT/animeverse-logo.png'"> 
         <div class="flex-1">
             <h1 id="title" class="text-lg font-bold uppercase mb-2 line-clamp-2">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
@@ -109,11 +107,9 @@
         <div id="comment-list" class="mt-6"></div>
     </div>
 
-
-
     <footer class="footer-main text-center">
         <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
-       
+        
     <div class="disclaimer-box">
         <p class="disclaimer-text">AnimeVerse does not store any files. All contents are provided by non-affiliated third parties.</p>
     </div>
@@ -137,6 +133,7 @@
 
         const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
+        const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png";
         
         let allData = [], seasons = [], currentAnimeId = "", currentEpIndex = 0, currentSeason = "";
 
@@ -148,18 +145,17 @@
 
             if(!currentAnimeId) return;
 
-            // 1. Firebase se data check karo (Fastest)
+            // FIX: Using anime_details to prevent double entry on home page
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            db.ref(`all_anime/${animeKey}`).once('value', snapshot => {
+            db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
                 const data = snapshot.val();
-                if(data && data.poster && data.desc) {
+                if(data && data.desc) {
                     updateUI(data.title, data.poster, data.year || "2026", data.desc);
                 } else {
                     fetchTMDBData(currentAnimeId);
                 }
             });
 
-            // 2. CSV Fetch (Original Logic)
             try {
                 const res = await fetch(csvURL);
                 const text = await res.text();
@@ -191,7 +187,8 @@
                         desc: r.overview
                     };
                     updateUI(details.title, details.poster, details.year, details.desc);
-                    db.ref(`all_anime/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
+                    // FIX: Save to details folder
+                    db.ref(`anime_details/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
                 } else {
                     fetchKitsuData(id, query);
                 }
@@ -211,14 +208,15 @@
                         desc: a.synopsis
                     };
                     updateUI(details.title, details.poster, details.year, details.desc);
-                    db.ref(`all_anime/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
+                    // FIX: Save to details folder
+                    db.ref(`anime_details/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
                 }
             } catch(e) {}
         }
 
         function updateUI(title, poster, year, desc) {
             document.getElementById('title').innerText = title;
-            document.getElementById('poster').src = poster;
+            document.getElementById('poster').src = poster || defaultLogo;
             document.getElementById('year').innerText = year;
             document.getElementById('desc').innerText = desc || "Streaming available on AnimeVerse.";
             renderEpisodes();
@@ -277,7 +275,7 @@
             grid.innerHTML = filtered.map((ep, i) => `
                 <div class="ep-card ${i === currentEpIndex ? 'active' : ''}" onclick="window.location.href='?id=${currentAnimeId}&s=${currentSeason}&ep=${i+1}'">
                     <div class="badge-count">${i+1}</div>
-                    <img src="${document.getElementById('poster').src}" class="ep-img">
+                    <img src="${document.getElementById('poster').src}" class="ep-img" onerror="this.src='${defaultLogo}'">
                     <p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>
                 </div>
             `).join('');
