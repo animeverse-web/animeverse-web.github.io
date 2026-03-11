@@ -1,3 +1,5 @@
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,6 +51,12 @@
         .plyr--video .plyr__control:hover { background: var(--neon); }
 
         .footer-main { background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 40px 20px; margin-top: 40px; }
+        
+         .disclaimer-box { background: rgba(255, 123, 0, 0.05); border: 1px dashed rgba(255, 123, 0, 0.3); margin: 20px 15px; padding: 15px; border-radius: 15px; text-align: center; }
+        .disclaimer-title { font-size: 10px; font-weight: 900; color: #FF7B00; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+        .disclaimer-text { font-size: 10px; color: #666; line-height: 1.4; font-weight: 500; }
+
+        footer { background: #000; padding: 40px 20px 100px; text-align: center; border-top: 1px solid #1a1a1a; margin-top: 40px; }
     </style>
 </head>
 <body>
@@ -62,7 +70,7 @@
     </div>
 
     <div class="header-card">
-        <img id="poster" src="" class="poster-img"> 
+        <img id="poster" src="./Gemini_Generated_Image_u4n26yu4n26yu4n2.png" class="poster-img"> 
         <div class="flex-1">
             <h1 id="title" class="text-lg font-bold uppercase mb-2 line-clamp-2">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
@@ -101,10 +109,16 @@
         <div id="comment-list" class="mt-6"></div>
     </div>
 
+
+
     <footer class="footer-main text-center">
         <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
-        <div class="text-[9px] text-gray-700 font-bold uppercase">© 2026 AnimeVerse</div>
-    </footer>
+       
+    <div class="disclaimer-box">
+        <p class="disclaimer-text">AnimeVerse does not store any files. All contents are provided by non-affiliated third parties.</p>
+    </div>
+     <div class="text-[9px] text-gray-700 font-bold uppercase">© 2026 AnimeVerse</div>
+</footer>
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
@@ -134,31 +148,80 @@
 
             if(!currentAnimeId) return;
 
-            const res = await fetch(csvURL);
-            const text = await res.text();
-            const rows = text.split('\n').slice(1);
-            allData = rows.map(r => {
-                const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                return { id: c[0]?.trim(), name: c[1]?.trim(), url: c[2]?.trim(), bot: c[3]?.trim() };
-            }).filter(x => x.id === currentAnimeId);
+            // 1. Firebase se data check karo (Fastest)
+            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+            db.ref(`all_anime/${animeKey}`).once('value', snapshot => {
+                const data = snapshot.val();
+                if(data && data.poster && data.desc) {
+                    updateUI(data.title, data.poster, data.year || "2026", data.desc);
+                } else {
+                    fetchTMDBData(currentAnimeId);
+                }
+            });
 
-            seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
-            document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}" ${s===currentSeason?'selected':''}>${s.replace('S','Season ')}</option>`).join('');
-            
+            // 2. CSV Fetch (Original Logic)
             try {
-                const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(currentAnimeId.replace(/-/g,' '))}`);
+                const res = await fetch(csvURL);
+                const text = await res.text();
+                const rows = text.split('\n').slice(1);
+                allData = rows.map(r => {
+                    const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    return { id: c[0]?.trim(), name: c[1]?.trim(), url: c[2]?.trim(), bot: c[3]?.trim() };
+                }).filter(x => x.id === currentAnimeId);
+
+                seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
+                document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}" ${s===currentSeason?'selected':''}>${s.replace('S','Season ')}</option>`).join('');
+                
+                renderEpisodes();
+                loadEpisodeData();
+            } catch(e) { console.error("CSV Loading Error"); }
+        }
+
+        async function fetchTMDBData(id) {
+            const query = id.replace(/-/g, ' ');
+            try {
+                const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(query)}`);
                 const tmData = await tmRes.json();
                 if(tmData.results?.[0]) {
                     const r = tmData.results[0];
-                    document.getElementById('title').innerText = r.name || r.title;
-                    document.getElementById('poster').src = "https://image.tmdb.org/t/p/w500" + r.poster_path;
-                    document.getElementById('year').innerText = (r.first_air_date || r.release_date || "").split('-')[0];
-                    document.getElementById('desc').innerText = r.overview;
+                    const details = {
+                        title: r.name || r.title,
+                        poster: "https://image.tmdb.org/t/p/w500" + r.poster_path,
+                        year: (r.first_air_date || r.release_date || "").split('-')[0],
+                        desc: r.overview
+                    };
+                    updateUI(details.title, details.poster, details.year, details.desc);
+                    db.ref(`all_anime/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
+                } else {
+                    fetchKitsuData(id, query);
+                }
+            } catch(e) { fetchKitsuData(id, query); }
+        }
+
+        async function fetchKitsuData(id, query) {
+            try {
+                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}`);
+                const data = await res.json();
+                if(data.data?.[0]) {
+                    const a = data.data[0].attributes;
+                    const details = {
+                        title: a.canonicalTitle,
+                        poster: a.posterImage.large,
+                        year: (a.startDate || "").split('-')[0],
+                        desc: a.synopsis
+                    };
+                    updateUI(details.title, details.poster, details.year, details.desc);
+                    db.ref(`all_anime/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
                 }
             } catch(e) {}
+        }
 
+        function updateUI(title, poster, year, desc) {
+            document.getElementById('title').innerText = title;
+            document.getElementById('poster').src = poster;
+            document.getElementById('year').innerText = year;
+            document.getElementById('desc').innerText = desc || "Streaming available on AnimeVerse.";
             renderEpisodes();
-            loadEpisodeData();
         }
 
         function loadEpisodeData() {
@@ -185,13 +248,11 @@
 
             updateTrendingToday(currentAnimeId, epKey);
 
-            const clickRef = db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`);
-            clickRef.transaction(c => (c || 0) + 1);
-            clickRef.on('value', snap => {
+            db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).transaction(c => (c || 0) + 1);
+            db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            // FIXED DOWNLOAD LOGIC
             document.getElementById('dl-button').onclick = () => {
                 if(ep.bot && ep.bot !== "" && ep.bot !== "#") {
                     window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
@@ -199,15 +260,13 @@
                     window.location.href = `download.html?id=${currentAnimeId}_s${cleanS}_e${currentEpIndex + 1}`;
                 }
             };
-
             listenToComments(animeKey, epKey);
         }
 
         function updateTrendingToday(anime, ep) {
             const trendId = (anime + "-" + ep).replace(/[.#$[\]\s]/g, "_");
-            const trendRef = db.ref(`trending_today/${trendId}`);
-            trendRef.transaction((curr) => {
-                if (curr) { curr.count++; curr.createdAt = Date.now(); return curr; }
+            db.ref(`trending_today/${trendId}`).transaction((curr) => {
+                if (curr) { curr.count++; return curr; }
                 return { animeName: anime.replace(/-/g, ' ').toUpperCase(), episode: ep, count: 1, createdAt: Date.now() };
             });
         }
@@ -240,7 +299,7 @@
                 const data = snap.val();
                 if(data) {
                     Object.values(data).reverse().forEach(c => {
-                        list.innerHTML += `<div class="comment-item"><div class="user-avatar text-xs">${c.name.charAt(0).toUpperCase()}</div><div class="flex-1"><h4 class="text-[11px] font-bold text-gray-400">${c.name}</h4><p class="text-xs text-gray-500">${c.text}</p></div></div>`;
+                        list.innerHTML += `<div class="mb-4 flex gap-3"><div class="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-[10px] font-bold text-orange-500">${c.name.charAt(0)}</div><div class="flex-1"><h4 class="text-[11px] font-bold text-gray-300">${c.name}</h4><p class="text-xs text-gray-500">${c.text}</p></div></div>`;
                     });
                 }
             });
