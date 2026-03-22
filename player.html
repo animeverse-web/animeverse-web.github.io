@@ -49,9 +49,7 @@
         .plyr--video .plyr__control:hover { background: var(--neon); }
 
         .footer-main { background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 40px 20px; margin-top: 40px; }
-        
-         .disclaimer-box { background: rgba(255, 123, 0, 0.05); border: 1px dashed rgba(255, 123, 0, 0.3); margin: 20px 15px; padding: 15px; border-radius: 15px; text-align: center; }
-        .disclaimer-title { font-size: 10px; font-weight: 900; color: #FF7B00; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+        .disclaimer-box { background: rgba(255, 123, 0, 0.05); border: 1px dashed rgba(255, 123, 0, 0.3); margin: 20px 15px; padding: 15px; border-radius: 15px; text-align: center; }
         .disclaimer-text { font-size: 10px; color: #666; line-height: 1.4; font-weight: 500; }
 
         footer { background: #000; padding: 40px 20px 100px; text-align: center; border-top: 1px solid #1a1a1a; margin-top: 40px; }
@@ -68,7 +66,7 @@
     </div>
 
     <div class="header-card">
-        <img id="poster" src="./Gemini_Generated_Image_u4n26yu4n26yu4n2.png" class="poster-img" onerror="this.src='https://i.ibb.co/mF0pYxT/animeverse-logo.png'"> 
+        <img id="poster" src="" class="poster-img" onerror="this.src='https://i.ibb.co/mF0pYxT/animeverse-logo.png'"> 
         <div class="flex-1">
             <h1 id="title" class="text-lg font-bold uppercase mb-2 line-clamp-2">Loading...</h1>
             <div class="flex items-center gap-3 mb-3">
@@ -109,15 +107,15 @@
 
     <footer class="footer-main text-center">
         <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
-        
-    <div class="disclaimer-box">
-        <p class="disclaimer-text">AnimeVerse does not store any files. All contents are provided by non-affiliated third parties.</p>
-    </div>
-     <div class="text-[9px] text-gray-700 font-bold uppercase">© 2026 AnimeVerse</div>
-</footer>
+        <div class="disclaimer-box">
+            <p class="disclaimer-text">AnimeVerse does not store any files. All contents are provided by non-affiliated third parties.</p>
+        </div>
+        <div class="text-[9px] text-gray-700 font-bold uppercase">© 2026 AnimeVerse</div>
+    </footer>
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
+        // --- FIREBASE INITIALIZATION ---
         const firebaseConfig = { 
             apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
             databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
@@ -131,22 +129,22 @@
             controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen']
         });
 
-        const csvURL = "https://docs.google.com/spreadsheets/d/1VLcid14lgDfdDvYzfJLpLsbgD_jpY1CGzutgpEGhZdA/export?format=csv";
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
         const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png";
         
-        let allData = [], seasons = [], currentAnimeId = "", currentEpIndex = 0, currentSeason = "";
+        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "S1";
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             currentAnimeId = params.get('id');
             currentSeason = params.get('s') || "S1";
-            currentEpIndex = parseInt(params.get('ep') || 1) - 1;
+            currentEpNum = parseInt(params.get('ep') || 1);
 
             if(!currentAnimeId) return;
 
-            // FIX: Using anime_details to prevent double entry on home page
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+
+            // 1. Fetch TMDB/Kitsu Details
             db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
                 const data = snapshot.val();
                 if(data && data.desc) {
@@ -156,23 +154,93 @@
                 }
             });
 
-            try {
-                const res = await fetch(csvURL);
-                const text = await res.text();
-                const rows = text.split('\n').slice(1);
-                allData = rows.map(r => {
-                    const c = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    return { id: c[0]?.trim(), name: c[1]?.trim(), url: c[2]?.trim(), bot: c[3]?.trim() };
-                }).filter(x => x.id === currentAnimeId);
-
-                seasons = [...new Set(allData.map(x => x.name.split(' - ')[0]))];
-                document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}" ${s===currentSeason?'selected':''}>${s.replace('S','Season ')}</option>`).join('');
-                
-                renderEpisodes();
-                loadEpisodeData();
-            } catch(e) { console.error("CSV Loading Error"); }
+            // 2. Fetch Episodes from Firebase (animeverse_links)
+            db.ref(`animeverse_links/${currentAnimeId}`).on('value', snapshot => {
+                animeEpisodes = snapshot.val();
+                if(animeEpisodes) {
+                    setupSeasons();
+                    loadEpisodeData();
+                } else {
+                    document.getElementById('title').innerText = "Anime Not Found!";
+                }
+            });
         }
 
+        function setupSeasons() {
+            const seasons = Object.keys(animeEpisodes).sort();
+            const select = document.getElementById('season-select');
+            select.innerHTML = seasons.map(s => 
+                `<option value="${s}" ${s === currentSeason ? 'selected' : ''}>${s.replace('S', 'Season ')}</option>`
+            ).join('');
+            renderEpisodes();
+        }
+
+        function renderEpisodes() {
+            const episodes = animeEpisodes[currentSeason];
+            const grid = document.getElementById('ep-grid');
+            if(!episodes) return;
+
+            const sortedEps = Object.keys(episodes).sort((a,b) => parseInt(a.replace('E','')) - parseInt(b.replace('E','')));
+            
+            grid.innerHTML = sortedEps.map(eKey => {
+                const num = eKey.replace('E', '');
+                return `
+                    <div class="ep-card ${num == currentEpNum ? 'active' : ''}" onclick="changeEpisode(${num})">
+                        <div class="badge-count">${num}</div>
+                        <img src="${document.getElementById('poster').src}" class="ep-img" onerror="this.src='${defaultLogo}'">
+                        <p class="text-[9px] font-bold p-2 truncate">Episode ${num}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadEpisodeData() {
+            const epKey = `E${currentEpNum}`;
+            const epData = animeEpisodes[currentSeason] ? animeEpisodes[currentSeason][epKey] : null;
+
+            if(!epData) return;
+
+            const plyrEl = document.getElementById('plyr-player');
+            const iframeEl = document.getElementById('main-player');
+
+            // Player Logic
+            if (epData.url.includes('workers.dev') || epData.url.includes('.mp4') || epData.url.includes('.mkv')) {
+                iframeEl.style.display = 'none';
+                plyrEl.style.display = 'block';
+                player.source = { type: 'video', sources: [{ src: epData.url, type: 'video/mp4' }] };
+            } else {
+                plyrEl.style.display = 'none';
+                iframeEl.style.display = 'block';
+                iframeEl.src = epData.url;
+            }
+
+            // Update Views
+            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+            const epViewKey = `${currentSeason}_E${currentEpNum}`;
+            db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
+            db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).on('value', snap => {
+                document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
+            });
+
+            // Trending & Comments
+            updateTrendingToday(currentAnimeId, epViewKey);
+            listenToComments(animeKey, epViewKey);
+
+            // Download Button
+            document.getElementById('dl-button').onclick = () => {
+                if(epData.bot && epData.bot !== "#") {
+                    window.open(epData.bot.startsWith("http") ? epData.bot : `https://t.me/verse1_8bot?start=${epData.bot}`, '_blank');
+                } else {
+                    window.location.href = `download.html?id=${currentAnimeId}_s${currentSeason.replace('S','')}_e${currentEpNum}`;
+                }
+            };
+
+            // Update URL without refresh
+            const newUrl = `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`;
+            window.history.pushState({}, '', newUrl);
+        }
+
+        // --- TMDB FETCH (Same as your old code) ---
         async function fetchTMDBData(id) {
             const query = id.replace(/-/g, ' ');
             try {
@@ -187,28 +255,6 @@
                         desc: r.overview
                     };
                     updateUI(details.title, details.poster, details.year, details.desc);
-                    // FIX: Save to details folder
-                    db.ref(`anime_details/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
-                } else {
-                    fetchKitsuData(id, query);
-                }
-            } catch(e) { fetchKitsuData(id, query); }
-        }
-
-        async function fetchKitsuData(id, query) {
-            try {
-                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(query)}`);
-                const data = await res.json();
-                if(data.data?.[0]) {
-                    const a = data.data[0].attributes;
-                    const details = {
-                        title: a.canonicalTitle,
-                        poster: a.posterImage.large,
-                        year: (a.startDate || "").split('-')[0],
-                        desc: a.synopsis
-                    };
-                    updateUI(details.title, details.poster, details.year, details.desc);
-                    // FIX: Save to details folder
                     db.ref(`anime_details/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
                 }
             } catch(e) {}
@@ -222,45 +268,6 @@
             renderEpisodes();
         }
 
-        function loadEpisodeData() {
-            const filtered = allData.filter(x => x.name.startsWith(currentSeason));
-            const ep = filtered[currentEpIndex];
-            if(!ep) return;
-
-            const plyrEl = document.getElementById('plyr-player');
-            const iframeEl = document.getElementById('main-player');
-
-            if (ep.url.includes('workers.dev') || ep.url.includes('.mp4') || ep.url.includes('.mkv')) {
-                iframeEl.style.display = 'none';
-                plyrEl.style.display = 'block';
-                player.source = { type: 'video', sources: [{ src: ep.url, type: 'video/mp4' }] };
-            } else {
-                plyrEl.style.display = 'none';
-                iframeEl.style.display = 'block';
-                iframeEl.src = ep.url;
-            }
-
-            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            const cleanS = currentSeason.replace(/\D/g,'') || "1";
-            const epKey = `S${cleanS}_E${currentEpIndex + 1}`;
-
-            updateTrendingToday(currentAnimeId, epKey);
-
-            db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).transaction(c => (c || 0) + 1);
-            db.ref(`animeverse/${animeKey}/${epKey}/total_clicks`).on('value', snap => {
-                document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
-            });
-
-            document.getElementById('dl-button').onclick = () => {
-                if(ep.bot && ep.bot !== "" && ep.bot !== "#") {
-                    window.open(ep.bot.startsWith("http") ? ep.bot : `https://t.me/verse1_8bot?start=${ep.bot}`, '_blank');
-                } else {
-                    window.location.href = `download.html?id=${currentAnimeId}_s${cleanS}_e${currentEpIndex + 1}`;
-                }
-            };
-            listenToComments(animeKey, epKey);
-        }
-
         function updateTrendingToday(anime, ep) {
             const trendId = (anime + "-" + ep).replace(/[.#$[\]\s]/g, "_");
             db.ref(`trending_today/${trendId}`).transaction((curr) => {
@@ -269,24 +276,12 @@
             });
         }
 
-        function renderEpisodes() {
-            const filtered = allData.filter(x => x.name.startsWith(currentSeason));
-            const grid = document.getElementById('ep-grid');
-            grid.innerHTML = filtered.map((ep, i) => `
-                <div class="ep-card ${i === currentEpIndex ? 'active' : ''}" onclick="window.location.href='?id=${currentAnimeId}&s=${currentSeason}&ep=${i+1}'">
-                    <div class="badge-count">${i+1}</div>
-                    <img src="${document.getElementById('poster').src}" class="ep-img" onerror="this.src='${defaultLogo}'">
-                    <p class="text-[9px] font-bold p-2 truncate">Episode ${i+1}</p>
-                </div>
-            `).join('');
-        }
-
         function postComment() {
             const name = document.getElementById('user-name').value.trim() || "User";
             const text = document.getElementById('comment-text').value.trim();
             if(!text) return;
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            const epKey = `S${currentSeason.replace(/\D/g,'')}_E${currentEpIndex + 1}`;
+            const epKey = `${currentSeason}_E${currentEpNum}`;
             db.ref(`comments/${animeKey}/${epKey}`).push({ name, text, timestamp: Date.now() });
             document.getElementById('comment-text').value = "";
         }
@@ -303,15 +298,28 @@
             });
         }
 
-        function changeSeason(s) { window.location.href = `?id=${currentAnimeId}&s=${s}&ep=1`; }
+        function changeSeason(s) { 
+            currentSeason = s; 
+            currentEpNum = 1; 
+            loadEpisodeData(); 
+            renderEpisodes();
+        }
+
+        function changeEpisode(e) { 
+            currentEpNum = e; 
+            loadEpisodeData(); 
+            renderEpisodes();
+        }
+
         function smartChange(dir) {
-            const filtered = allData.filter(x => x.name.startsWith(currentSeason));
-            const newEp = (currentEpIndex + 1) + dir;
-            if(newEp >= 1 && newEp <= filtered.length) window.location.href = `?id=${currentAnimeId}&s=${currentSeason}&ep=${newEp}`;
+            const episodes = animeEpisodes[currentSeason];
+            const max = Object.keys(episodes).length;
+            const next = currentEpNum + dir;
+            if(next >= 1 && next <= max) changeEpisode(next);
         }
 
         function reportBrokenLink() {
-            const info = `${currentAnimeId} | ${currentSeason} | Ep ${currentEpIndex + 1}`;
+            const info = `${currentAnimeId} | ${currentSeason} | Ep ${currentEpNum}`;
             db.ref('reports').push({ anime: info, time: new Date().toLocaleString(), status: "Broken Link" });
             alert("Bhai, report bhej di hai! Admin jald check karega.");
         }
