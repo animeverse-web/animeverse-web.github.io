@@ -151,7 +151,7 @@
     <h2 class="text-[#FF7B00] font-black italic uppercase mb-4">🔥 Added Today</h2>
     <div id="today-list" class="grid grid-cols-3 gap-4">
         </div>
-    </div>
+</div>
     <section id="latestSection"><h2>Latest series</h2><div class="anime-grid" id="latestContainer"></div></section>
     <section id="popularSection"><h2 id="popularHeading">Popular Anime</h2><div class="anime-grid" id="popularContainer"></div></section>
     <section id="trendingSection"><h2>Trending Anime</h2><div class="anime-grid" id="trendingContainer"></div></section>
@@ -246,6 +246,22 @@ async function fetchSmartData(title, episode, defaultPoster) {
     return result;
 }
 
+function toggleSearch() { document.getElementById('searchContainer').classList.toggle('active'); }
+
+function triggerSearch() {
+    const term = document.getElementById('searchInput').value.trim();
+    if(!term) return;
+    // Basic search functionality
+    const matches = animeData.filter(a => a.title.toLowerCase().includes(term.toLowerCase()));
+    if(matches.length > 0) {
+        const container = document.getElementById('popularContainer');
+        document.getElementById('popularHeading').innerText = `Results for "${term}"`;
+        container.innerHTML = 'Loading...';
+        renderSearchResults(matches);
+    } else {
+        alert("Anime not found!");
+    }
+}
 // --- 2. AUTO DELETE LOGIC ---
 function checkAndResetDailyData() {
     const lastResetDate = localStorage.getItem('daily_reset_date');
@@ -415,6 +431,15 @@ async function loadAddedToday() {
             }
         } else { section.style.display = 'none'; }
     });
+}
+
+async function renderSearchResults(matches) {
+    const container = document.getElementById('popularContainer');
+    container.innerHTML = '';
+    for(const a of matches) {
+        a.details = await fetchTMDB(a.title);
+        if(a.details) container.appendChild(createCard(a));
+    }
 }
 
 function trackClick(title) { db.ref('global_clicks/' + title.replace(/[.#$[\]]/g, "_")).transaction(c => (c || 0) + 1); }
