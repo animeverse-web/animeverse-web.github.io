@@ -1,3 +1,5 @@
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -104,6 +106,11 @@
         <button onclick="postComment()" class="comment-btn">Post Comment</button>
         <div id="comment-list" class="mt-6"></div>
     </div>
+    <div class="px-4 mb-10">
+    <h3 class="text-[12px] font-black uppercase tracking-[2px] text-orange-500 mb-4">Watch This Also</h3>
+    <div id="recommendation-grid" class="grid grid-cols-3 gap-3">
+        </div>
+</div>
 
     <footer class="footer-main text-center">
         <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
@@ -164,6 +171,7 @@
                     document.getElementById('title').innerText = "Anime Not Found!";
                 }
             });
+            loadAnimeRecommendations();
         }
 
         function setupSeasons() {
@@ -241,6 +249,49 @@
         }
 
         // --- TMDB FETCH (Same as your old code) ---
+        
+        async function loadAnimeRecommendations() {
+    const recGrid = document.getElementById('recommendation-grid');
+    
+    // Firebase se 'animeverse_links' uthana
+    db.ref("animeverse_links").limitToLast(12).once('value', snapshot => {
+        const allAnimes = snapshot.val();
+        if (!allAnimes) return;
+
+        const animeIds = Object.keys(allAnimes);
+        // Shuffle karke random 6 anime nikalna
+        const shuffled = animeIds.sort(() => 0.5 - Math.random()).slice(0, 6);
+
+        recGrid.innerHTML = shuffled.map(id => {
+            const displayName = id.replace(/-/g, ' ');
+            return `
+                <div class="relative overflow-hidden rounded-lg bg-[#1a1a1a] aspect-[2/3] cursor-pointer shadow-lg" onclick="window.location.href='?id=${id}'">
+                    <img src="${defaultLogo}" class="w-full h-full object-cover" id="rec-img-${id}">
+                    <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black to-transparent">
+                        <p class="text-[9px] font-bold text-white truncate uppercase">${displayName}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Har anime ke liye poster fetch karna
+        shuffled.forEach(id => fetchRecPoster(id));
+    });
+}
+
+async function fetchRecPoster(id) {
+    const cleanName = id.replace(/-/g, ' ');
+    try {
+        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
+        const data = await res.json();
+        if(data.results?.[0]?.poster_path) {
+            document.getElementById(`rec-img-${id}`).src = "https://image.tmdb.org/t/p/w342" + data.results[0].poster_path;
+        }
+    } catch(e) {
+        console.log("Poster error for:", id);
+    }
+}
+        
         async function fetchTMDBData(id) {
             const query = id.replace(/-/g, ' ');
             try {
