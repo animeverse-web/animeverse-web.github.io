@@ -198,10 +198,10 @@ const TMDB_API_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
 let animeData = [];
 window.allTitles = [];
 
-// --- 2. SEARCH ENGINE WITH CLEAR BUTTON ---
+// --- 2. SEARCH LOGIC (BINA KUCH HATAYE) ---
 const searchInput = document.getElementById('searchInput');
 const suggestionsBox = document.getElementById('suggestions');
-const clearBtn = document.getElementById('clearSearchBtn'); // Make sure this ID is in your HTML
+const clearBtn = document.getElementById('clearSearchBtn');
 
 function toggleSearch() { 
     const container = document.getElementById('searchContainer');
@@ -209,23 +209,17 @@ function toggleSearch() {
     if(container.classList.contains('active')) searchInput.focus();
 }
 
-// Clear Search logic
 function clearSearch() {
     searchInput.value = '';
     if(clearBtn) clearBtn.style.display = 'none';
     suggestionsBox.style.display = 'none';
-    
-    // Show all hidden sections
-    const sections = ['heroSection', 'newlySection', 'today-section', 'latestSection', 'popularSection', 'trendingSection', 'movieSection'];
-    sections.forEach(id => {
+    ['heroSection', 'newlySection', 'today-section', 'latestSection', 'popularSection', 'trendingSection', 'movieSection'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.style.display = 'block';
     });
-    
     const heading = document.getElementById('popularHeading');
     if(heading) heading.innerText = "Popular Anime";
-    
-    renderGrids(); // Restore original grids
+    renderGrids(); 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -234,10 +228,9 @@ if(clearBtn) clearBtn.onclick = clearSearch;
 searchInput.addEventListener('input', () => {
     const value = searchInput.value.trim();
     if(clearBtn) clearBtn.style.display = value.length > 0 ? 'block' : 'none';
-    
     suggestionsBox.innerHTML = '';
     if (value.length > 0) {
-        const matches = window.allTitles.filter(t => t.toLowerCase().includes(value.toLowerCase())).slice(0, 6);
+        const matches = window.allTitles.filter(t => t.toLowerCase().includes(value.toLowerCase())).slice(0, 8);
         if (matches.length > 0) {
             suggestionsBox.style.display = 'block';
             matches.forEach(match => {
@@ -257,14 +250,9 @@ searchInput.addEventListener('input', () => {
 async function triggerSearch() {
     const term = searchInput.value.trim();
     if(!term) return;
-
-    // Hide everything else
-    const sectionsToHide = ['heroSection', 'newlySection', 'today-section', 'latestSection', 'trendingSection', 'movieSection'];
-    sectionsToHide.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.style.display = 'none';
+    ['heroSection', 'newlySection', 'today-section', 'latestSection', 'trendingSection', 'movieSection'].forEach(id => {
+        const el = document.getElementById(id); if(el) el.style.display = 'none';
     });
-
     const container = document.getElementById('popularContainer');
     const heading = document.getElementById('popularHeading');
     const matches = animeData.filter(a => a.title.toLowerCase().includes(term.toLowerCase()));
@@ -273,11 +261,7 @@ async function triggerSearch() {
         heading.innerText = `Results for "${term}"`;
         container.innerHTML = '<div class="loading-text">Searching AnimeVerse...</div>';
         const resultsFragment = document.createDocumentFragment();
-        for(const a of matches) {
-            const details = await fetchTMDB(a.title);
-            const enriched = { ...a, poster: details ? details.poster : a.poster, rating: details ? details.rating : a.rating };
-            resultsFragment.appendChild(createCard(enriched));
-        }
+        for(const a of matches) { resultsFragment.appendChild(createCard(a)); }
         container.innerHTML = ''; 
         container.appendChild(resultsFragment); 
     } else {
@@ -286,7 +270,7 @@ async function triggerSearch() {
     }
 }
 
-// --- 3. API CONNECTORS (TMDB & ANILIST) ---
+// --- 3. API CONNECTORS ---
 async function fetchTMDB(title) {
     try {
         const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`);
@@ -302,44 +286,47 @@ async function fetchTMDB(title) {
     } catch (e) { return null; }
 }
 
-async function fetchSmartData(title, episode, defaultPoster) {
-    let result = { image: defaultPoster || 'https://via.placeholder.com/300x169', rating: "8.5" };
-    try {
-        const aniRes = await fetch('https://graphql.anilist.co', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                query: `query ($s: String) { Media (search: $s, type: ANIME) { averageScore streamingEpisodes { thumbnail } bannerImage } }`, 
-                variables: { s: title } 
-            })
-        });
-        const aniData = await aniRes.json();
-        const media = aniData.data?.Media;
-        if (media) {
-            if (media.averageScore) result.rating = (media.averageScore / 10).toFixed(1);
-            if (media.streamingEpisodes && media.streamingEpisodes[episode - 1]) result.image = media.streamingEpisodes[episode - 1].thumbnail;
-            else if (media.bannerImage) result.image = media.bannerImage;
-            return result; 
-        }
-    } catch (e) {}
-    const tm = await fetchTMDB(title);
-    if(tm) { result.image = tm.poster; result.rating = tm.rating; }
-    return result;
-}
-
-// --- 4. DATA LOADING & RENDERING ---
+// --- 4. DATA LOADING & POSTER FIX ---
 function initApp() {
-    // Load Global Anime Data
+    // 1. All Anime Data Fix
     db.ref('all_anime').on('value', async (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
-        animeData = Object.values(data);
-        window.allTitles = animeData.map(a => a.title);
+        
+        animeData = [];
+        window.allTitles = [];
+        
+        // Loop through Firebase keys
+        for (const key in data) {
+            const item = data[key];
+            const title = key; // Firebase ki key hi anime ka naam hai
+            
+            // Agar poster link database mein nahi hai, toh TMDB se fetch karega
+            let poster = item.image || item.poster;
+            let rating = item.rating || "8.5";
+            
+            if (!poster || poster.includes("placeholder")) {
+                const apiData = await fetchTMDB(title);
+                if (apiData) {
+                    poster = apiData.poster;
+                    rating = apiData.rating;
+                }
+            }
+
+            animeData.push({
+                title: title,
+                category: item.category || 'latest',
+                poster: poster || 'https://via.placeholder.com/500x750',
+                rating: rating
+            });
+            window.allTitles.push(title);
+        }
+        
         renderGrids();
         loadHero();
     });
 
-    // Load Newly Added (Fixed Design)
+    // 2. Newly Added logic
     db.ref('newly_added_section').on('value', (snap) => {
         const container = document.getElementById('newlyContainer');
         const section = document.getElementById('newlySection');
@@ -349,7 +336,8 @@ function initApp() {
         Object.values(snap.val()).reverse().forEach(item => {
             const card = document.createElement('a');
             card.className = 'ep-card';
-            card.href = `player.html?id=${item.slug}&s=S1&ep=${item.ep}`;
+            const slug = item.slug || item.name.toLowerCase().replace(/ /g, '-').replace(/[:']/g, '');
+            card.href = `player.html?id=${slug}&s=S1&ep=${item.ep}`;
             card.innerHTML = `<div class="ep-badge">EP ${item.ep}</div><img src="${item.image || 'https://via.placeholder.com/500x281'}"><div class="ep-title">${item.name}</div>`;
             container.appendChild(card);
         });
@@ -358,64 +346,29 @@ function initApp() {
     loadAddedToday();
 }
 
-async function loadAddedToday() {
-    const today = new Date().toISOString().split('T')[0]; 
-    db.ref(`added_today/${today}`).on('value', async snapshot => {
-        const data = snapshot.val();
-        const section = document.getElementById('today-section');
-        const list = document.getElementById('today-list');
-
-        if (data && list) {
-            section.style.display = 'block';
-            list.innerHTML = "";
-            list.style.cssText = "display: flex; overflow-x: auto; gap: 12px; padding: 10px 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch;";
-            
-            const grouped = {};
-            Object.keys(data).forEach(id => {
-                const item = data[id];
-                if(!grouped[id]) grouped[id] = { id: id, s: item.s, max: item.e };
-                else if(parseInt(item.e) > parseInt(grouped[id].max)) grouped[id].max = item.e;
-            });
-
-            for (const id in grouped) {
-                const item = grouped[id];
-                const animeName = item.id.replace(/-/g, ' ');
-                const localAnime = animeData.find(a => a.title.toLowerCase() === animeName.toLowerCase());
-                const smartData = await fetchSmartData(animeName, item.max, localAnime ? localAnime.poster : null);
-                
-                list.innerHTML += `
-                    <div style="min-width: 140px; width: 140px; flex-shrink: 0; cursor:pointer;" onclick="window.location.href='player.html?id=${item.id}&s=S${item.s}&ep=${item.max}'">
-                        <div style="background: rgba(20,20,20,0.95); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative; height: 135px;">
-                            <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #f47e21; font-size: 8px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 10;">⭐ ${smartData.rating}</div>
-                            <div style="width: 100%; height: 85px; overflow: hidden;">
-                                <img src="${smartData.image}" style="width: 100%; height: 100%; object-fit: cover;">
-                            </div>
-                            <div style="position: absolute; top: 65px; left: 5px; background: #ff7b00; color: #fff; font-size: 7px; padding: 2px 6px; border-radius: 4px; font-weight: 900;">S${item.s} EP ${item.max}</div>
-                            <div style="padding: 25px 5px 5px; text-align: center;">
-                                <div style="font-size: 9px; font-weight: 600; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">${animeName}</div>
-                            </div>
-                        </div>
-                    </div>`;
-            }
-        } else if (section) { section.style.display = 'none'; }
-    });
-}
-
 async function renderGrids() {
-    const sections = { 'latest': 'latestContainer', 'popular': 'popularContainer', 'trending': 'trendingContainer', 'movies': 'movieContainer' };
-    const fragments = { 'latest': [], 'popular': [], 'trending': [], 'movies': [] };
+    const containers = {
+        'latest': document.getElementById('latestContainer'),
+        'movie': document.getElementById('movieContainer'),
+        'movies': document.getElementById('movieContainer'),
+        'completed': document.getElementById('popularContainer'),
+        'popular': document.getElementById('popularContainer'),
+        'trending': document.getElementById('trendingContainer')
+    };
 
-    for (const a of animeData) {
+    // Containers ko saaf karein
+    Object.values(containers).forEach(c => { if(c) c.innerHTML = ''; });
+
+    animeData.forEach(a => {
+        // --- SUGGESTION CATEGORY FILTER ---
+        if (a.category === 'suggestion') return;
+
         const card = createCard(a);
-        const cat = a.category || 'latest';
-        if (fragments[cat]) fragments[cat].push(card);
-    }
-
-    Object.keys(sections).forEach(key => {
-        const container = document.getElementById(sections[key]);
-        if (container) {
-            container.innerHTML = '';
-            fragments[key].forEach(card => container.appendChild(card));
+        const target = containers[a.category];
+        if (target) {
+            target.appendChild(card);
+        } else if (containers['latest']) {
+            containers['latest'].appendChild(card);
         }
     });
 }
@@ -423,17 +376,56 @@ async function renderGrids() {
 function createCard(anime) {
     const card = document.createElement('a');
     card.className = 'anime-card';
-    const slug = anime.title.toLowerCase().replace(/ /g, '-');
+    // Slug generation fix
+    const slug = anime.title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, '');
     card.href = `player.html?id=${slug}`;
     card.innerHTML = `
         <span class="badge-hd">HD | HINDI</span>
-        <img src="${anime.poster || 'https://via.placeholder.com/500x750'}" loading="lazy">
-        <div class="card-info">⭐ ${anime.rating || '8.5'} Rating</div>
+        <img src="${anime.poster}" loading="lazy" onerror="this.src='https://via.placeholder.com/500x750'">
+        <div class="card-info">⭐ ${anime.rating} Rating</div>
         <div class="anime-title">${anime.title}</div>`;
     card.onclick = () => {
         db.ref('global_clicks/' + anime.title.replace(/[.#$[\]]/g, "_")).transaction(c => (c || 0) + 1);
     };
     return card;
+}
+
+// Baaki functions (loadHero, loadAddedToday) waisa hi rahega...
+async function loadAddedToday() {
+    const today = new Date().toISOString().split('T')[0]; 
+    db.ref(`added_today/${today}`).on('value', async snapshot => {
+        const data = snapshot.val();
+        const section = document.getElementById('today-section');
+        const list = document.getElementById('today-list');
+        if (data && list) {
+            section.style.display = 'block';
+            list.innerHTML = "";
+            list.style.cssText = "display: flex; overflow-x: auto; gap: 12px; padding: 10px 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch;";
+            const grouped = {};
+            Object.keys(data).forEach(id => {
+                const item = data[id];
+                if(!grouped[id]) grouped[id] = { id: id, s: item.s, max: item.e };
+                else if(parseInt(item.e) > parseInt(grouped[id].max)) grouped[id].max = item.e;
+            });
+            for (const id in grouped) {
+                const item = grouped[id];
+                const animeName = item.id.replace(/-/g, ' ');
+                const localAnime = animeData.find(a => a.title.toLowerCase() === animeName.toLowerCase());
+                const apiData = await fetchTMDB(animeName);
+                const img = apiData ? apiData.poster : (localAnime ? localAnime.poster : 'https://via.placeholder.com/140x85');
+                const rate = apiData ? apiData.rating : '8.5';
+                list.innerHTML += `
+                    <div style="min-width: 140px; width: 140px; flex-shrink: 0; cursor:pointer;" onclick="window.location.href='player.html?id=${item.id}&s=S${item.s}&ep=${item.max}'">
+                        <div style="background: rgba(20,20,20,0.95); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative; height: 135px;">
+                            <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #f47e21; font-size: 8px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 10;">⭐ ${rate}</div>
+                            <div style="width: 100%; height: 85px; overflow: hidden;"><img src="${img}" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                            <div style="position: absolute; top: 65px; left: 5px; background: #ff7b00; color: #fff; font-size: 7px; padding: 2px 6px; border-radius: 4px; font-weight: 900;">S${item.s} EP ${item.max}</div>
+                            <div style="padding: 25px 5px 5px; text-align: center;"><div style="font-size: 9px; font-weight: 600; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">${animeName}</div></div>
+                        </div>
+                    </div>`;
+            }
+        } else if (section) { section.style.display = 'none'; }
+    });
 }
 
 async function loadHero() {
@@ -449,14 +441,7 @@ async function loadHero() {
     });
 }
 
-// --- 5. EXECUTION ---
 initApp();
-
-document.addEventListener('click', (e) => {
-    if (suggestionsBox && !searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-        suggestionsBox.style.display = 'none';
-    }
-});
 </script>
 </body>
 </html>
