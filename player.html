@@ -85,7 +85,6 @@
 
     <div class="flex gap-2 px-[15px] mb-6">
         <button class="nav-btn" onclick="smartChange(-1)">Prev</button>
-        <!-- Updated Download Button -->
         <button id="dl-button" class="nav-btn btn-dl">Download Ep</button>
         <button class="nav-btn" onclick="smartChange(1)">Next</button>
     </div>
@@ -105,10 +104,11 @@
         <button onclick="postComment()" class="comment-btn">Post Comment</button>
         <div id="comment-list" class="mt-6"></div>
     </div>
+
     <div class="px-4 mb-10">
-    <h3 class="text-[12px] font-black uppercase tracking-[2px] text-orange-500 mb-4">Watch This Also</h3>
-    <div id="recommendation-grid" class="grid grid-cols-3 gap-3"></div>
-</div>
+        <h3 class="text-[12px] font-black uppercase tracking-[2px] text-orange-500 mb-4">Watch This Also</h3>
+        <div id="recommendation-grid" class="grid grid-cols-3 gap-3"></div>
+    </div>
 
     <footer class="footer-main text-center">
         <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
@@ -120,6 +120,7 @@
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
+        // --- FIREBASE INITIALIZATION ---
         const firebaseConfig = { 
             apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
             databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
@@ -136,18 +137,19 @@
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
         const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png";
         
-        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "S1";
+        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "";
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             currentAnimeId = params.get('id');
-            currentSeason = params.get('s') || "S1";
+            currentSeason = params.get('s'); // Default empty to detect available season later[cite: 4]
             currentEpNum = parseInt(params.get('ep') || 1);
 
             if(!currentAnimeId) return;
 
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
 
+            // 1. Fetch TMDB Details[cite: 4]
             db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
                 const data = snapshot.val();
                 if(data && data.desc) {
@@ -157,9 +159,17 @@
                 }
             });
 
+            // 2. Fetch Episodes from Firebase[cite: 4]
             db.ref(`animeverse_links/${currentAnimeId}`).on('value', snapshot => {
                 animeEpisodes = snapshot.val();
                 if(animeEpisodes) {
+                    const availableSeasons = Object.keys(animeEpisodes).sort();
+                    
+                    // Auto-detection: Agar URL mein season nahi hai, to pehla available uthao[cite: 4]
+                    if (!currentSeason || !animeEpisodes[currentSeason]) {
+                        currentSeason = availableSeasons[0];
+                    }
+                    
                     setupSeasons();
                     loadEpisodeData();
                 } else {
@@ -206,6 +216,7 @@
             const plyrEl = document.getElementById('plyr-player');
             const iframeEl = document.getElementById('main-player');
 
+            // Player Logic[cite: 4]
             if (epData.url.includes('workers.dev') || epData.url.includes('.mp4') || epData.url.includes('.mkv')) {
                 iframeEl.style.display = 'none';
                 plyrEl.style.display = 'block';
@@ -216,6 +227,7 @@
                 iframeEl.src = epData.url;
             }
 
+            // Update Views[cite: 4]
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             const epViewKey = `${currentSeason}_E${currentEpNum}`;
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
@@ -223,19 +235,21 @@
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
+            // Trending & Comments[cite: 4]
             updateTrendingToday(currentAnimeId, epViewKey);
             listenToComments(animeKey, epViewKey);
 
-            // UPDATED: Ab ye hamesha download.html par redirect karega[cite: 4]
+            // Updated Download Button Logic[cite: 4]
             document.getElementById('dl-button').onclick = () => {
-                const seasonNum = currentSeason.replace('S','');
-                window.location.href = `download.html?id=${currentAnimeId}_s${seasonNum}_e${currentEpNum}`;
+                const sNum = currentSeason.replace('S', '');
+                window.location.href = `download.html?id=${currentAnimeId}_s${sNum}_e${currentEpNum}`;
             };
 
+            // Update URL[cite: 4]
             const newUrl = `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`;
             window.history.pushState({}, '', newUrl);
         }
-        
+
         async function loadAnimeRecommendations() {
             const recGrid = document.getElementById('recommendation-grid');
             db.ref("animeverse_links").limitToLast(12).once('value', snapshot => {
