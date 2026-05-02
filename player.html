@@ -1,5 +1,3 @@
-</body>
-</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,6 +85,7 @@
 
     <div class="flex gap-2 px-[15px] mb-6">
         <button class="nav-btn" onclick="smartChange(-1)">Prev</button>
+        <!-- Updated Download Button -->
         <button id="dl-button" class="nav-btn btn-dl">Download Ep</button>
         <button class="nav-btn" onclick="smartChange(1)">Next</button>
     </div>
@@ -108,8 +107,7 @@
     </div>
     <div class="px-4 mb-10">
     <h3 class="text-[12px] font-black uppercase tracking-[2px] text-orange-500 mb-4">Watch This Also</h3>
-    <div id="recommendation-grid" class="grid grid-cols-3 gap-3">
-        </div>
+    <div id="recommendation-grid" class="grid grid-cols-3 gap-3"></div>
 </div>
 
     <footer class="footer-main text-center">
@@ -122,7 +120,6 @@
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
-        // --- FIREBASE INITIALIZATION ---
         const firebaseConfig = { 
             apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
             databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
@@ -151,7 +148,6 @@
 
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
 
-            // 1. Fetch TMDB/Kitsu Details
             db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
                 const data = snapshot.val();
                 if(data && data.desc) {
@@ -161,7 +157,6 @@
                 }
             });
 
-            // 2. Fetch Episodes from Firebase (animeverse_links)
             db.ref(`animeverse_links/${currentAnimeId}`).on('value', snapshot => {
                 animeEpisodes = snapshot.val();
                 if(animeEpisodes) {
@@ -211,7 +206,6 @@
             const plyrEl = document.getElementById('plyr-player');
             const iframeEl = document.getElementById('main-player');
 
-            // Player Logic
             if (epData.url.includes('workers.dev') || epData.url.includes('.mp4') || epData.url.includes('.mkv')) {
                 iframeEl.style.display = 'none';
                 plyrEl.style.display = 'block';
@@ -222,7 +216,6 @@
                 iframeEl.src = epData.url;
             }
 
-            // Update Views
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             const epViewKey = `${currentSeason}_E${currentEpNum}`;
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
@@ -230,67 +223,51 @@
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            // Trending & Comments
             updateTrendingToday(currentAnimeId, epViewKey);
             listenToComments(animeKey, epViewKey);
 
-            // Download Button
+            // UPDATED: Ab ye hamesha download.html par redirect karega[cite: 4]
             document.getElementById('dl-button').onclick = () => {
-                if(epData.bot && epData.bot !== "#") {
-                    window.open(epData.bot.startsWith("http") ? epData.bot : `https://t.me/verse1_8bot?start=${epData.bot}`, '_blank');
-                } else {
-                    window.location.href = `download.html?id=${currentAnimeId}_s${currentSeason.replace('S','')}_e${currentEpNum}`;
-                }
+                const seasonNum = currentSeason.replace('S','');
+                window.location.href = `download.html?id=${currentAnimeId}_s${seasonNum}_e${currentEpNum}`;
             };
 
-            // Update URL without refresh
             const newUrl = `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`;
             window.history.pushState({}, '', newUrl);
         }
-
-        // --- TMDB FETCH (Same as your old code) ---
         
         async function loadAnimeRecommendations() {
-    const recGrid = document.getElementById('recommendation-grid');
-    
-    // Firebase se 'animeverse_links' uthana
-    db.ref("animeverse_links").limitToLast(12).once('value', snapshot => {
-        const allAnimes = snapshot.val();
-        if (!allAnimes) return;
-
-        const animeIds = Object.keys(allAnimes);
-        // Shuffle karke random 6 anime nikalna
-        const shuffled = animeIds.sort(() => 0.5 - Math.random()).slice(0, 6);
-
-        recGrid.innerHTML = shuffled.map(id => {
-            const displayName = id.replace(/-/g, ' ');
-            return `
-                <div class="relative overflow-hidden rounded-lg bg-[#1a1a1a] aspect-[2/3] cursor-pointer shadow-lg" onclick="window.location.href='?id=${id}'">
-                    <img src="${defaultLogo}" class="w-full h-full object-cover" id="rec-img-${id}">
-                    <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black to-transparent">
-                        <p class="text-[9px] font-bold text-white truncate uppercase">${displayName}</p>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // Har anime ke liye poster fetch karna
-        shuffled.forEach(id => fetchRecPoster(id));
-    });
-}
-
-async function fetchRecPoster(id) {
-    const cleanName = id.replace(/-/g, ' ');
-    try {
-        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
-        const data = await res.json();
-        if(data.results?.[0]?.poster_path) {
-            document.getElementById(`rec-img-${id}`).src = "https://image.tmdb.org/t/p/w342" + data.results[0].poster_path;
+            const recGrid = document.getElementById('recommendation-grid');
+            db.ref("animeverse_links").limitToLast(12).once('value', snapshot => {
+                const allAnimes = snapshot.val();
+                if (!allAnimes) return;
+                const animeIds = Object.keys(allAnimes);
+                const shuffled = animeIds.sort(() => 0.5 - Math.random()).slice(0, 6);
+                recGrid.innerHTML = shuffled.map(id => {
+                    const displayName = id.replace(/-/g, ' ');
+                    return `
+                        <div class="relative overflow-hidden rounded-lg bg-[#1a1a1a] aspect-[2/3] cursor-pointer shadow-lg" onclick="window.location.href='?id=${id}'">
+                            <img src="${defaultLogo}" class="w-full h-full object-cover" id="rec-img-${id}">
+                            <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black to-transparent">
+                                <p class="text-[9px] font-bold text-white truncate uppercase">${displayName}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                shuffled.forEach(id => fetchRecPoster(id));
+            });
         }
-    } catch(e) {
-        console.log("Poster error for:", id);
-    }
-}
+
+        async function fetchRecPoster(id) {
+            const cleanName = id.replace(/-/g, ' ');
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
+                const data = await res.json();
+                if(data.results?.[0]?.poster_path) {
+                    document.getElementById(`rec-img-${id}`).src = "https://image.tmdb.org/t/p/w342" + data.results[0].poster_path;
+                }
+            } catch(e) { console.log("Poster error for:", id); }
+        }
         
         async function fetchTMDBData(id) {
             const query = id.replace(/-/g, ' ');
@@ -350,16 +327,13 @@ async function fetchRecPoster(id) {
         }
 
         function changeSeason(s) { 
-            currentSeason = s; 
-            currentEpNum = 1; 
-            loadEpisodeData(); 
-            renderEpisodes();
+            currentSeason = s; currentEpNum = 1; 
+            loadEpisodeData(); renderEpisodes();
         }
 
         function changeEpisode(e) { 
             currentEpNum = e; 
-            loadEpisodeData(); 
-            renderEpisodes();
+            loadEpisodeData(); renderEpisodes();
         }
 
         function smartChange(dir) {
