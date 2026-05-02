@@ -104,11 +104,11 @@
         <button onclick="postComment()" class="comment-btn">Post Comment</button>
         <div id="comment-list" class="mt-6"></div>
     </div>
-
     <div class="px-4 mb-10">
-        <h3 class="text-[12px] font-black uppercase tracking-[2px] text-orange-500 mb-4">Watch This Also</h3>
-        <div id="recommendation-grid" class="grid grid-cols-3 gap-3"></div>
-    </div>
+    <h3 class="text-[12px] font-black uppercase tracking-[2px] text-orange-500 mb-4">Watch This Also</h3>
+    <div id="recommendation-grid" class="grid grid-cols-3 gap-3">
+        </div>
+</div>
 
     <footer class="footer-main text-center">
         <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
@@ -142,14 +142,14 @@
         async function init() {
             const params = new URLSearchParams(window.location.search);
             currentAnimeId = params.get('id');
-            currentSeason = params.get('s'); // Default empty to detect available season later[cite: 4]
+            currentSeason = params.get('s'); 
             currentEpNum = parseInt(params.get('ep') || 1);
 
             if(!currentAnimeId) return;
 
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
 
-            // 1. Fetch TMDB Details[cite: 4]
+            // 1. Fetch TMDB/Kitsu Details
             db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
                 const data = snapshot.val();
                 if(data && data.desc) {
@@ -159,13 +159,13 @@
                 }
             });
 
-            // 2. Fetch Episodes from Firebase[cite: 4]
+            // 2. Fetch Episodes from Firebase (animeverse_links)
             db.ref(`animeverse_links/${currentAnimeId}`).on('value', snapshot => {
                 animeEpisodes = snapshot.val();
                 if(animeEpisodes) {
                     const availableSeasons = Object.keys(animeEpisodes).sort();
                     
-                    // Auto-detection: Agar URL mein season nahi hai, to pehla available uthao[cite: 4]
+                    // FIXED: Auto-Detect First Season if not in URL or missing[cite: 5]
                     if (!currentSeason || !animeEpisodes[currentSeason]) {
                         currentSeason = availableSeasons[0];
                     }
@@ -216,7 +216,7 @@
             const plyrEl = document.getElementById('plyr-player');
             const iframeEl = document.getElementById('main-player');
 
-            // Player Logic[cite: 4]
+            // Player Logic
             if (epData.url.includes('workers.dev') || epData.url.includes('.mp4') || epData.url.includes('.mkv')) {
                 iframeEl.style.display = 'none';
                 plyrEl.style.display = 'block';
@@ -227,7 +227,7 @@
                 iframeEl.src = epData.url;
             }
 
-            // Update Views[cite: 4]
+            // Update Views
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             const epViewKey = `${currentSeason}_E${currentEpNum}`;
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
@@ -235,17 +235,21 @@
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            // Trending & Comments[cite: 4]
+            // Trending & Comments
             updateTrendingToday(currentAnimeId, epViewKey);
             listenToComments(animeKey, epViewKey);
 
-            // Updated Download Button Logic[cite: 4]
+            // Download Button Updated Logic[cite: 5]
             document.getElementById('dl-button').onclick = () => {
-                const sNum = currentSeason.replace('S', '');
-                window.location.href = `download.html?id=${currentAnimeId}_s${sNum}_e${currentEpNum}`;
+                if(epData.bot && epData.bot !== "#") {
+                    window.open(epData.bot.startsWith("http") ? epData.bot : `https://t.me/verse1_8bot?start=${epData.bot}`, '_blank');
+                } else {
+                    const sNum = currentSeason.replace('S', '');
+                    window.location.href = `download.html?id=${currentAnimeId}_s${sNum}_e${currentEpNum}`;
+                }
             };
 
-            // Update URL[cite: 4]
+            // Update URL without refresh
             const newUrl = `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`;
             window.history.pushState({}, '', newUrl);
         }
@@ -280,7 +284,9 @@
                 if(data.results?.[0]?.poster_path) {
                     document.getElementById(`rec-img-${id}`).src = "https://image.tmdb.org/t/p/w342" + data.results[0].poster_path;
                 }
-            } catch(e) { console.log("Poster error for:", id); }
+            } catch(e) {
+                console.log("Poster error for:", id);
+            }
         }
         
         async function fetchTMDBData(id) {
@@ -341,13 +347,16 @@
         }
 
         function changeSeason(s) { 
-            currentSeason = s; currentEpNum = 1; 
-            loadEpisodeData(); renderEpisodes();
+            currentSeason = s; 
+            currentEpNum = 1; 
+            loadEpisodeData(); 
+            renderEpisodes();
         }
 
         function changeEpisode(e) { 
             currentEpNum = e; 
-            loadEpisodeData(); renderEpisodes();
+            loadEpisodeData(); 
+            renderEpisodes();
         }
 
         function smartChange(dir) {
