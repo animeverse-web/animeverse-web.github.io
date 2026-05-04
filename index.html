@@ -1,447 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-6XVHNP2C9G');
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AnimeVerse | Premium Watchlist Build</title>
     
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1" name="viewport"/>
-    <meta name="google-adsense-account" content="ca-pub-8123448291547296">
-
-    <title>Animeverse | Premium HD Hindi Dubbed Anime</title>
-    <meta name="description" content="Animeverse par dekhiye premium Hindi dubbed anime series aur movies HD quality mein. Latest episodes, trending movies, aur fast streaming ka maza lein bilkul free.">
-    
-    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
-    <link rel="apple-touch-icon" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
-    
-    <meta property="og:image" content="https://animeverse-web.github.io/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
-    <meta name="twitter:image" content="https://animeverse-web.github.io/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "url": "https://animeverse-web.github.io/",
-      "logo": "https://animeverse-web.github.io/Gemini_Generated_Image_u4n26yu4n26yu4n2.png",
-      "name": "Animeverse"
-    }
-    </script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=Quicksand:wght@300;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary-color: #f47e21; --secondary-color: #ff0000; --accent-glow: 0 0 15px rgba(244, 126, 33, 0.4); }
-        body { font-family: 'Poppins', sans-serif; background: #000 url('./IMG_20250528_184959.jpg') no-repeat center center fixed; background-size: cover; color: #fff; margin: 0; padding: 0; padding-top: 85px; overflow-x: hidden; scroll-behavior: smooth; }
-
-        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(0, 0, 0, 0.95); border-bottom: 2px solid var(--primary-color); position: fixed; top: 0; left: 0; width: 100%; z-index: 2000; box-sizing: border-box; }
-        .logo-container img { height: 40px; border-radius: 8px; filter: drop-shadow(var(--accent-glow)); }
-        .menu-btn, .search-trigger { font-size: 1.6rem; cursor: pointer; color: #fff; background: none; border: none; outline: none; transition: 0.3s; }
-
-        #sideNav { position: fixed; left: 0; top: 0; width: 260px; height: 100%; background: #0a0a0a; z-index: 3000; padding: 30px 20px; transform: translateX(-100%); transition: 0.4s; box-sizing: border-box; }
-        #sideNav.open { transform: translateX(0); box-shadow: 10px 0 50px #000; }
-        #sideNav a { display: block; color: #eee; padding: 12px; text-decoration: none; font-size: 15px; border-radius: 8px; margin-bottom: 5px; }
-        #sideNav a:hover { background: var(--primary-color); color: white; }
-        .close-btn { text-align: right; font-size: 1.5rem; cursor: pointer; color: var(--primary-color); margin-bottom: 20px; }
-
-        .search-section { position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-20px); width: 100%; max-width: 600px; z-index: 1500; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 0 15px; box-sizing: border-box; }
-        .search-section.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); max-height: 120px; padding: 15px 15px; }
-        .search-box { display: flex; background: #111; border: 2px solid var(--primary-color); border-radius: 30px; overflow: hidden; box-shadow: 0 0 15px rgba(244, 126, 33, 0.5); }
-        .search-box input { flex: 1; background: transparent; border: none; color: #fff; padding: 12px 40px 12px 20px; outline: none; font-size: 14px; width: 100%; }
-        .go-btn { background: var(--primary-color); border: none; color: white; padding: 0 20px; font-weight: 800; cursor: pointer; }
-
-        #suggestions { position: absolute; top: 100%; left: 15px; right: 15px; background: rgba(15, 15, 15, 0.98); backdrop-filter: blur(10px); border-radius: 15px; border: 1px solid var(--primary-color); max-height: 250px; overflow-y: auto; display: none; margin-top: 10px; z-index: 9999; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-        #suggestions div { padding: 14px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; color: #eee; transition: 0.2s; }
-        #suggestions div:hover { background: var(--primary-color); color: white; padding-left: 25px; }
-
-        #newlyContainer { display: flex; gap: 12px; overflow-x: auto; padding: 10px 5px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-        #newlyContainer::-webkit-scrollbar { display: none; }
+        :root { --app-bg: #0f1014; --accent: #ff4757; --surface: #1e1f26; }
+        body { background-color: var(--app-bg); color: #ffffff; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         
-        .ep-card { flex: 0 0 calc(55% - 10px); scroll-snap-align: start; background: rgba(15,15,15,0.95); border-radius: 10px; overflow: hidden; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); position: relative; transition: 0.3s; }
-        .ep-card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
-        .ep-badge { position: absolute; top: 8px; left: 8px; background: var(--primary-color); font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 900; z-index: 10; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-        .ep-title { padding: 8px 5px; font-size: 0.8rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .app-header { background: rgba(15, 16, 20, 0.95); backdrop-filter: blur(25px); z-index: 2000; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .bottom-nav { background: rgba(30, 31, 38, 0.98); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.08); height: 85px; padding-bottom: env(safe-area-inset-bottom); }
 
-        .hero { padding: 15px; width: 100%; box-sizing: border-box; }
-        .hero-card { background: #111; background-size: cover; background-position: center; height: 170px; border-radius: 12px; border: 1px solid var(--primary-color); display: flex; align-items: center; padding: 15px 20px; position: relative; overflow: hidden; }
-        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.95) 45%, transparent); z-index: 1; }
-        .hero-content { position: relative; z-index: 2; width: 100%; }
-        .hero-tag { background: var(--secondary-color); padding: 2px 8px; border-radius: 4px; font-size: 8px; font-weight: 800; text-transform: uppercase; }
-        .hero-card h1 { margin: 4px 0; font-size: 1.1rem; font-weight: 800; text-transform: uppercase; line-height: 1.2; } 
-        .hero-card p { font-size: 9.5px; color: #bbb; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; max-width: 65%; }
-        .hero-btn { display: inline-block; background: var(--primary-color); color: #fff; padding: 7px 16px; border-radius: 20px; text-decoration: none; font-weight: bold; margin-top: 10px; font-size: 9px; }
-
-        .container { padding: 10px; max-width: 1100px; margin: 0 auto; }
-        h2 { border-left: 4px solid var(--primary-color); padding-left: 10px; margin: 25px 0 15px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
-        .anime-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr); }
-        @media (min-width: 768px) { .anime-grid { grid-template-columns: repeat(6, 1fr); } }
-
-        .anime-card { background: rgba(15,15,15,0.95); border-radius: 8px; overflow: hidden; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); position: relative; transition: transform 0.2s, box-shadow 0.2s; -webkit-tap-highlight-color: transparent; }
-        .badge-hd { position: absolute; top: 5px; left: 5px; background: var(--primary-color); font-size: 8px; padding: 2px 6px; border-radius: 3px; font-weight: bold; z-index: 5; }
-        .card-info { position: absolute; bottom: 35px; left: 0; right: 0; background: rgba(0,0,0,0.8); font-size: 8px; padding: 4px; text-align: center; color: var(--primary-color); font-weight: bold; }
-        .anime-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-        .anime-title { padding: 6px 4px; font-size: 0.7rem; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        .skeleton { background: #1a1a1a; background: linear-gradient(90deg, #1a1a1a 25%, #222 50%, #1a1a1a 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 8px; }
+        /* Animations */
+        .skeleton { background: linear-gradient(90deg, #1e1f26 25%, #2a2b35 50%, #1e1f26 75%); background-size: 200% 100%; animation: skeleton-loading 1.6s infinite linear; }
         @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .skeleton-card { width: 100%; aspect-ratio: 2/3; margin-bottom: 10px; }
-        
-        .disclaimer-box { background: rgba(255, 123, 0, 0.05); border: 1px dashed rgba(255, 123, 0, 0.3); margin: 20px 15px; padding: 15px; border-radius: 15px; text-align: center; }
-        .disclaimer-title { font-size: 10px; font-weight: 900; color: #FF7B00; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-        .disclaimer-text { font-size: 10px; color: #666; line-height: 1.4; font-weight: 500; }
 
-        footer { background: #000; padding: 40px 20px 100px; text-align: center; border-top: 1px solid #1a1a1a; margin-top: 40px; }
-        .bottom-actions { position: fixed; bottom: 0; width: 100%; display: flex; gap: 8px; padding: 10px; background: rgba(0,0,0,0.95); z-index: 1001; box-sizing: border-box; }
-        .btn-action { flex: 1; padding: 13px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: bold; color: #fff; font-size: 0.75rem; }
+        /* BOLD SEARCH BAR */
+        #search-box { position: fixed; top: 85px; left: 0; width: 100%; z-index: 2500; padding: 0 15px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .search-input-wrapper { background: #1e1f26; border: 2px solid rgba(255, 255, 255, 0.05); border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); display: flex; align-items: center; overflow: hidden; }
+        .search-input-wrapper:focus-within { border-color: var(--accent); }
+        #searchInput { width: 100%; background: transparent; padding: 22px 25px; font-size: 16px; font-weight: 600; outline: none; color: white; }
+        #search-suggestions { background: #1e1f26; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 30px; margin-top: 15px; max-height: 480px; overflow-y: auto; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9); }
 
-        #comingSoonModal { display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items:center; justify-content:center; padding: 15px; }
-       
+        /* Watchlist Dotted Slots */
+        .dotted-slot { 
+            width: 62px; 
+            height: 62px; 
+            border: 2px dashed rgba(255, 255, 255, 0.15); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .anime-poster { aspect-ratio: 2/3; border-radius: 26px; object-fit: cover; }
+        .rating-chip { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15); }
+        .featured-gradient { background: linear-gradient(to top, #0f1014 10%, rgba(15,16,20,0.5) 50%, transparent 100%); }
+        .active-scale:active { transform: scale(0.94); }
+        body.modal-open { overflow: hidden; }
     </style>
 </head>
-<body>
+<body class="pb-32">
 
-<header>
-    <button class="menu-btn" onclick="document.getElementById('sideNav').classList.add('open')">☰</button>
-    <div class="logo-container"><img src="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png" alt="Animeverse Logo"></div>
-    <button class="search-trigger" onclick="toggleSearch()">🔍</button>
-</header>
-
-<nav id="sideNav">
-    <div class="close-btn" onclick="document.getElementById('sideNav').classList.remove('open')">✕</div>
-    <a href="./index.html">🏠 Home</a>
-    <a href="#" onclick="showComingSoon(); return false;">⚔️ Adventure</a>
-    <a href="#" onclick="showComingSoon(); return false;">🥊 Action</a>
-    <a href="./about us.html">ℹ️ About Us</a>
-    <a href="./contact us.html">📞 Contact Us</a>
-    <a href="schedule.html">📅 Schedule</a>
-</nav>
-
-<div class="search-section" id="searchContainer">
-    <div class="search-box">
-        <div style="position: relative; flex: 1; display: flex; align-items: center;">
-            <input type="text" id="searchInput" placeholder="Search anime..." autocomplete="off">
-            <span id="clearSearchBtn" style="display: none; position: absolute; right: 12px; cursor: pointer; color: #f47e21; font-size: 20px; font-weight: bold; user-select: none;">&times;</span>
+    <!-- Header -->
+    <header class="app-header fixed top-0 w-full px-6 py-4 flex justify-between items-center shadow-2xl">
+        <div class="flex flex-col">
+            <h1 class="text-2xl font-black tracking-tighter uppercase leading-tight">Anime<span class="text-[#ff4757]">Verse</span></h1>
+            <p class="text-[8px] font-bold text-gray-500 tracking-[0.2em] uppercase">Premium Streaming</p>
         </div>
-        <button class="go-btn" onclick="triggerSearch()">GO</button>
-    </div>
-    <div id="suggestions"></div>
-</div>
-
-<div class="hero" id="heroSection">
-    <div class="hero-card" id="heroCard">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <span class="hero-tag">🔥 Trending Globally</span>
-            <h1 id="heroTitle">Solo Leveling</h1>
-            <p id="heroDesc">Loading...</p>
-            <a href="#" id="heroBtn" class="hero-btn">WATCH HD</a>
+        <div class="flex gap-4 items-center">
+            <button onclick="toggleSearch()" class="bg-white/5 w-11 h-11 rounded-full flex items-center justify-center border border-white/10 active-scale">
+                <i class="fas fa-search text-gray-300"></i>
+            </button>
+            <div class="w-11 h-11 rounded-full border-2 border-[#ff4757] p-0.5 shadow-lg">
+                <img src="https://ui-avatars.com/api/?name=AV&background=ff4757&color=fff" class="rounded-full w-full h-full">
+            </div>
         </div>
-    </div>
-</div>
+    </header>
 
-<div class="container">
-    <section id="newlySection" style="display:none;">
-        <h2 style="color: #00d2ff; border-left-color: #00d2ff;">✨ Newly Episode Added</h2>
-        <div id="newlyContainer"></div>
-    </section>
-      <div id="today-section" style="display:none;" class="p-5">
-    <h2 class="text-[#FF7B00] font-black italic uppercase mb-4">🔥 Added Today</h2>
-    <div id="today-list" class="grid grid-cols-3 gap-4">
+    <!-- Search System -->
+    <div id="search-box" class="hidden opacity-0 transform -translate-y-6">
+        <div class="search-input-wrapper">
+            <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search anime..." autocomplete="off">
+            <div class="pr-6 flex items-center">
+                <i class="fas fa-times-circle text-gray-500 text-2xl cursor-pointer hover:text-[#ff4757]" onclick="toggleSearch()"></i>
+            </div>
         </div>
-</div>
-
-    <section id="latestSection"><h2>Latest series</h2><div class="anime-grid" id="latestContainer"></div></section>
-    <section id="popularSection"><h2 id="popularHeading">Popular Anime</h2><div class="anime-grid" id="popularContainer"></div></section>
-    <section id="trendingSection"><h2>Trending Anime</h2><div class="anime-grid" id="trendingContainer"></div></section>
-    <section id="movieSection"><h2>Movies</h2><div class="anime-grid" id="movieContainer"></div></section>
-</div>
-
-<div id="comingSoonModal">
-    <div style="background:#111; border:2px solid var(--primary-color); padding:30px; border-radius:20px; text-align:center;">
-        <h2 style="color:var(--primary-color); border:none;">COMING SOON</h2>
-        <p style="color:#eee;"> Hindi Dubbed episodes shortly!</p>
-        <button onclick="closeModal()" class="hero-btn">CLOSE</button>
+        <div id="search-suggestions" class="hidden no-scrollbar"></div>
     </div>
-</div>
 
-<footer>
-    <div style="font-size: 2rem; font-weight: 800; color: var(--primary-color); letter-spacing: 4px;">ANIMEVERSE</div>
-    <p style="font-size: 10px; color: #444;">&copy; | 2026 ANIMEVERSE |</p>
-    <div class="disclaimer-box">
-        <p class="disclaimer-text">AnimeVerse does not store any files. All contents are provided by non-affiliated third parties.</p>
-    </div>
-</footer>
+    <!-- Main Content -->
+    <main class="mt-28 px-5 space-y-12">
+        <div id="skeleton-loader" class="space-y-12">
+            <div class="flex gap-4"><div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div><div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div></div>
+            <div class="h-72 w-full rounded-[40px] skeleton"></div>
+        </div>
 
-<div class="bottom-actions">
-    <a href="https://youtube.com/@animia-g6q" class="btn-action" style="background:#ff0000;">YOUTUBE</a>
-    <a href="https://t.me/animeverse648" class="btn-action" style="background:#0088cc;">TELEGRAM</a>
-</div>
-<script>
-// --- 1. CONFIGURATION & INITIALIZATION ---
-const firebaseConfig = { 
-    apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
-    databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
-    projectId: "animeverse-9eada", 
-    appId: "1:296666771306:web:df732df90b1e5e9108ff13" 
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const TMDB_API_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
-
-let animeData = [];
-window.allTitles = [];
-
-// --- 2. SEARCH LOGIC (BINA KUCH HATAYE) ---
-const searchInput = document.getElementById('searchInput');
-const suggestionsBox = document.getElementById('suggestions');
-const clearBtn = document.getElementById('clearSearchBtn');
-
-function toggleSearch() { 
-    const container = document.getElementById('searchContainer');
-    container.classList.toggle('active'); 
-    if(container.classList.contains('active')) searchInput.focus();
-}
-
-function clearSearch() {
-    searchInput.value = '';
-    if(clearBtn) clearBtn.style.display = 'none';
-    suggestionsBox.style.display = 'none';
-    ['heroSection', 'newlySection', 'today-section', 'latestSection', 'popularSection', 'trendingSection', 'movieSection'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.style.display = 'block';
-    });
-    const heading = document.getElementById('popularHeading');
-    if(heading) heading.innerText = "Popular Anime";
-    renderGrids(); 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-if(clearBtn) clearBtn.onclick = clearSearch;
-
-searchInput.addEventListener('input', () => {
-    const value = searchInput.value.trim();
-    if(clearBtn) clearBtn.style.display = value.length > 0 ? 'block' : 'none';
-    suggestionsBox.innerHTML = '';
-    if (value.length > 0) {
-        const matches = window.allTitles.filter(t => t.toLowerCase().includes(value.toLowerCase())).slice(0, 8);
-        if (matches.length > 0) {
-            suggestionsBox.style.display = 'block';
-            matches.forEach(match => {
-                const div = document.createElement('div');
-                div.innerText = match;
-                div.onclick = () => {
-                    searchInput.value = match;
-                    suggestionsBox.style.display = 'none';
-                    triggerSearch();
-                };
-                suggestionsBox.appendChild(div);
-            });
-        } else { suggestionsBox.style.display = 'none'; }
-    } else { suggestionsBox.style.display = 'none'; }
-});
-
-async function triggerSearch() {
-    const term = searchInput.value.trim();
-    if(!term) return;
-    ['heroSection', 'newlySection', 'today-section', 'latestSection', 'trendingSection', 'movieSection'].forEach(id => {
-        const el = document.getElementById(id); if(el) el.style.display = 'none';
-    });
-    const container = document.getElementById('popularContainer');
-    const heading = document.getElementById('popularHeading');
-    const matches = animeData.filter(a => a.title.toLowerCase().includes(term.toLowerCase()));
-
-    if(matches.length > 0) {
-        heading.innerText = `Results for "${term}"`;
-        container.innerHTML = '<div class="loading-text">Searching AnimeVerse...</div>';
-        const resultsFragment = document.createDocumentFragment();
-        for(const a of matches) { resultsFragment.appendChild(createCard(a)); }
-        container.innerHTML = ''; 
-        container.appendChild(resultsFragment); 
-    } else {
-        alert("Anime nahi mila!");
-        clearSearch();
-    }
-}
-
-// --- 3. API CONNECTORS ---
-async function fetchTMDB(title) {
-    try {
-        const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`);
-        const data = await res.json();
-        if (data.results?.[0]) {
-            const a = data.results[0];
-            return { 
-                poster: 'https://image.tmdb.org/t/p/w500' + (a.poster_path || a.backdrop_path), 
-                rating: a.vote_average?.toFixed(1) || '8.5',
-                banner: 'https://image.tmdb.org/t/p/original' + (a.backdrop_path || a.poster_path)
-            };
-        }
-    } catch (e) { return null; }
-}
-
-// --- 4. DATA LOADING & POSTER FIX ---
-function initApp() {
-    // 1. All Anime Data Fix
-    db.ref('all_anime').on('value', async (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-        
-        animeData = [];
-        window.allTitles = [];
-        
-        // Loop through Firebase keys
-        for (const key in data) {
-            const item = data[key];
-            const title = key; // Firebase ki key hi anime ka naam hai
+        <div id="real-content" class="hidden space-y-12">
             
-            // Agar poster link database mein nahi hai, toh TMDB se fetch karega
-            let poster = item.image || item.poster;
-            let rating = item.rating || "8.5";
-            
-            if (!poster || poster.includes("placeholder")) {
-                const apiData = await fetchTMDB(title);
-                if (apiData) {
-                    poster = apiData.poster;
-                    rating = apiData.rating;
-                }
-            }
-
-            animeData.push({
-                title: title,
-                category: item.category || 'latest',
-                poster: poster || 'https://via.placeholder.com/500x750',
-                rating: rating
-            });
-            window.allTitles.push(title);
-        }
-        
-        renderGrids();
-        loadHero();
-    });
-
-    // 2. Newly Added logic
-    db.ref('newly_added_section').on('value', (snap) => {
-        const container = document.getElementById('newlyContainer');
-        const section = document.getElementById('newlySection');
-        if (!snap.exists()) { section.style.display = 'none'; return; }
-        section.style.display = 'block';
-        container.innerHTML = '';
-        Object.values(snap.val()).reverse().forEach(item => {
-            const card = document.createElement('a');
-            card.className = 'ep-card';
-            const slug = item.slug || item.name.toLowerCase().replace(/ /g, '-').replace(/[:']/g, '');
-            card.href = `player.html?id=${slug}&s=S1&ep=${item.ep}`;
-            card.innerHTML = `<div class="ep-badge">EP ${item.ep}</div><img src="${item.image || 'https://via.placeholder.com/500x281'}"><div class="ep-title">${item.name}</div>`;
-            container.appendChild(card);
-        });
-    });
-
-    loadAddedToday();
-}
-
-async function renderGrids() {
-    const containers = {
-        'latest': document.getElementById('latestContainer'),
-        'movie': document.getElementById('movieContainer'),
-        'movies': document.getElementById('movieContainer'),
-        'completed': document.getElementById('popularContainer'),
-        'popular': document.getElementById('popularContainer'),
-        'trending': document.getElementById('trendingContainer')
-    };
-
-    // Containers ko saaf karein
-    Object.values(containers).forEach(c => { if(c) c.innerHTML = ''; });
-
-    animeData.forEach(a => {
-        // --- SUGGESTION CATEGORY FILTER ---
-        if (a.category === 'suggestion') return;
-
-        const card = createCard(a);
-        const target = containers[a.category];
-        if (target) {
-            target.appendChild(card);
-        } else if (containers['latest']) {
-            containers['latest'].appendChild(card);
-        }
-    });
-}
-
-function createCard(anime) {
-    const card = document.createElement('a');
-    card.className = 'anime-card';
-    // Slug generation fix
-    const slug = anime.title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, '');
-    card.href = `player.html?id=${slug}`;
-    card.innerHTML = `
-        <span class="badge-hd">HD | HINDI</span>
-        <img src="${anime.poster}" loading="lazy" onerror="this.src='https://via.placeholder.com/500x750'">
-        <div class="card-info">⭐ ${anime.rating} Rating</div>
-        <div class="anime-title">${anime.title}</div>`;
-    card.onclick = () => {
-        db.ref('global_clicks/' + anime.title.replace(/[.#$[\]]/g, "_")).transaction(c => (c || 0) + 1);
-    };
-    return card;
-}
-
-// Baaki functions (loadHero, loadAddedToday) waisa hi rahega...
-async function loadAddedToday() {
-    const today = new Date().toISOString().split('T')[0]; 
-    db.ref(`added_today/${today}`).on('value', async snapshot => {
-        const data = snapshot.val();
-        const section = document.getElementById('today-section');
-        const list = document.getElementById('today-list');
-        if (data && list) {
-            section.style.display = 'block';
-            list.innerHTML = "";
-            list.style.cssText = "display: flex; overflow-x: auto; gap: 12px; padding: 10px 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch;";
-            const grouped = {};
-            Object.keys(data).forEach(id => {
-                const item = data[id];
-                if(!grouped[id]) grouped[id] = { id: id, s: item.s, max: item.e };
-                else if(parseInt(item.e) > parseInt(grouped[id].max)) grouped[id].max = item.e;
-            });
-            for (const id in grouped) {
-                const item = grouped[id];
-                const animeName = item.id.replace(/-/g, ' ');
-                const localAnime = animeData.find(a => a.title.toLowerCase() === animeName.toLowerCase());
-                const apiData = await fetchTMDB(animeName);
-                const img = apiData ? apiData.poster : (localAnime ? localAnime.poster : 'https://via.placeholder.com/140x85');
-                const rate = apiData ? apiData.rating : '8.5';
-                list.innerHTML += `
-                    <div style="min-width: 140px; width: 140px; flex-shrink: 0; cursor:pointer;" onclick="window.location.href='player.html?id=${item.id}&s=S${item.s}&ep=${item.max}'">
-                        <div style="background: rgba(20,20,20,0.95); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative; height: 135px;">
-                            <div style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #f47e21; font-size: 8px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 10;">⭐ ${rate}</div>
-                            <div style="width: 100%; height: 85px; overflow: hidden;"><img src="${img}" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                            <div style="position: absolute; top: 65px; left: 5px; background: #ff7b00; color: #fff; font-size: 7px; padding: 2px 6px; border-radius: 4px; font-weight: 900;">S${item.s} EP ${item.max}</div>
-                            <div style="padding: 25px 5px 5px; text-align: center;"><div style="font-size: 9px; font-weight: 600; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase;">${animeName}</div></div>
+            <!-- WATCHLIST STORIES WITH DOTTED CIRCLES -->
+            <section class="flex gap-4 overflow-x-auto no-scrollbar py-2">
+                <div id="stories-container" class="flex gap-5 items-center">
+                    <!-- ADD BUTTON -->
+                    <div class="flex-shrink-0 text-center space-y-2 cursor-pointer active-scale" onclick="toggleSearch()">
+                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[#ff4757] to-[#ff6b81] flex items-center justify-center border-2 border-white/10 shadow-lg">
+                            <i class="fas fa-plus text-white text-xl"></i>
                         </div>
+                        <p class="text-[9px] text-gray-500 font-black uppercase tracking-widest">My List</p>
+                    </div>
+                    
+                    <!-- REAL ITEMS & DOTTED CIRCLES -->
+                    <div id="watchlist-items" class="flex gap-5">
+                        <!-- Dynamic content via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Banner -->
+            <section class="relative h-72 rounded-[40px] overflow-hidden shadow-2xl border border-white/5 group" onclick="if(featuredData) openInfoModal(featuredData.title, featuredData.slug, featuredData.banner || featuredData.poster, featuredData.rating)">
+                <img id="featured-img" class="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110">
+                <div class="absolute inset-0 featured-gradient p-8 flex flex-col justify-end">
+                    <div class="flex gap-3 items-center mb-4">
+                        <span class="text-[10px] font-black bg-[#ff4757] px-3 py-1.5 rounded-lg tracking-widest uppercase">Featured Today</span>
+                        <span id="featured-rating" class="rating-chip text-[11px] px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-white"></span>
+                    </div>
+                    <h2 id="featured-title" class="text-3xl font-black mb-6 drop-shadow-2xl line-clamp-2 leading-tight"></h2>
+                    <button class="w-max bg-white text-black px-8 py-3.5 rounded-2xl text-[11px] font-black flex items-center gap-2 shadow-xl active-scale">
+                        <i class="fas fa-play"></i> WATCH NOW
+                    </button>
+                </div>
+            </section>
+
+            <!-- Grid Content -->
+            <section><h3 class="text-xl font-black mb-6 flex items-center gap-3"><span class="w-1.5 h-7 bg-[#ff4757] rounded-full"></span> For You</h3><div id="auto-scroll-container" class="flex overflow-x-auto no-scrollbar gap-5 w-full py-2"></div></section>
+            <section><h3 class="text-xl font-black mb-6 px-1">Must Watch Series</h3><div id="series-grid" class="grid grid-cols-3 gap-4"></div></section>
+            <section class="pb-16"><h3 class="text-xl font-black mb-6 px-1">Latest Movies</h3><div id="movies-grid" class="grid grid-cols-2 gap-3"></div></section>
+        </div>
+    </main>
+
+    <!-- INFO MODAL -->
+    <div id="info-modal" class="fixed inset-0 z-[5000] hidden items-end justify-center px-4 pb-10 transition-opacity duration-300 opacity-0">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="closeInfoModal()"></div>
+        <div id="modal-content" class="relative w-full max-w-lg bg-[#1e1f26] rounded-[40px] overflow-hidden shadow-2xl border border-white/10 transform translate-y-full transition-transform duration-500">
+            <div class="relative h-60">
+                <img id="modal-banner" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#1e1f26] via-transparent to-transparent"></div>
+                <button onclick="closeInfoModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 backdrop-blur-xl flex items-center justify-center border border-white/10 text-white active-scale"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="px-8 pb-12 -mt-12 relative">
+                <h2 id="modal-title" class="text-3xl font-black leading-tight mb-4 uppercase tracking-tighter"></h2>
+                <div class="flex gap-3 mb-6">
+                    <span id="modal-rating" class="bg-[#ff4757] text-white text-[11px] font-black px-3 py-1 rounded shadow-lg"></span>
+                    <span id="modal-status" class="bg-white/5 text-gray-400 text-[11px] font-bold px-3 py-1 rounded border border-white/5"></span>
+                </div>
+                <p id="modal-desc" class="text-gray-400 text-[13px] leading-relaxed mb-8 line-clamp-4 font-medium"></p>
+                <div class="flex gap-4">
+                    <button id="modal-play-btn" class="flex-1 bg-white text-black py-4 rounded-2xl font-black text-[12px] flex items-center justify-center gap-3 shadow-xl active-scale"><i class="fas fa-play text-[#ff4757]"></i> PLAY</button>
+                    <button id="modal-fav-btn" class="w-14 h-14 rounded-2xl bg-[#ff4757]/10 border border-[#ff4757]/30 flex items-center justify-center text-xl text-[#ff4757] active-scale"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav fixed bottom-0 w-full flex justify-between items-center px-12 z-[3000]">
+        <a href="index.html" class="flex flex-col items-center gap-2 text-[#ff4757]"><i class="fas fa-th-large text-2xl"></i><span class="text-[9px] font-black uppercase">Browse</span></a>
+        <a href="#" class="flex flex-col items-center gap-2 text-gray-500"><i class="fas fa-heart text-2xl"></i><span class="text-[9px] font-black uppercase">List</span></a>
+        <a href="https://t.me/animeverse648" class="flex flex-col items-center gap-2 text-gray-500"><i class="fab fa-telegram-plane text-2xl"></i><span class="text-[9px] font-black uppercase">Join</span></a>
+    </nav>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", projectId: "animeverse-9eada", appId: "1:296666771306:web:df732df90b1e5e9108ff13" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const TMDB_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
+
+        let allAnimeData = [];
+        let featuredData = null;
+
+        async function fetchMeta(title) {
+            const cleanTitle = encodeURIComponent(title);
+            try {
+                const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${cleanTitle}`);
+                const tmdbData = await tmdbRes.json();
+                if (tmdbData.results?.[0]?.poster_path) return { p: 'https://image.tmdb.org/t/p/w500' + tmdbData.results[0].poster_path, b: 'https://image.tmdb.org/t/p/original' + (tmdbData.results[0].backdrop_path || tmdbData.results[0].poster_path), r: tmdbData.results[0].vote_average ? tmdbData.results[0].vote_average.toFixed(1) : '8.0' };
+                
+                const jikanRes = await fetch(`https://api.jikan.moe/v4/anime?q=${cleanTitle}&limit=1`);
+                const jikanData = await jikanRes.json();
+                if (jikanData.data?.[0]?.images?.jpg?.large_image_url) return { p: jikanData.data[0].images.jpg.large_image_url, b: jikanData.data[0].images.jpg.large_image_url, r: jikanData.data[0].score ? jikanData.data[0].score.toFixed(1) : '7.8' };
+            } catch (e) { console.error(e); }
+            return { p: 'https://via.placeholder.com/500x750', b: 'https://via.placeholder.com/1000x500', r: '7.0' };
+        }
+
+        function initApp() {
+            db.ref('all_anime').on('value', async (snap) => {
+                const data = snap.val(); if (!data) return;
+                const titles = Object.keys(data);
+                allAnimeData = await Promise.all(titles.map(async (title) => {
+                    const meta = await fetchMeta(title);
+                    return { title, item: data[title], slug: title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, ''), poster: meta.p, banner: meta.b, rating: meta.r };
+                }));
+
+                featuredData = allAnimeData[Math.floor(Math.random() * allAnimeData.length)];
+                document.getElementById('featured-img').src = featuredData.banner || featuredData.poster;
+                document.getElementById('featured-title').innerText = featuredData.title;
+                document.getElementById('featured-rating').innerHTML = `<i class="fas fa-star text-white"></i> ${featuredData.rating}`;
+
+                document.getElementById('skeleton-loader').classList.add('hidden');
+                document.getElementById('real-content').classList.remove('hidden');
+                renderUI();
+            });
+        }
+
+        function renderUI() {
+            const series = document.getElementById('series-grid'), movies = document.getElementById('movies-grid'), carousel = document.getElementById('auto-scroll-container'), watchlistArea = document.getElementById('watchlist-items');
+            series.innerHTML = ''; movies.innerHTML = ''; carousel.innerHTML = ''; watchlistArea.innerHTML = '';
+            
+            const watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]');
+
+            // --- RENDER WATCHLIST ITEMS + DOTTED CIRCLES ---
+            watchlist.forEach(t => {
+                const a = allAnimeData.find(i => i.title === t);
+                if(a) {
+                    watchlistArea.innerHTML += `
+                        <div class="flex-shrink-0 text-center space-y-2 cursor-pointer active-scale" onclick="openInfoModal('${a.title.replace(/'/g, "\\'")}', '${a.slug}', '${a.banner || a.poster}', '${a.rating}')">
+                            <div class="w-16 h-16 rounded-full border-2 border-[#ff4757] p-0.5 shadow-xl"><img src="${a.poster}" class="w-full h-full rounded-full object-cover"></div>
+                            <p class="text-[9px] w-16 truncate text-gray-400 font-bold">${t}</p>
+                        </div>`;
+                }
+            });
+
+            // Fill with 5 Dotted Circles if watchlist is small
+            const slotsToFill = Math.max(0, 5 - watchlist.length);
+            for(let i=0; i<slotsToFill; i++) {
+                watchlistArea.innerHTML += `
+                    <div class="flex-shrink-0 text-center space-y-2 opacity-40">
+                        <div class="dotted-slot"><i class="fas fa-plus text-gray-600 text-xs"></i></div>
+                        <p class="text-[8px] text-gray-700 font-black uppercase tracking-widest">Empty</p>
                     </div>`;
             }
-        } else if (section) { section.style.display = 'none'; }
-    });
-}
 
-async function loadHero() {
-    db.ref('global_clicks').orderByValue().limitToLast(1).once('value', async (snap) => {
-        let top = "Solo Leveling"; snap.forEach(c => top = c.key.replace(/_/g, ' '));
-        const details = await fetchTMDB(top);
-        const titleEl = document.getElementById('heroTitle');
-        const cardEl = document.getElementById('heroCard');
-        if(titleEl) titleEl.innerText = top.toUpperCase();
-        if(cardEl && details) {
-            cardEl.style.backgroundImage = `linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%), url('${details.banner}')`;
+            allAnimeData.forEach(({title, item, slug, poster, banner, rating}) => {
+                const isLiked = watchlist.includes(title), cat = item.category?.toLowerCase() || '';
+                const safeTitle = title.replace(/'/g, "\\'");
+                
+                const card = `
+                    <div class="relative group flex flex-col cursor-pointer active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner || poster}', '${rating}')">
+                        <div class="relative overflow-hidden rounded-[26px] shadow-2xl">
+                            <img src="${poster}" class="anime-poster w-full group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute top-3 left-3 rating-chip px-2 py-1 rounded-lg text-[9px] text-white flex items-center gap-1 shadow-md"><i class="fas fa-star text-yellow-400"></i> ${rating}</div>
+                            <button onclick="event.stopPropagation(); toggleWatchlist('${safeTitle}')" class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 z-10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button>
+                        </div>
+                        <h4 class="text-[11px] font-black mt-4 truncate text-gray-400 px-1 uppercase tracking-tighter">${title}</h4>
+                    </div>`;
+
+                if (cat.includes('trending') || cat.includes('popular')) carousel.innerHTML += `<div class="w-36 flex-shrink-0">${card}</div>`;
+                if (cat.includes('series') || cat === '' || cat.includes('latest')) series.innerHTML += card;
+                if (cat.includes('movie')) movies.innerHTML += `<div class="bg-[#1e1f26] rounded-[35px] p-4 border border-white/5 shadow-2xl active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner || poster}', '${rating}')"><div class="relative overflow-hidden rounded-2xl h-52"><img src="${poster}" class="w-full h-full object-cover shadow-lg"><div class="absolute top-3 left-3 rating-chip px-2.5 py-1 rounded-lg text-[10px] text-white flex items-center gap-1.5"><i class="fas fa-star text-yellow-400"></i> ${rating}</div><button onclick="event.stopPropagation(); toggleWatchlist('${safeTitle}')" class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button></div><h4 class="text-xs font-black truncate mt-4 text-gray-200">${title}</h4><div class="flex justify-between items-center mt-3"><span class="text-[8px] font-black text-[#ff4757] uppercase tracking-widest">Movie</span></div></div>`;
+            });
         }
-    });
-}
 
-initApp();
-</script>
+        async function openInfoModal(title, slug, banner, rating) {
+            document.body.classList.add('modal-open');
+            const modal = document.getElementById('info-modal');
+            const content = document.getElementById('modal-content');
+            
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-banner').src = banner;
+            document.getElementById('modal-rating').innerHTML = `<i class="fas fa-star text-white text-[9px]"></i> ${rating}`;
+            document.getElementById('modal-desc').innerText = "Streaming exclusive on AnimeVerse...";
+            document.getElementById('modal-status').innerText = "Premium Series";
+            
+            document.getElementById('modal-play-btn').onclick = () => location.href = `player.html?id=${slug}`;
+            
+            const watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]');
+            const isLiked = watchlist.includes(title);
+            document.getElementById('modal-fav-btn').innerHTML = `<i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-solid text-white'}"></i>`;
+            document.getElementById('modal-fav-btn').onclick = () => { toggleWatchlist(title); openInfoModal(title, slug, banner, rating); };
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.add('opacity-100'); content.classList.remove('translate-y-full'); }, 10);
+
+            try {
+                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1`);
+                const data = await res.json();
+                if (data.data?.[0]?.attributes) {
+                    const attr = data.data[0].attributes;
+                    document.getElementById('modal-desc').innerText = attr.synopsis || "Plot details coming soon.";
+                    document.getElementById('modal-status').innerText = attr.status === 'current' ? 'Airing Now' : 'Finished';
+                }
+            } catch (e) { console.log("Detail Error"); }
+        }
+
+        function closeInfoModal() {
+            document.body.classList.remove('modal-open');
+            const modal = document.getElementById('info-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('opacity-100');
+            content.classList.add('translate-y-full');
+            setTimeout(() => { modal.classList.add('hidden'); }, 400);
+        }
+
+        function handleSearch(q) {
+            const box = document.getElementById('search-suggestions'), term = q.toLowerCase().trim();
+            if(!term) { box.classList.add('hidden'); return; }
+            const matches = allAnimeData.filter(a => a.title.toLowerCase().includes(term));
+            if(matches.length > 0) {
+                box.innerHTML = matches.map(a => `<div class="flex items-center gap-5 p-5 border-b border-white/5 active:bg-white/5" onclick="openInfoModal('${a.title.replace(/'/g, "\\'")}', '${a.slug}', '${a.banner || a.poster}', '${a.rating}')"><img src="${a.poster}" class="w-12 h-16 rounded-lg object-cover shadow-lg"><div class="flex-1"><p class="text-xs font-black text-gray-200 uppercase">${a.title}</p><p class="text-[8px] text-gray-500 font-bold uppercase mt-1 tracking-widest">${a.item.category || 'Anime'}</p></div><i class="fas fa-info-circle text-[#ff4757] text-lg"></i></div>`).join('');
+                box.classList.remove('hidden');
+            } else { box.innerHTML = `<div class="p-8 text-center text-gray-600 font-black text-[10px] uppercase">No Result Found</div>`; box.classList.remove('hidden'); }
+        }
+
+        function toggleSearch() {
+            const b = document.getElementById('search-box');
+            if(b.classList.contains('hidden')) { b.classList.remove('hidden'); setTimeout(() => { b.classList.add('opacity-100'); b.classList.remove('-translate-y-6'); }, 10); document.getElementById('searchInput').focus(); }
+            else { b.classList.remove('opacity-100'); b.classList.add('-translate-y-6'); setTimeout(() => b.classList.add('hidden'), 400); }
+        }
+
+        function toggleWatchlist(t) {
+            let l = JSON.parse(localStorage.getItem('my_watchlist') || '[]');
+            l.includes(t) ? l = l.filter(x => x !== t) : l.push(t);
+            localStorage.setItem('my_watchlist', JSON.stringify(l));
+            renderUI();
+        }
+
+        function startAutoScroll() {
+            const c = document.getElementById('auto-scroll-container');
+            setInterval(() => { c.scrollBy({ left: 160, behavior: 'smooth' }); if (c.scrollLeft >= (c.scrollWidth - c.clientWidth - 10)) setTimeout(() => c.scrollLeft = 0, 1000); }, 4000);
+        }
+
+        initApp();
+        startAutoScroll();
+    </script>
 </body>
 </html>
