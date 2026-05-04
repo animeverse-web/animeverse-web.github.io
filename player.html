@@ -3,120 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AnimeVerse | Stream & Download</title>
-    
-    <meta property="og:type" content="video.other">
-    <meta id="og-title" property="og:title" content="AnimeVerse - Watch Online">
-    <meta id="og-desc" property="og:description" content="Stream and Download your favorite anime in Hindi/Sub.">
-    <meta id="og-image" property="og:image" content="https://i.ibb.co/mF0pYxT/animeverse-logo.png"> 
+    <title>AnimeVerse | Premium Mobile Player</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --neon: #FF7B00; --bg: #0D0D12; --card-bg: #181c25; }
-        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; touch-action: pan-x pan-y; overflow-x: hidden; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 10px; }
-
-        .back-btn { background: #1c1f26; border: 1px solid #2a2e38; border-radius: 10px; padding: 8px 12px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .header-card { background: var(--card-bg); margin: 15px; padding: 15px; border-radius: 20px; display: flex; gap: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .poster-img { width: 110px; aspect-ratio: 2/3; object-fit: cover; border-radius: 12px; background: #000; }
+        :root { --accent: #ff4757; --bg: #0f1014; --surface: #1e1f26; --glass: rgba(255, 255, 255, 0.03); }
+        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        .video-box { margin: 0 15px; position: relative; width: calc(100% - 30px); aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid #222; }
-        #main-player { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        .plyr { width: 100%; height: 100%; }
-
-        .nav-btn { flex: 1; background: #1c1f26; color: #fff; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; border: 1px solid #2a2e38; text-align: center; cursor: pointer; }
-        .btn-dl { background: var(--neon); color: #000; border: none; }
-
-        .ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 400px; overflow-y: auto; padding: 15px; }
-        .ep-card { background: #181c25; border-radius: 12px; overflow: hidden; border: 2px solid transparent; transition: 0.3s; cursor: pointer; position: relative; opacity: 0.6; }
-        .ep-card.active { opacity: 1 !important; border-color: var(--neon); transform: scale(0.96); }
-        .ep-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
-        .badge-count { position: absolute; top: 4px; left: 4px; background: var(--neon); color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; z-index: 10; }
-
-        .comment-container { background: #181c25; margin: 15px; padding: 15px; border-radius: 20px; border: 1px solid #2a2e38; }
-        .comment-input { width: 100%; background: #0d0d12; border: 1px solid #2a2e38; border-radius: 12px; padding: 12px; color: #fff; font-size: 14px; outline: none; margin-bottom: 8px; }
-        .comment-btn { background: var(--neon); color: #000; font-weight: 800; padding: 10px 20px; border-radius: 10px; font-size: 12px; text-transform: uppercase; width: 100%; }
+        /* Updated Header: Niche laya gaya aur margin badhaya gaya */
+        .app-bar { 
+            position: relative; width: 100%; z-index: 1000; 
+            padding: 50px 20px 20px 20px; /* Top padding increased to push it down */
+            display: flex; align-items: center; justify-content: space-between;
+        }
         
-        .plyr--full-ui input[type=range] { color: var(--neon); }
-        .plyr__control--overlaid { background: var(--neon); }
-        .plyr--video .plyr__control:hover { background: var(--neon); }
+        /* Video Section with Rounded Borders & Shadow */
+        .player-wrapper { 
+            width: calc(100% - 30px); margin: 0 auto; aspect-ratio: 16/9; 
+            background: #000; border-radius: 24px; overflow: hidden; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9); 
+            border: 1px solid rgba(255,255,255,0.08); 
+            position: sticky; top: 15px; z-index: 50;
+        }
+        
+        /* Episode Cards */
+        .ep-card { 
+            flex: 0 0 160px; position: relative; border-radius: 20px; 
+            overflow: hidden; background: var(--surface);
+            border: 1px solid var(--glass); transition: 0.3s;
+        }
+        .ep-card.active { border-color: var(--accent); transform: scale(1.02); box-shadow: 0 10px 20px rgba(255, 71, 87, 0.2); }
+        .ep-img { width: 100%; height: 90px; object-fit: cover; opacity: 0.5; transition: 0.3s; }
+        .ep-card.active .ep-img { opacity: 1; }
+        
+        .ep-overlay { 
+            position: absolute; inset: 0; 
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); 
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 10px;
+        }
+        .ep-label { font-size: 8px; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+        .ep-name { font-size: 10px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
 
-        .footer-main { background: #0a0a0f; border-top: 1px solid #1a1a24; padding: 40px 20px; margin-top: 40px; }
-        .disclaimer-box { background: rgba(255, 123, 0, 0.05); border: 1px dashed rgba(255, 123, 0, 0.3); margin: 20px 15px; padding: 15px; border-radius: 15px; text-align: center; }
-        .disclaimer-text { font-size: 10px; color: #666; line-height: 1.4; font-weight: 500; }
+        .tab-btn { padding: 10px 22px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid var(--glass); }
+        .tab-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
 
-        footer { background: #000; padding: 40px 20px 100px; text-align: center; border-top: 1px solid #1a1a1a; margin-top: 40px; }
+        .fab-download { position: fixed; bottom: 30px; right: 25px; width: 56px; height: 56px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(255, 71, 87, 0.5); z-index: 100; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass-card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
-<body>
+<body class="pb-24">
 
-    <div class="p-5 flex items-center gap-4">
-        <button class="back-btn" onclick="window.history.back()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        </button>
-        <div class="text-2xl font-black italic uppercase">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
-        <button onclick="reportBrokenLink()" class="ml-auto text-[8px] text-[#ff4444] border border-[#ff4444] px-2 py-1 rounded uppercase font-black">🚨 Report Error</button>
-    </div>
+    <!-- Header Section (Pushed down with padding) -->
+    <header class="app-bar">
+        <button onclick="window.history.back()" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-chevron-left"></i></button>
+        <div class="text-[12px] font-black tracking-[4px] uppercase italic">Anime<span class="text-[#ff4757]">Verse</span></div>
+        <button onclick="alert('Report Sent!')" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-flag text-xs text-red-500"></i></button>
+    </header>
 
-    <div class="header-card">
-        <img id="poster" src="" class="poster-img" onerror="this.src='https://i.ibb.co/mF0pYxT/animeverse-logo.png'"> 
-        <div class="flex-1">
-            <h1 id="title" class="text-lg font-bold uppercase mb-2 line-clamp-2">Loading...</h1>
-            <div class="flex items-center gap-3 mb-3">
-                <span class="bg-[#2a2e38] text-[#FF7B00] text-[10px] font-bold px-2 py-1 rounded">Hindi / Sub</span>
-                <span id="year" class="text-xs text-gray-500 font-bold">----</span>
-                <span class="text-[10px] bg-white/5 px-2 py-1 rounded text-gray-400 font-bold">👁️ <span id="ep-views">0</span> VIEWS</span>
-            </div>
-            <p id="desc" class="text-[11px] text-gray-400 line-clamp-3 leading-relaxed">Fetching details...</p>
-        </div>
-    </div>
-
-    <div class="video-box mb-4" id="video-container">
+    <!-- Player with Border and Spacing -->
+    <div class="player-wrapper">
         <video id="plyr-player" playsinline controls style="display:none;"></video>
-        <iframe id="main-player" src="" allowfullscreen style="display:none;"></iframe>
+        <iframe id="main-player" src="" allowfullscreen style="display:none; width: 100%; height: 100%; border: none;"></iframe>
     </div>
 
-    <div class="flex gap-2 px-[15px] mb-6">
-        <button class="nav-btn" onclick="smartChange(-1)">Prev</button>
-        <button id="dl-button" class="nav-btn btn-dl">Download Ep</button>
-        <button class="nav-btn" onclick="smartChange(1)">Next</button>
-    </div>
-
-    <div class="px-[15px] mb-8">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-600">Episodes List</h3>
-            <select id="season-select" onchange="changeSeason(this.value)" class="bg-transparent text-[#FF7B00] font-bold text-xs outline-none cursor-pointer"></select>
+    <main class="px-5 mt-8">
+        <!-- Title & Stats -->
+        <div class="flex items-start justify-between mb-8">
+            <div class="flex-1 pr-4">
+                <h1 id="title" class="text-2xl font-black uppercase leading-tight tracking-tighter mb-2">Anime Title</h1>
+                <div class="flex items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    <span id="year">----</span>
+                    <span class="text-white bg-[#ff4757] px-2 py-0.5 rounded-md">4K ULTRA</span>
+                    <span><i class="fas fa-eye text-[#ff4757] mr-1"></i> <span id="ep-views">0</span></span>
+                </div>
+            </div>
+            <img id="poster" src="" class="w-16 h-24 object-cover rounded-2xl shadow-2xl border border-white/10">
         </div>
-        <div id="ep-grid" class="ep-grid"></div>
-    </div>
 
-    <div class="comment-container">
-        <h3 class="text-[10px] font-black uppercase tracking-[2px] text-gray-500 mb-4">Live Comments</h3>
-        <input type="text" id="user-name" placeholder="Name" class="comment-input">
-        <textarea id="comment-text" placeholder="Share your thoughts..." class="comment-input" rows="2"></textarea>
-        <button onclick="postComment()" class="comment-btn">Post Comment</button>
-        <div id="comment-list" class="mt-6"></div>
-    </div>
-
-    <div class="px-4 mb-10">
-        <h3 class="text-[12px] font-black uppercase tracking-[2px] text-orange-500 mb-4">Watch This Also</h3>
-        <div id="recommendation-grid" class="grid grid-cols-3 gap-3"></div>
-    </div>
-
-    <footer class="footer-main text-center">
-        <div class="text-2xl font-black italic uppercase mb-4">ANIME<span class="text-[#FF7B00]">VERSE</span></div>
-        <div class="disclaimer-box">
-            <p class="disclaimer-text">AnimeVerse does not store any files. All contents are provided by non-affiliated third parties.</p>
+        <!-- Episode Slider -->
+        <div class="mb-10">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-500">Episodes List</h3>
+                <select id="season-select" onchange="changeSeason(this.value)" class="bg-transparent text-[#ff4757] font-black text-[10px] outline-none uppercase"></select>
+            </div>
+            <div id="ep-grid" class="flex gap-4 overflow-x-auto no-scrollbar pb-4"></div>
         </div>
-        <div class="text-[9px] text-gray-700 font-bold uppercase">© 2026 AnimeVerse</div>
-    </footer>
+
+        <!-- Controls -->
+        <div class="flex gap-3 mb-10">
+            <button onclick="smartChange(-1)" class="glass-card flex-1 py-5 font-black text-[10px] uppercase tracking-widest"><i class="fas fa-arrow-left mr-2"></i> Prev</button>
+            <button onclick="smartChange(1)" class="glass-card flex-1 py-5 font-black text-[10px] uppercase tracking-widest">Next <i class="fas fa-arrow-right ml-2"></i></button>
+        </div>
+
+        <!-- Synopsis & Discussion -->
+        <div class="flex gap-2 mb-6">
+            <button class="tab-btn active">Storyline</button>
+            <button class="tab-btn">Comments</button>
+        </div>
+        <div id="desc" class="text-[13px] text-gray-400 leading-relaxed font-medium mb-10 italic">
+            Connecting to secure servers...
+        </div>
+
+        <!-- Comments -->
+        <div class="glass-card p-6">
+            <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">User Chat</h3>
+            <div class="space-y-4">
+                <input type="text" id="user-name" placeholder="Your Name" class="w-full bg-black/30 border border-white/5 rounded-2xl px-5 py-4 text-xs outline-none focus:border-[#ff4757]/30">
+                <textarea id="comment-text" placeholder="Share your thoughts..." rows="2" class="w-full bg-black/30 border border-white/5 rounded-2xl px-5 py-4 text-xs outline-none focus:border-[#ff4757]/30"></textarea>
+                <button onclick="postComment()" class="w-full bg-[#ff4757] py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">Post Comment</button>
+            </div>
+            <div id="comment-list" class="mt-8 space-y-4"></div>
+        </div>
+    </main>
+
+    <button id="dl-button" class="fab-download"><i class="fas fa-download"></i></button>
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
@@ -128,96 +137,110 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        const player = new Plyr('#plyr-player', {
-            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen']
-        });
-
+        const player = new Plyr('#plyr-player');
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
-        const defaultLogo = "https://i.ibb.co/mF0pYxT/animeverse-logo.png";
-        
-        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "";
+
+        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "", tmdbId = "", globalPoster = "";
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             currentAnimeId = params.get('id');
             currentSeason = params.get('s'); 
             currentEpNum = parseInt(params.get('ep') || 1);
-
             if(!currentAnimeId) return;
-
-            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-
-            db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
-                const data = snapshot.val();
-                if(data && data.desc) {
-                    updateUI(data.title, data.poster, data.year || "2026", data.desc);
-                } else {
-                    fetchTMDBData(currentAnimeId);
-                }
-            });
 
             db.ref(`animeverse_links/${currentAnimeId}`).on('value', snapshot => {
                 animeEpisodes = snapshot.val();
                 if(animeEpisodes) {
-                    const availableSeasons = Object.keys(animeEpisodes).sort();
-                    // Auto-Detect logic: Agar URL mein season galat hai ya nahi hai toh pehla season select karein
-                    if (!currentSeason || !animeEpisodes[currentSeason]) {
-                        currentSeason = availableSeasons[0];
-                    }
+                    const seasons = Object.keys(animeEpisodes).sort();
+                    if (!currentSeason || !animeEpisodes[currentSeason]) currentSeason = seasons[0];
                     setupSeasons();
                     loadEpisodeData();
-                } else {
-                    document.getElementById('title').innerText = "Anime Not Found!";
                 }
             });
-            loadAnimeRecommendations();
+
+            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+            db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
+                const data = snapshot.val();
+                if(data) {
+                    globalPoster = data.poster;
+                    updateUI(data.title, data.poster, data.year, data.desc);
+                    fetchGlobalSync(data.title);
+                } else fetchGlobalSync(currentAnimeId);
+            });
+        }
+
+        async function fetchGlobalSync(query) {
+            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${query.replace(/-/g, ' ')}`);
+            const data = await res.json();
+            if(data.results?.[0]) {
+                const r = data.results[0];
+                tmdbId = r.id;
+                if(!globalPoster) globalPoster = "https://image.tmdb.org/t/p/w500" + r.poster_path;
+                updateUI(r.name || r.title, globalPoster, (r.first_air_date || r.release_date || "").split('-')[0], r.overview);
+                renderEpisodes(); 
+            }
+        }
+
+        function updateUI(title, poster, year, desc) {
+            document.getElementById('title').innerText = title;
+            document.getElementById('poster').src = poster;
+            document.getElementById('year').innerText = year;
+            document.getElementById('desc').innerText = desc;
         }
 
         function setupSeasons() {
             const seasons = Object.keys(animeEpisodes).sort();
             const select = document.getElementById('season-select');
-            select.innerHTML = seasons.map(s => 
-                `<option value="${s}" ${s === currentSeason ? 'selected' : ''}>${s.replace('S', 'Season ')}</option>`
-            ).join('');
+            select.innerHTML = seasons.map(s => `<option value="${s}" ${s === currentSeason ? 'selected' : ''}>${s.replace('S', 'Season ')}</option>`).join('');
             renderEpisodes();
         }
 
         function renderEpisodes() {
             const episodes = animeEpisodes[currentSeason];
-            const grid = document.getElementById('ep-grid');
             if(!episodes) return;
-
+            const grid = document.getElementById('ep-grid');
             const sortedEps = Object.keys(episodes).sort((a,b) => parseInt(a.replace('E','')) - parseInt(b.replace('E','')));
-            grid.innerHTML = sortedEps.map(eKey => {
+            
+            grid.innerHTML = "";
+            sortedEps.forEach(eKey => {
                 const num = eKey.replace('E', '');
-                return `
-                    <div class="ep-card ${num == currentEpNum ? 'active' : ''}" onclick="changeEpisode(${num})">
-                        <div class="badge-count">${num}</div>
-                        <img src="${document.getElementById('poster').src}" class="ep-img" onerror="this.src='${defaultLogo}'">
-                        <p class="text-[9px] font-bold p-2 truncate">Episode ${num}</p>
+                const sNum = currentSeason.replace('S', '');
+                const card = document.createElement('div');
+                card.className = `ep-card ${num == currentEpNum ? 'active' : ''}`;
+                card.onclick = () => changeEpisode(num);
+                card.innerHTML = `
+                    <img id="thumb-${num}" src="${globalPoster}" class="ep-img">
+                    <div class="ep-overlay">
+                        <div class="ep-label">EP ${num}</div>
+                        <div id="name-${num}" class="ep-name">Streaming...</div>
                     </div>
                 `;
-            }).join('');
+                grid.appendChild(card);
+
+                if(tmdbId) {
+                    fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${sNum}/episode/${num}?api_key=${tmdbKey}`)
+                    .then(r => r.json()).then(data => {
+                        if(data.still_path) document.getElementById(`thumb-${num}`).src = "https://image.tmdb.org/t/p/w500" + data.still_path;
+                        if(data.name) document.getElementById(`name-${num}`).innerText = data.name;
+                    }).catch(() => { document.getElementById(`name-${num}`).innerText = "Play Episode"; });
+                }
+            });
         }
 
         function loadEpisodeData() {
             const epKey = `E${currentEpNum}`;
-            const epData = animeEpisodes[currentSeason] ? animeEpisodes[currentSeason][epKey] : null;
-
+            const epData = animeEpisodes[currentSeason]?.[epKey];
             if(!epData) return;
 
             const plyrEl = document.getElementById('plyr-player');
             const iframeEl = document.getElementById('main-player');
 
-            if (epData.url.includes('workers.dev') || epData.url.includes('.mp4') || epData.url.includes('.mkv')) {
-                iframeEl.style.display = 'none';
-                plyrEl.style.display = 'block';
+            if (epData.url.includes('workers.dev') || epData.url.includes('.mp4')) {
+                iframeEl.style.display = 'none'; plyrEl.style.display = 'block';
                 player.source = { type: 'video', sources: [{ src: epData.url, type: 'video/mp4' }] };
             } else {
-                plyrEl.style.display = 'none';
-                iframeEl.style.display = 'block';
-                iframeEl.src = epData.url;
+                plyrEl.style.display = 'none'; iframeEl.style.display = 'block'; iframeEl.src = epData.url;
             }
 
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
@@ -227,127 +250,40 @@
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            updateTrendingToday(currentAnimeId, epViewKey);
-            listenToComments(animeKey, epViewKey);
-
-            // --- FIXED DOWNLOAD LOGIC ---
-            // Ab bot key ko ignore karke seedha download page khulega
             document.getElementById('dl-button').onclick = () => {
-                const sNum = currentSeason.replace('S', '');
-                window.location.href = `download.html?id=${currentAnimeId}_s${sNum}_e${currentEpNum}`;
+                window.location.href = `download.html?id=${currentAnimeId}_s${currentSeason.replace('S','')}_e${currentEpNum}`;
             };
 
-            const newUrl = `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`;
-            window.history.pushState({}, '', newUrl);
-        }
-
-        async function loadAnimeRecommendations() {
-            const recGrid = document.getElementById('recommendation-grid');
-            db.ref("animeverse_links").limitToLast(12).once('value', snapshot => {
-                const allAnimes = snapshot.val();
-                if (!allAnimes) return;
-                const animeIds = Object.keys(allAnimes);
-                const shuffled = animeIds.sort(() => 0.5 - Math.random()).slice(0, 6);
-                recGrid.innerHTML = shuffled.map(id => {
-                    const displayName = id.replace(/-/g, ' ');
-                    return `
-                        <div class="relative overflow-hidden rounded-lg bg-[#1a1a1a] aspect-[2/3] cursor-pointer shadow-lg" onclick="window.location.href='?id=${id}'">
-                            <img src="${defaultLogo}" class="w-full h-full object-cover" id="rec-img-${id}">
-                            <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black to-transparent">
-                                <p class="text-[9px] font-bold text-white truncate uppercase">${displayName}</p>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                shuffled.forEach(id => fetchRecPoster(id));
-            });
-        }
-
-        async function fetchRecPoster(id) {
-            const cleanName = id.replace(/-/g, ' ');
-            try {
-                const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(cleanName)}`);
-                const data = await res.json();
-                if(data.results?.[0]?.poster_path) {
-                    document.getElementById(`rec-img-${id}`).src = "https://image.tmdb.org/t/p/w342" + data.results[0].poster_path;
-                }
-            } catch(e) {}
-        }
-        
-        async function fetchTMDBData(id) {
-            const query = id.replace(/-/g, ' ');
-            try {
-                const tmRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${encodeURIComponent(query)}`);
-                const tmData = await tmRes.json();
-                if(tmData.results?.[0]) {
-                    const r = tmData.results[0];
-                    const details = {
-                        title: r.name || r.title,
-                        poster: "https://image.tmdb.org/t/p/w500" + r.poster_path,
-                        year: (r.first_air_date || r.release_date || "").split('-')[0],
-                        desc: r.overview
-                    };
-                    updateUI(details.title, details.poster, details.year, details.desc);
-                    db.ref(`anime_details/${id.replace(/[.#$[\]]/g, "_")}`).update(details);
-                }
-            } catch(e) {}
-        }
-
-        function updateUI(title, poster, year, desc) {
-            document.getElementById('title').innerText = title;
-            document.getElementById('poster').src = poster || defaultLogo;
-            document.getElementById('year').innerText = year;
-            document.getElementById('desc').innerText = desc || "Streaming available on AnimeVerse.";
-            renderEpisodes();
-        }
-
-        function updateTrendingToday(anime, ep) {
-            const trendId = (anime + "-" + ep).replace(/[.#$[\]\s]/g, "_");
-            db.ref(`trending_today/${trendId}`).transaction((curr) => {
-                if (curr) { curr.count++; return curr; }
-                return { animeName: anime.replace(/-/g, ' ').toUpperCase(), episode: ep, count: 1, createdAt: Date.now() };
-            });
+            listenToComments(animeKey, epViewKey);
+            window.history.pushState({}, '', `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`);
+            
+            document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
+            const active = document.querySelector(`.ep-card[onclick="changeEpisode(${currentEpNum})"]`);
+            if(active) active.classList.add('active');
         }
 
         function postComment() {
-            const name = document.getElementById('user-name').value.trim() || "User";
-            const text = document.getElementById('comment-text').value.trim();
+            const name = document.getElementById('user-name').value || "Fan";
+            const text = document.getElementById('comment-text').value;
             if(!text) return;
-            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            const epKey = `${currentSeason}_E${currentEpNum}`;
-            db.ref(`comments/${animeKey}/${epKey}`).push({ name, text, timestamp: Date.now() });
+            db.ref(`comments/${currentAnimeId.replace(/[.#$[\]]/g, "_")}/${currentSeason}_E${currentEpNum}`).push({ name, text, time: Date.now() });
             document.getElementById('comment-text').value = "";
         }
 
-        function listenToComments(animeKey, epKey) {
-            db.ref(`comments/${animeKey}/${epKey}`).on('value', snap => {
+        function listenToComments(ak, ek) {
+            db.ref(`comments/${ak}/${ek}`).on('value', snap => {
                 const list = document.getElementById('comment-list'); list.innerHTML = "";
-                const data = snap.val();
-                if(data) {
-                    Object.values(data).reverse().forEach(c => {
-                        list.innerHTML += `<div class="mb-4 flex gap-3"><div class="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-[10px] font-bold text-orange-500">${c.name.charAt(0)}</div><div class="flex-1"><h4 class="text-[11px] font-bold text-gray-300">${c.name}</h4><p class="text-xs text-gray-500">${c.text}</p></div></div>`;
-                    });
-                }
+                if(snap.val()) Object.values(snap.val()).reverse().forEach(c => {
+                    list.innerHTML += `<div class="bg-white/5 p-4 rounded-2xl"><p class="text-[9px] font-black text-[#ff4757] uppercase mb-1">${c.name}</p><p class="text-xs text-gray-400 font-medium">${c.text}</p></div>`;
+                });
             });
         }
 
         function changeSeason(s) { currentSeason = s; currentEpNum = 1; loadEpisodeData(); renderEpisodes(); }
         function changeEpisode(e) { currentEpNum = e; loadEpisodeData(); renderEpisodes(); }
-        function smartChange(dir) {
-            const episodes = animeEpisodes[currentSeason];
-            const max = Object.keys(episodes).length;
-            const next = currentEpNum + dir;
-            if(next >= 1 && next <= max) changeEpisode(next);
-        }
-
-        function reportBrokenLink() {
-            const info = `${currentAnimeId} | ${currentSeason} | Ep ${currentEpNum}`;
-            db.ref('reports').push({ anime: info, time: new Date().toLocaleString(), status: "Broken Link" });
-            alert("Bhai, report bhej di hai! Admin jald check karega.");
-        }
+        function smartChange(dir) { changeEpisode(currentEpNum + dir); }
 
         init();
     </script>
 </body>
-</html>
 </html>
