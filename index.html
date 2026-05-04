@@ -204,7 +204,15 @@
 
             // Step 2: Fetch background update from Firebase
             db.ref('all_anime').on('value', async (snap) => {
-                const data = snap.val(); if (!data) return;
+                const data = snap.val(); 
+                
+                // FIXED: Agar database empty ho toh loader hide karo aur message dikhao
+                if (!data) {
+                    document.getElementById('skeleton-loader').classList.add('hidden');
+                    document.getElementById('real-content').classList.remove('hidden');
+                    return;
+                }
+
                 const titles = Object.keys(data);
                 
                 // Parallel Loading Logic
@@ -228,6 +236,11 @@
         }
 
         function renderUIAndShow() {
+            // FIXED: Loader ko hamesha pehle hide karo takay ye atkega nahi
+            document.getElementById('skeleton-loader').classList.add('hidden');
+            document.getElementById('real-content').classList.remove('hidden');
+
+            // Agar data filter ho gaya ho toh yahan se return karo
             if (allAnimeData.length === 0) return;
             
             // Render Featured
@@ -238,8 +251,6 @@
             document.getElementById('featured-section').onclick = () => openInfoModal(featuredData.title, featuredData.slug, featuredData.banner, featuredData.rating);
             document.getElementById('featured-play').onclick = (e) => { e.stopPropagation(); location.href = `player.html?id=${featuredData.slug}`; };
 
-            document.getElementById('skeleton-loader').classList.add('hidden');
-            document.getElementById('real-content').classList.remove('hidden');
             renderGrids();
         }
 
@@ -288,7 +299,8 @@
 
         async function openInfoModal(title, slug, banner, rating) {
             document.body.classList.add('modal-open');
-            const modal = document.getElementById(.getElementById('info-modal'), content = document.getElementById('modal-content');
+            // FIXED: Syntax error resolved here
+            const modal = document.getElementById('info-modal'), content = document.getElementById('modal-content');
             
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-banner').src = banner;
