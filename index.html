@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6XVHNP2C9G');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AnimeVerse | Premium Optimized</title>
+    
+    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
+    <link rel="apple-touch-icon" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
+    <meta property="og:image" content="https://animeverse-web.github.io/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
+    <meta name="twitter:image" content="https://animeverse-web.github.io/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -41,7 +54,6 @@
 </head>
 <body class="pb-32">
 
-    <!-- Header -->
     <header class="app-header fixed top-0 w-full px-6 py-4 flex justify-between items-center">
         <div class="flex flex-col">
             <h1 class="text-2xl font-black tracking-tighter uppercase leading-tight">Anime<span class="text-[#ff4757]">Verse</span></h1>
@@ -51,13 +63,12 @@
             <button onclick="toggleSearch()" class="bg-white/5 w-11 h-11 rounded-full flex items-center justify-center border border-white/10 active-scale">
                 <i class="fas fa-search text-gray-300"></i>
             </button>
-            <div class="w-11 h-11 rounded-full border-2 border-[#ff4757] p-0.5 shadow-lg">
-                <img src="https://ui-avatars.com/api/?name=AV&background=ff4757&color=fff" class="rounded-full w-full h-full">
+            <div class="w-11 h-11 rounded-full border-2 border-[#ff4757] p-0.5 shadow-lg overflow-hidden bg-black">
+                <img src="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png" alt="Logo" class="rounded-full w-full h-full object-cover">
             </div>
         </div>
     </header>
 
-    <!-- Search System -->
     <div id="search-box" class="hidden opacity-0 transform -translate-y-6">
         <div class="search-input-wrapper">
             <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search anime..." autocomplete="off">
@@ -68,16 +79,13 @@
         <div id="search-suggestions" class="hidden no-scrollbar"></div>
     </div>
 
-    <!-- Main Content -->
     <main class="mt-28 px-5 space-y-12">
-        <!-- Skeleton Loading -->
         <div id="skeleton-loader" class="space-y-12">
             <div class="flex gap-4"><div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div><div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div></div>
             <div class="h-72 w-full rounded-[40px] skeleton"></div>
         </div>
 
         <div id="real-content" class="hidden space-y-12">
-            <!-- Watchlist Stories -->
             <section class="flex gap-4 overflow-x-auto no-scrollbar py-2">
                 <div id="stories-container" class="flex gap-5 items-center">
                     <div class="flex-shrink-0 text-center space-y-2 cursor-pointer active-scale" onclick="toggleSearch()">
@@ -90,7 +98,6 @@
                 </div>
             </section>
 
-            <!-- Featured Banner -->
             <section id="featured-section" class="relative h-72 rounded-[40px] overflow-hidden shadow-2xl border border-white/5 group">
                 <img id="featured-img" class="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110">
                 <div class="absolute inset-0 featured-gradient p-8 flex flex-col justify-end">
@@ -105,7 +112,6 @@
                 </div>
             </section>
 
-            <!-- Categories -->
             <section>
                 <h3 class="text-xl font-black mb-6 flex items-center gap-3"><span class="w-1.5 h-7 bg-[#ff4757] rounded-full"></span> For You</h3>
                 <div id="auto-scroll-container" class="flex overflow-x-auto no-scrollbar gap-5 w-full py-2"></div>
@@ -116,7 +122,6 @@
         </div>
     </main>
 
-    <!-- Info Modal -->
     <div id="info-modal" class="fixed inset-0 z-[5000] hidden items-end justify-center px-4 pb-10 transition-opacity duration-300 opacity-0">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="closeInfoModal()"></div>
         <div id="modal-content" class="relative w-full max-w-lg bg-[#1e1f26] rounded-[40px] overflow-hidden shadow-2xl border border-white/10 transform translate-y-full transition-transform duration-500">
@@ -140,7 +145,6 @@
         </div>
     </div>
 
-    <!-- Nav -->
     <nav class="bottom-nav fixed bottom-0 w-full flex justify-between items-center px-12 z-[3000]">
         <a href="index.html" class="flex flex-col items-center gap-2 text-[#ff4757]"><i class="fas fa-th-large text-2xl"></i><span class="text-[9px] font-black uppercase">Browse</span></a>
         <a href="#" class="flex flex-col items-center gap-2 text-gray-500"><i class="fas fa-heart text-2xl"></i><span class="text-[9px] font-black uppercase">List</span></a>
@@ -161,14 +165,12 @@
         let allAnimeData = [];
         let featuredData = null;
 
-        // --- FAST CACHE LOGIC ---
         const getCache = () => JSON.parse(localStorage.getItem('av_cache') || '[]');
         const setCache = (data) => localStorage.setItem('av_cache', JSON.stringify(data));
 
         async function fetchMeta(title) {
             const query = encodeURIComponent(title);
             try {
-                // TMDB (Fastest & Best Posters)
                 const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${query}`);
                 const tmdb = await tmdbRes.json();
                 if (tmdb.results?.[0]?.poster_path) {
@@ -179,7 +181,6 @@
                     };
                 }
                 
-                // KITSU FALLBACK (Replaced Jikan)
                 const kitsuRes = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${query}&page[limit]=1`);
                 const kitsu = await kitsuRes.json();
                 if (kitsu.data?.[0]) {
@@ -195,18 +196,15 @@
         }
 
         async function initApp() {
-            // Step 1: Load from cache immediately
             const cache = getCache();
             if (cache.length > 0) {
                 allAnimeData = cache;
                 renderUIAndShow();
             }
 
-            // Step 2: Fetch background update from Firebase
             db.ref('all_anime').on('value', async (snap) => {
                 const data = snap.val(); 
                 
-                // FIXED: Agar database empty ho toh loader hide karo aur message dikhao
                 if (!data) {
                     document.getElementById('skeleton-loader').classList.add('hidden');
                     document.getElementById('real-content').classList.remove('hidden');
@@ -215,7 +213,6 @@
 
                 const titles = Object.keys(data);
                 
-                // Parallel Loading Logic
                 const freshData = await Promise.all(titles.map(async (title) => {
                     const existing = allAnimeData.find(a => a.title === title);
                     if (existing && existing.poster && !existing.poster.includes('placeholder')) {
@@ -236,14 +233,11 @@
         }
 
         function renderUIAndShow() {
-            // FIXED: Loader ko hamesha pehle hide karo takay ye atkega nahi
             document.getElementById('skeleton-loader').classList.add('hidden');
             document.getElementById('real-content').classList.remove('hidden');
 
-            // Agar data filter ho gaya ho toh yahan se return karo
             if (allAnimeData.length === 0) return;
             
-            // Render Featured
             if(!featuredData) featuredData = allAnimeData[Math.floor(Math.random() * allAnimeData.length)];
             document.getElementById('featured-img').src = featuredData.banner || featuredData.poster;
             document.getElementById('featured-title').innerText = featuredData.title;
@@ -261,7 +255,6 @@
             series.innerHTML = ''; movies.innerHTML = ''; carousel.innerHTML = ''; watchlistArea.innerHTML = '';
             const watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]');
 
-            // Render Watchlist
             watchlist.forEach(t => {
                 const a = allAnimeData.find(i => i.title === t);
                 if(a) {
@@ -278,7 +271,6 @@
                 watchlistArea.innerHTML += `<div class="flex-shrink-0 text-center space-y-2 opacity-40"><div class="dotted-slot"><i class="fas fa-plus text-gray-600 text-xs"></i></div><p class="text-[8px] text-gray-700 font-black uppercase tracking-widest">Empty</p></div>`;
             }
 
-            // Main Grids
             allAnimeData.forEach(({title, item, slug, poster, banner, rating}) => {
                 const isLiked = watchlist.includes(title), cat = item.category?.toLowerCase() || '', safeTitle = title.replace(/'/g, "\\'");
                 const card = `
@@ -293,13 +285,12 @@
 
                 if (cat.includes('trending') || cat.includes('popular')) carousel.innerHTML += `<div class="w-36 flex-shrink-0">${card}</div>`;
                 if (cat.includes('series') || cat === '' || cat.includes('latest')) series.innerHTML += card;
-                if (cat.includes('movie')) movies.innerHTML += `<div class="bg-[#1e1f26] rounded-[35px] p-4 border border-white/5 active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')"><div class="relative overflow-hidden rounded-2xl h-52"><img src="${poster}" class="w-full h-full object-cover shadow-lg"><div class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button></div><h4 class="text-xs font-black truncate mt-4 text-gray-200">${title}</h4></div>`;
+                if (cat.includes('movie')) movies.innerHTML += `<div class="bg-[#1e1f26] rounded-[35px] p-4 border border-white/5 active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')"><div class="relative overflow-hidden rounded-2xl h-52"><img src="${poster}" class="w-full h-full object-cover shadow-lg"><div class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button></div><h4 class="text-xs font-black truncate mt-4 text-gray-200">${title}</h4></div>`;
             });
         }
 
         async function openInfoModal(title, slug, banner, rating) {
             document.body.classList.add('modal-open');
-            // FIXED: Syntax error resolved here
             const modal = document.getElementById('info-modal'), content = document.getElementById('modal-content');
             
             document.getElementById('modal-title').innerText = title;
@@ -365,4 +356,4 @@
         initApp();
     </script>
 </body>
-</html>
+</html> 
