@@ -285,7 +285,7 @@
 
                 if (cat.includes('trending') || cat.includes('popular')) carousel.innerHTML += `<div class="w-36 flex-shrink-0">${card}</div>`;
                 if (cat.includes('series') || cat === '' || cat.includes('latest')) series.innerHTML += card;
-                if (cat.includes('movie')) movies.innerHTML += `<div class="bg-[#1e1f26] rounded-[35px] p-4 border border-white/5 active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')"><div class="relative overflow-hidden rounded-2xl h-52"><img src="${poster}" class="w-full h-full object-cover shadow-lg"><div class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button></div><h4 class="text-xs font-black truncate mt-4 text-gray-200">${title}</h4></div>`;
+                if (cat.includes('movie')) movies.innerHTML += `<div class="bg-[#1e1f26] rounded-[35px] p-4 border border-white/5 active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')"><div class="relative overflow-hidden rounded-2xl h-52"><img src="${poster}" class="w-full h-full object-cover shadow-lg"><div class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button></div><h4 class="text-xs font-black truncate mt-4 text-gray-200">${title}</h4></div>`;
             });
         }
 
@@ -356,4 +356,4 @@
         initApp();
     </script>
 </body>
-</html> 
+</html>
