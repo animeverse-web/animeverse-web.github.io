@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AnimeVerse | Premium Mobile Player</title>
+    <title>AnimeVerse | Premium Player</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
@@ -17,14 +17,12 @@
         :root { --accent: #ff4757; --bg: #0f1014; --surface: #1e1f26; --glass: rgba(255, 255, 255, 0.03); }
         body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* Updated Header: Niche laya gaya aur margin badhaya gaya */
         .app-bar { 
             position: relative; width: 100%; z-index: 1000; 
-            padding: 50px 20px 20px 20px; /* Top padding increased to push it down */
+            padding: 50px 20px 20px 20px; 
             display: flex; align-items: center; justify-content: space-between;
         }
         
-        /* Video Section with Rounded Borders & Shadow */
         .player-wrapper { 
             width: calc(100% - 30px); margin: 0 auto; aspect-ratio: 16/9; 
             background: #000; border-radius: 24px; overflow: hidden; 
@@ -32,51 +30,65 @@
             border: 1px solid rgba(255,255,255,0.08); 
             position: sticky; top: 15px; z-index: 50;
         }
-        
-        /* Episode Cards */
+
+        #ep-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px;
+            width: 100%;
+        }
+
+        @media (min-width: 1024px) {
+            #ep-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+                gap: 15px;
+            }
+            main { max-width: 1200px; margin: 0 auto !important; }
+        }
+
         .ep-card { 
-            flex: 0 0 160px; position: relative; border-radius: 20px; 
+            position: relative; border-radius: 12px; 
             overflow: hidden; background: var(--surface);
             border: 1px solid var(--glass); transition: 0.3s;
+            aspect-ratio: 16/9;
         }
-        .ep-card.active { border-color: var(--accent); transform: scale(1.02); box-shadow: 0 10px 20px rgba(255, 71, 87, 0.2); }
-        .ep-img { width: 100%; height: 90px; object-fit: cover; opacity: 0.5; transition: 0.3s; }
+
+        .ep-card.active { border-color: var(--accent); transform: scale(1.05); z-index: 2; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
+        .ep-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; transition: 0.3s; }
         .ep-card.active .ep-img { opacity: 1; }
         
         .ep-overlay { 
             position: absolute; inset: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent); 
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); 
+            display: flex; flex-direction: column; justify-content: flex-end; padding: 6px;
         }
-        .ep-label { font-size: 8px; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-        .ep-name { font-size: 10px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
+        .ep-label { font-size: 7px; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+        .ep-name { font-size: 8px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
 
         .tab-btn { padding: 10px 22px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid var(--glass); }
         .tab-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
-
         .fab-download { position: fixed; bottom: 30px; right: 25px; width: 56px; height: 56px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(255, 71, 87, 0.5); z-index: 100; }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
         .glass-card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
 <body class="pb-24">
 
-    <!-- Header Section (Pushed down with padding) -->
+    <!-- Header -->
     <header class="app-bar">
-        <button onclick="window.history.back()" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-chevron-left"></i></button>
+        <!-- Changed window.history.back() to index.html link -->
+        <button onclick="window.location.href='./index.html'" class="w-11 h-11 glass-card flex items-center justify-center">
+            <i class="fas fa-chevron-left"></i>
+        </button>
         <div class="text-[12px] font-black tracking-[4px] uppercase italic">Anime<span class="text-[#ff4757]">Verse</span></div>
         <button onclick="alert('Report Sent!')" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-flag text-xs text-red-500"></i></button>
     </header>
 
-    <!-- Player with Border and Spacing -->
     <div class="player-wrapper">
         <video id="plyr-player" playsinline controls style="display:none;"></video>
         <iframe id="main-player" src="" allowfullscreen style="display:none; width: 100%; height: 100%; border: none;"></iframe>
     </div>
 
     <main class="px-5 mt-8">
-        <!-- Title & Stats -->
         <div class="flex items-start justify-between mb-8">
             <div class="flex-1 pr-4">
                 <h1 id="title" class="text-2xl font-black uppercase leading-tight tracking-tighter mb-2">Anime Title</h1>
@@ -89,31 +101,26 @@
             <img id="poster" src="" class="w-16 h-24 object-cover rounded-2xl shadow-2xl border border-white/10">
         </div>
 
-        <!-- Episode Slider -->
         <div class="mb-10">
             <div class="flex justify-between items-center mb-5">
-                <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-500">Episodes List</h3>
+                <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-500">Episode Selection</h3>
                 <select id="season-select" onchange="changeSeason(this.value)" class="bg-transparent text-[#ff4757] font-black text-[10px] outline-none uppercase"></select>
             </div>
-            <div id="ep-grid" class="flex gap-4 overflow-x-auto no-scrollbar pb-4"></div>
+            <div id="ep-grid"></div>
         </div>
 
-        <!-- Controls -->
         <div class="flex gap-3 mb-10">
             <button onclick="smartChange(-1)" class="glass-card flex-1 py-5 font-black text-[10px] uppercase tracking-widest"><i class="fas fa-arrow-left mr-2"></i> Prev</button>
             <button onclick="smartChange(1)" class="glass-card flex-1 py-5 font-black text-[10px] uppercase tracking-widest">Next <i class="fas fa-arrow-right ml-2"></i></button>
         </div>
 
-        <!-- Synopsis & Discussion -->
         <div class="flex gap-2 mb-6">
             <button class="tab-btn active">Storyline</button>
-            <button class="tab-btn">Comments</button>
         </div>
         <div id="desc" class="text-[13px] text-gray-400 leading-relaxed font-medium mb-10 italic">
-            Connecting to secure servers...
+            Connecting to servers...
         </div>
 
-        <!-- Comments -->
         <div class="glass-card p-6">
             <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">User Chat</h3>
             <div class="space-y-4">
@@ -213,7 +220,7 @@
                     <img id="thumb-${num}" src="${globalPoster}" class="ep-img">
                     <div class="ep-overlay">
                         <div class="ep-label">EP ${num}</div>
-                        <div id="name-${num}" class="ep-name">Streaming...</div>
+                        <div id="name-${num}" class="ep-name">Episode ${num}</div>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -223,7 +230,7 @@
                     .then(r => r.json()).then(data => {
                         if(data.still_path) document.getElementById(`thumb-${num}`).src = "https://image.tmdb.org/t/p/w500" + data.still_path;
                         if(data.name) document.getElementById(`name-${num}`).innerText = data.name;
-                    }).catch(() => { document.getElementById(`name-${num}`).innerText = "Play Episode"; });
+                    }).catch(() => {});
                 }
             });
         }
@@ -245,6 +252,7 @@
 
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             const epViewKey = `${currentSeason}_E${currentEpNum}`;
+            
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
@@ -256,17 +264,15 @@
 
             listenToComments(animeKey, epViewKey);
             window.history.pushState({}, '', `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`);
-            
-            document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
-            const active = document.querySelector(`.ep-card[onclick="changeEpisode(${currentEpNum})"]`);
-            if(active) active.classList.add('active');
+            renderEpisodes();
         }
 
         function postComment() {
             const name = document.getElementById('user-name').value || "Fan";
             const text = document.getElementById('comment-text').value;
             if(!text) return;
-            db.ref(`comments/${currentAnimeId.replace(/[.#$[\]]/g, "_")}/${currentSeason}_E${currentEpNum}`).push({ name, text, time: Date.now() });
+            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+            db.ref(`comments/${animeKey}/${currentSeason}_E${currentEpNum}`).push({ name, text, time: Date.now() });
             document.getElementById('comment-text').value = "";
         }
 
@@ -279,8 +285,8 @@
             });
         }
 
-        function changeSeason(s) { currentSeason = s; currentEpNum = 1; loadEpisodeData(); renderEpisodes(); }
-        function changeEpisode(e) { currentEpNum = e; loadEpisodeData(); renderEpisodes(); }
+        function changeSeason(s) { currentSeason = s; currentEpNum = 1; loadEpisodeData(); }
+        function changeEpisode(e) { currentEpNum = e; loadEpisodeData(); }
         function smartChange(dir) { changeEpisode(currentEpNum + dir); }
 
         init();
