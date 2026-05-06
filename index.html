@@ -51,6 +51,8 @@
         .featured-gradient { background: linear-gradient(to top, #0f1014 10%, rgba(15,16,20,0.5) 50%, transparent 100%); }
         .active-scale:active { transform: scale(0.94); }
         body.modal-open { overflow: hidden; }
+        
+        #auto-scroll-container { scroll-behavior: smooth; }
     </style>
 </head>
 <body class="pb-32">
@@ -165,9 +167,20 @@
 
         let allAnimeData = [];
         let featuredData = null;
+        let autoScrollInterval = null;
+        let resumeTimeout = null;
 
         const getCache = () => JSON.parse(localStorage.getItem('av_cache') || '[]');
         const setCache = (data) => localStorage.setItem('av_cache', JSON.stringify(data));
+
+        // Shuffle function to randomize order
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
         async function fetchMeta(title) {
             const query = encodeURIComponent(title);
@@ -272,10 +285,13 @@
                 watchlistArea.innerHTML += `<div class="flex-shrink-0 text-center space-y-2 opacity-40"><div class="dotted-slot"><i class="fas fa-plus text-gray-600 text-xs"></i></div><p class="text-[8px] text-gray-700 font-black uppercase tracking-widest">Empty</p></div>`;
             }
 
+            // Shuffle data for For You section (carousel) only on each render/refresh
+            const shuffledForYou = shuffleArray([...allAnimeData]);
+
             allAnimeData.forEach(({title, item, slug, poster, banner, rating}) => {
                 const isLiked = watchlist.includes(title), cat = item.category?.toLowerCase() || '', safeTitle = title.replace(/'/g, "\\'");
                 const card = `
-                    <div class="relative group flex flex-col cursor-pointer active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')">
+                    <div class="relative group flex flex-col cursor-pointer active-scale anime-card" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')">
                         <div class="relative overflow-hidden rounded-[26px] shadow-2xl">
                             <img src="${poster}" class="anime-poster w-full group-hover:scale-110 transition duration-500">
                             <div class="absolute top-3 left-3 rating-chip px-2 py-1 rounded-lg text-[9px] text-white flex items-center gap-1 shadow-md"><i class="fas fa-star text-yellow-400"></i> ${rating}</div>
@@ -284,10 +300,69 @@
                         <h4 class="text-[11px] font-black mt-4 truncate text-gray-400 px-1 uppercase tracking-tighter">${title}</h4>
                     </div>`;
 
-                if (cat.includes('trending') || cat.includes('popular')) carousel.innerHTML += `<div class="w-36 flex-shrink-0">${card}</div>`;
                 if (cat.includes('series') || cat === '' || cat.includes('latest')) series.innerHTML += card;
                 if (cat.includes('movie')) movies.innerHTML += `<div class="bg-[#1e1f26] rounded-[35px] p-4 border border-white/5 active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')"><div class="relative overflow-hidden rounded-2xl h-52"><img src="${poster}" class="w-full h-full object-cover shadow-lg"><div class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button></div><h4 class="text-xs font-black truncate mt-4 text-gray-200">${title}</h4></div>`;
             });
+
+            // Specific loop for Shuffled Carousel (For You)
+            shuffledForYou.forEach(({title, item, slug, poster, banner, rating}) => {
+                const isLiked = watchlist.includes(title), cat = item.category?.toLowerCase() || '', safeTitle = title.replace(/'/g, "\\'");
+                if (cat.includes('trending') || cat.includes('popular')) {
+                    carousel.innerHTML += `<div class="w-36 flex-shrink-0 trending-item">
+                        <div class="relative group flex flex-col cursor-pointer active-scale anime-card" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')">
+                            <div class="relative overflow-hidden rounded-[26px] shadow-2xl">
+                                <img src="${poster}" class="anime-poster w-full group-hover:scale-110 transition duration-500">
+                                <div class="absolute top-3 left-3 rating-chip px-2 py-1 rounded-lg text-[9px] text-white flex items-center gap-1 shadow-md"><i class="fas fa-star text-yellow-400"></i> ${rating}</div>
+                            </div>
+                            <h4 class="text-[11px] font-black mt-4 truncate text-gray-400 px-1 uppercase tracking-tighter">${title}</h4>
+                        </div>
+                    </div>`;
+                }
+            });
+
+            initInfiniteAutoScroll(carousel);
+        }
+
+        function initInfiniteAutoScroll(container) {
+            if (autoScrollInterval) clearInterval(autoScrollInterval);
+            
+            const trendingItems = container.querySelectorAll('.trending-item');
+            if (trendingItems.length <= 1) return;
+
+            // Clone items for loop
+            trendingItems.forEach(item => {
+                const clone = item.cloneNode(true);
+                container.appendChild(clone);
+            });
+
+            const startScrolling = () => {
+                autoScrollInterval = setInterval(() => {
+                    const cardWidth = 144 + 20; // card + gap
+                    const maxScroll = container.scrollWidth / 2;
+
+                    if (container.scrollLeft >= maxScroll) {
+                        container.style.scrollBehavior = 'auto';
+                        container.scrollLeft = 0;
+                        container.style.scrollBehavior = 'smooth';
+                        setTimeout(() => { container.scrollLeft += cardWidth; }, 50);
+                    } else {
+                        container.scrollLeft += cardWidth;
+                    }
+                }, 1500);
+            };
+
+            const handleUserInteraction = () => {
+                clearInterval(autoScrollInterval);
+                clearTimeout(resumeTimeout);
+                // 3 second wait after user stops interacting to resume auto-scroll
+                resumeTimeout = setTimeout(startScrolling, 3000);
+            };
+
+            container.addEventListener('touchstart', handleUserInteraction, {passive: true});
+            container.addEventListener('mousedown', handleUserInteraction);
+            container.addEventListener('wheel', handleUserInteraction, {passive: true});
+
+            startScrolling();
         }
 
         async function openInfoModal(title, slug, banner, rating) {
