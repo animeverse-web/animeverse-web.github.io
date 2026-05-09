@@ -15,7 +15,7 @@
 
     <style>
         :root { --accent: #ff4757; --bg: #0f1014; --surface: #1e1f26; --glass: rgba(255, 255, 255, 0.03); }
-        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         
         .app-bar { 
             position: relative; width: 100%; z-index: 1000; 
@@ -23,49 +23,59 @@
             display: flex; align-items: center; justify-content: space-between;
         }
         
+        /* Fixed Player Wrapper for Responsiveness */
         .player-wrapper { 
-            width: calc(100% - 30px); margin: 0 auto; aspect-ratio: 16/9; 
-            background: #000; border-radius: 24px; overflow: hidden; 
+            width: calc(100% - 32px); 
+            margin: 0 auto; 
+            position: relative;
+            background: #000; 
+            border-radius: 24px; 
+            overflow: hidden; 
             box-shadow: 0 20px 50px rgba(0,0,0,0.9); 
             border: 1px solid rgba(255,255,255,0.08); 
-            position: sticky; top: 15px; z-index: 50;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        #ep-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 8px;
-            width: 100%;
+        /* Ensure iframe and video take full size of parent */
+        #main-player, #plyr-player, .plyr {
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
+        .error-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 25px; animation: fadeIn 0.4s ease-in-out;
+            z-index: 10;
+        }
+        .error-icon { font-size: 38px; color: #ff4757; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(255,71,87,0.5)); }
+        .error-title { font-size: 13px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+        .error-desc { font-size: 11px; color: #888; font-weight: 500; line-height: 1.6; max-width: 80%; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        #ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
         @media (min-width: 1024px) {
-            #ep-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-                gap: 15px;
-            }
+            #ep-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
             main { max-width: 1200px; margin: 0 auto !important; }
         }
 
-        .ep-card { 
-            position: relative; border-radius: 12px; 
-            overflow: hidden; background: var(--surface);
-            border: 1px solid var(--glass); transition: 0.3s;
-            aspect-ratio: 16/9;
-        }
-
+        .ep-card { position: relative; border-radius: 12px; overflow: hidden; background: var(--surface); border: 1px solid var(--glass); transition: 0.3s; aspect-ratio: 16/9; }
         .ep-card.active { border-color: var(--accent); transform: scale(1.05); z-index: 2; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
         .ep-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; transition: 0.3s; }
         .ep-card.active .ep-img { opacity: 1; }
         
-        .ep-overlay { 
-            position: absolute; inset: 0; 
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); 
-            display: flex; flex-direction: column; justify-content: flex-end; padding: 6px;
-        }
+        .ep-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 6px; }
         .ep-label { font-size: 7px; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
         .ep-name { font-size: 8px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
 
-        .tab-btn { padding: 10px 22px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid var(--glass); }
+        .tab-btn { padding: 10px 22px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid var(--glass); cursor: pointer; }
         .tab-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
         .fab-download { position: fixed; bottom: 30px; right: 25px; width: 56px; height: 56px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(255, 71, 87, 0.5); z-index: 100; }
         .glass-card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
@@ -73,9 +83,7 @@
 </head>
 <body class="pb-24">
 
-    <!-- Header -->
     <header class="app-bar">
-        <!-- Changed window.history.back() to index.html link -->
         <button onclick="window.location.href='./index.html'" class="w-11 h-11 glass-card flex items-center justify-center">
             <i class="fas fa-chevron-left"></i>
         </button>
@@ -83,9 +91,15 @@
         <button onclick="alert('Report Sent!')" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-flag text-xs text-red-500"></i></button>
     </header>
 
-    <div class="player-wrapper">
+    <div class="player-wrapper" id="player-container">
+        <div id="error-display" class="error-container" style="display:none;"></div>
         <video id="plyr-player" playsinline controls style="display:none;"></video>
-        <iframe id="main-player" src="" allowfullscreen style="display:none; width: 100%; height: 100%; border: none;"></iframe>
+        <iframe id="main-player" src="" allowfullscreen style="display:none;"></iframe>
+    </div>
+
+    <div class="flex gap-2 px-5 mt-6">
+        <button id="btn-srv1" onclick="switchServer(1)" class="tab-btn active flex-1">Server 1</button>
+        <button id="btn-srv2" onclick="switchServer(2)" class="tab-btn flex-1">Server 2</button>
     </div>
 
     <main class="px-5 mt-8">
@@ -93,7 +107,7 @@
             <div class="flex-1 pr-4">
                 <h1 id="title" class="text-2xl font-black uppercase leading-tight tracking-tighter mb-2">Anime Title</h1>
                 <div class="flex items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    <span id="year">----</span>
+                    <span id="year">2026</span>
                     <span class="text-white bg-[#ff4757] px-2 py-0.5 rounded-md">4K ULTRA</span>
                     <span><i class="fas fa-eye text-[#ff4757] mr-1"></i> <span id="ep-views">0</span></span>
                 </div>
@@ -117,9 +131,7 @@
         <div class="flex gap-2 mb-6">
             <button class="tab-btn active">Storyline</button>
         </div>
-        <div id="desc" class="text-[13px] text-gray-400 leading-relaxed font-medium mb-10 italic">
-            Connecting to servers...
-        </div>
+        <div id="desc" class="text-[13px] text-gray-400 leading-relaxed font-medium mb-10 italic">Connecting to servers...</div>
 
         <div class="glass-card p-6">
             <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">User Chat</h3>
@@ -148,6 +160,7 @@
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
 
         let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "", tmdbId = "", globalPoster = "";
+        let currentLinks = { srv1: "", srv2: "" };
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
@@ -208,7 +221,6 @@
             if(!episodes) return;
             const grid = document.getElementById('ep-grid');
             const sortedEps = Object.keys(episodes).sort((a,b) => parseInt(a.replace('E','')) - parseInt(b.replace('E','')));
-            
             grid.innerHTML = "";
             sortedEps.forEach(eKey => {
                 const num = eKey.replace('E', '');
@@ -216,15 +228,8 @@
                 const card = document.createElement('div');
                 card.className = `ep-card ${num == currentEpNum ? 'active' : ''}`;
                 card.onclick = () => changeEpisode(num);
-                card.innerHTML = `
-                    <img id="thumb-${num}" src="${globalPoster}" class="ep-img">
-                    <div class="ep-overlay">
-                        <div class="ep-label">EP ${num}</div>
-                        <div id="name-${num}" class="ep-name">Episode ${num}</div>
-                    </div>
-                `;
+                card.innerHTML = `<img id="thumb-${num}" src="${globalPoster}" class="ep-img"><div class="ep-overlay"><div class="ep-label">EP ${num}</div><div id="name-${num}" class="ep-name">Episode ${num}</div></div>`;
                 grid.appendChild(card);
-
                 if(tmdbId) {
                     fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${sNum}/episode/${num}?api_key=${tmdbKey}`)
                     .then(r => r.json()).then(data => {
@@ -235,24 +240,20 @@
             });
         }
 
-        function loadEpisodeData() {
+        async function loadEpisodeData() {
             const epKey = `E${currentEpNum}`;
-            const epData = animeEpisodes[currentSeason]?.[epKey];
-            if(!epData) return;
-
-            const plyrEl = document.getElementById('plyr-player');
-            const iframeEl = document.getElementById('main-player');
-
-            if (epData.url.includes('workers.dev') || epData.url.includes('.mp4')) {
-                iframeEl.style.display = 'none'; plyrEl.style.display = 'block';
-                player.source = { type: 'video', sources: [{ src: epData.url, type: 'video/mp4' }] };
-            } else {
-                plyrEl.style.display = 'none'; iframeEl.style.display = 'block'; iframeEl.src = epData.url;
-            }
-
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             const epViewKey = `${currentSeason}_E${currentEpNum}`;
-            
+            currentLinks = { srv1: "", srv2: "" };
+
+            const s1Snap = await db.ref(`animeverse_links/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
+            if(s1Snap.val()) currentLinks.srv1 = s1Snap.val().url;
+
+            const s2Snap = await db.ref(`player4me/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
+            if(s2Snap.val()) currentLinks.srv2 = s2Snap.val().url;
+
+            switchServer(1);
+
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
@@ -265,6 +266,40 @@
             listenToComments(animeKey, epViewKey);
             window.history.pushState({}, '', `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`);
             renderEpisodes();
+        }
+
+        function switchServer(srvNum) {
+            const plyrEl = document.getElementById('plyr-player');
+            const iframeEl = document.getElementById('main-player');
+            const errorEl = document.getElementById('error-display');
+            
+            document.getElementById('btn-srv1').classList.toggle('active', srvNum === 1);
+            document.getElementById('btn-srv2').classList.toggle('active', srvNum === 2);
+
+            let finalUrl = (srvNum === 1) ? currentLinks.srv1 : currentLinks.srv2;
+
+            if (!finalUrl || finalUrl === "") {
+                plyrEl.style.display = 'none'; 
+                iframeEl.style.display = 'none'; 
+                errorEl.style.display = 'flex';
+                errorEl.innerHTML = `
+                    <i class="fas fa-tools error-icon"></i>
+                    <div class="error-title">Source Under Update</div>
+                    <div class="error-desc">We are currently syncing this episode to Server ${srvNum}. Please switch to another server!</div>
+                `;
+                return;
+            }
+
+            errorEl.style.display = 'none';
+            if (finalUrl.includes('workers.dev') || finalUrl.includes('.mp4')) {
+                iframeEl.style.display = 'none'; 
+                plyrEl.style.display = 'block';
+                player.source = { type: 'video', sources: [{ src: finalUrl, type: 'video/mp4' }] };
+            } else {
+                plyrEl.style.display = 'none'; 
+                iframeEl.style.display = 'block'; 
+                iframeEl.src = finalUrl;
+            }
         }
 
         function postComment() {
