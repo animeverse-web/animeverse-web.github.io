@@ -246,11 +246,15 @@
             const epViewKey = `${currentSeason}_E${currentEpNum}`;
             currentLinks = { srv1: "", srv2: "" };
 
+            // Server 1 Fetch
             const s1Snap = await db.ref(`animeverse_links/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
-            if(s1Snap.val()) currentLinks.srv1 = s1Snap.val().url;
+            if(s1Snap.val()) currentLinks.srv1 = s1Snap.val().url || s1Snap.val().link;
 
-            const s2Snap = await db.ref(`player4me/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
-            if(s2Snap.val()) currentLinks.srv2 = s2Snap.val().url;
+            // Server 2 Fetch (Player4me/Bot saved format)
+            const s2Snap = await db.ref(`Animes/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
+            if(s2Snap.val()) {
+                currentLinks.srv2 = s2Snap.val().link; 
+            }
 
             switchServer(1);
 
@@ -284,21 +288,31 @@
                 errorEl.style.display = 'flex';
                 errorEl.innerHTML = `
                     <i class="fas fa-tools error-icon"></i>
-                    <div class="error-title">Source Under Update</div>
-                    <div class="error-desc">We are currently syncing this episode to Server ${srvNum}. Please switch to another server!</div>
+                    <div class="error-title">Source Syncing</div>
+                    <div class="error-desc">Server ${srvNum} is updating this episode. Please try Server ${srvNum === 1 ? 2 : 1}!</div>
                 `;
                 return;
             }
 
             errorEl.style.display = 'none';
-            if (finalUrl.includes('workers.dev') || finalUrl.includes('.mp4')) {
-                iframeEl.style.display = 'none'; 
-                plyrEl.style.display = 'block';
-                player.source = { type: 'video', sources: [{ src: finalUrl, type: 'video/mp4' }] };
-            } else {
+
+            // Server 2 always uses iframe (Player4me Embed)
+            if (srvNum === 2) {
                 plyrEl.style.display = 'none'; 
                 iframeEl.style.display = 'block'; 
                 iframeEl.src = finalUrl;
+            } 
+            // Server 1 (Existing fallback logic)
+            else {
+                if (finalUrl.includes('workers.dev') || finalUrl.includes('.mp4')) {
+                    iframeEl.style.display = 'none'; 
+                    plyrEl.style.display = 'block';
+                    player.source = { type: 'video', sources: [{ src: finalUrl, type: 'video/mp4' }] };
+                } else {
+                    plyrEl.style.display = 'none'; 
+                    iframeEl.style.display = 'block'; 
+                    iframeEl.src = finalUrl;
+                }
             }
         }
 
