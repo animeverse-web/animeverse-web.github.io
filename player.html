@@ -233,41 +233,166 @@
                 if(tmdbId) {
                     fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${sNum}/episode/${num}?api_key=${tmdbKey}`)
                     .then(r => r.json()).then(data => {
-                        if(data.still_path) document.getElementById(`thumb-${num}`).src = "https://image.tmdb.org/t/p/w500" + data.still_path;
-                        if(data.name) document.getElementById(`name-${num}`).innerText = data.name;
-                    }).catch(() => {});
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AnimeVerse | Premium Player</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --accent: #ff4757; --bg: #0f1014; --surface: #1e1f26; --glass: rgba(255, 255, 255, 0.03); }
+        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        
+        .app-bar { position: relative; width: 100%; z-index: 1000; padding: 50px 20px 20px 20px; display: flex; align-items: center; justify-content: space-between; }
+        
+        .player-wrapper { 
+            width: calc(100% - 32px); margin: 0 auto; position: relative; background: #000; border-radius: 24px; 
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.08); 
+            aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;
+        }
+
+        #main-player, #plyr-player, .plyr { width: 100% !important; height: 100% !important; border: none; position: absolute; top: 0; left: 0; }
+
+        .error-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 25px; z-index: 10; }
+        .error-icon { font-size: 38px; color: #ff4757; margin-bottom: 12px; }
+        .error-title { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+        .error-desc { font-size: 11px; color: #888; max-width: 80%; }
+
+        #ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+        .ep-card { position: relative; border-radius: 12px; overflow: hidden; background: var(--surface); border: 1px solid var(--glass); transition: 0.3s; aspect-ratio: 16/9; }
+        .ep-card.active { border-color: var(--accent); transform: scale(1.05); }
+        .ep-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
+        .ep-card.active .ep-img { opacity: 1; }
+        
+        .ep-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 6px; }
+        .ep-label { font-size: 7px; font-weight: 900; color: var(--accent); text-transform: uppercase; }
+        .ep-name { font-size: 8px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
+
+        .tab-btn { padding: 10px 22px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid var(--glass); cursor: pointer; }
+        .tab-btn.active { background: var(--accent); border-color: var(--accent); }
+        .glass-card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="pb-24">
+
+    <header class="app-bar">
+        <button onclick="window.location.href='./index.html'" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-chevron-left"></i></button>
+        <div class="text-[12px] font-black tracking-[4px] uppercase italic">Anime<span class="text-[#ff4757]">Verse</span></div>
+        <button onclick="alert('Report Sent!')" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-flag text-xs text-red-500"></i></button>
+    </header>
+
+    <div class="player-wrapper" id="player-container">
+        <div id="error-display" class="error-container" style="display:none;"></div>
+        <video id="plyr-player" playsinline controls style="display:none;"></video>
+        <iframe id="main-player" src="" allowfullscreen style="display:none;"></iframe>
+    </div>
+
+    <div class="flex gap-2 px-5 mt-6">
+        <button id="btn-srv1" onclick="switchServer(1)" class="tab-btn active flex-1">Server 1</button>
+        <button id="btn-srv2" onclick="switchServer(2)" class="tab-btn flex-1">Server 2</button>
+    </div>
+
+    <main class="px-5 mt-8">
+        <div class="flex items-start justify-between mb-8">
+            <div class="flex-1 pr-4">
+                <h1 id="title" class="text-2xl font-black uppercase tracking-tighter mb-2">Anime Title</h1>
+                <div class="flex items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    <span id="year">2026</span>
+                    <span class="text-white bg-[#ff4757] px-2 py-0.5 rounded-md">4K ULTRA</span>
+                    <span><i class="fas fa-eye text-[#ff4757] mr-1"></i> <span id="ep-views">0</span></span>
+                </div>
+            </div>
+            <img id="poster" src="" class="w-16 h-24 object-cover rounded-2xl shadow-2xl border border-white/10">
+        </div>
+
+        <div class="mb-10">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-400">Episodes</h3>
+                <select id="season-select" onchange="changeSeason(this.value)" class="bg-transparent text-[#ff4757] font-black text-[10px] outline-none uppercase"></select>
+            </div>
+            <div id="ep-grid"></div>
+        </div>
+
+        <div id="desc" class="text-[13px] text-gray-400 leading-relaxed mb-10 italic">Loading details...</div>
+    </main>
+
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <script>
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
+            databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
+            projectId: "animeverse-9eada", 
+            appId: "1:296666771306:web:df732df90b1e5e9108ff13" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const player = new Plyr('#plyr-player');
+        const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
+
+        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "", tmdbId = "", globalPoster = "";
+        let currentLinks = { srv1: "", srv2: "" };
+
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            currentAnimeId = params.get('id');
+            currentSeason = params.get('s'); 
+            currentEpNum = parseInt(params.get('ep') || 1);
+            if(!currentAnimeId) return;
+
+            // Load Episodes List from Server 1 folder
+            db.ref(`animeverse_links/${currentAnimeId}`).on('value', snapshot => {
+                animeEpisodes = snapshot.val();
+                if(animeEpisodes) {
+                    const seasons = Object.keys(animeEpisodes).sort();
+                    if (!currentSeason || !animeEpisodes[currentSeason]) currentSeason = seasons[0];
+                    setupSeasons();
+                    loadEpisodeData();
                 }
+            });
+
+            // Load Details
+            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
+            db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
+                const data = snapshot.val();
+                if(data) {
+                    globalPoster = data.poster;
+                    updateUI(data.title, data.poster, data.year, data.desc);
+                    fetchTMDB(data.title);
+                } else fetchTMDB(currentAnimeId);
             });
         }
 
         async function loadEpisodeData() {
             const epKey = `E${currentEpNum}`;
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            const epViewKey = `${currentSeason}_E${currentEpNum}`;
             currentLinks = { srv1: "", srv2: "" };
 
-            // Server 1 Fetch
+            // SERVER 1 FETCH (animeverse_links)
             const s1Snap = await db.ref(`animeverse_links/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
-            if(s1Snap.val()) currentLinks.srv1 = s1Snap.val().url || s1Snap.val().link;
+            if(s1Snap.exists()) currentLinks.srv1 = s1Snap.val().url || s1Snap.val().link;
 
-            // Server 2 Fetch (Player4me/Bot saved format)
+            // SERVER 2 FETCH (Animes)
             const s2Snap = await db.ref(`Animes/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
-            if(s2Snap.val()) {
-                currentLinks.srv2 = s2Snap.val().link; 
-            }
+            if(s2Snap.exists()) currentLinks.srv2 = s2Snap.val().link;
 
             switchServer(1);
 
+            // Views logic
+            const epViewKey = `${currentSeason}_E${currentEpNum}`;
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
 
-            document.getElementById('dl-button').onclick = () => {
-                window.location.href = `download.html?id=${currentAnimeId}_s${currentSeason.replace('S','')}_e${currentEpNum}`;
-            };
-
-            listenToComments(animeKey, epViewKey);
             window.history.pushState({}, '', `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`);
             renderEpisodes();
         }
@@ -282,61 +407,65 @@
 
             let finalUrl = (srvNum === 1) ? currentLinks.srv1 : currentLinks.srv2;
 
-            if (!finalUrl || finalUrl === "") {
-                plyrEl.style.display = 'none'; 
-                iframeEl.style.display = 'none'; 
-                errorEl.style.display = 'flex';
-                errorEl.innerHTML = `
-                    <i class="fas fa-tools error-icon"></i>
-                    <div class="error-title">Source Syncing</div>
-                    <div class="error-desc">Server ${srvNum} is updating this episode. Please try Server ${srvNum === 1 ? 2 : 1}!</div>
-                `;
+            if (!finalUrl) {
+                plyrEl.style.display = 'none'; iframeEl.style.display = 'none'; errorEl.style.display = 'flex';
+                errorEl.innerHTML = `<i class="fas fa-tools error-icon"></i><div class="error-title">Updating Server ${srvNum}</div><div class="error-desc">Please try another server.</div>`;
                 return;
             }
 
             errorEl.style.display = 'none';
-
-            // Server 2 always uses iframe (Player4me Embed)
             if (srvNum === 2) {
-                plyrEl.style.display = 'none'; 
-                iframeEl.style.display = 'block'; 
-                iframeEl.src = finalUrl;
-            } 
-            // Server 1 (Existing fallback logic)
-            else {
+                // Server 2 (Animes/Hosting) hamesha iframe
+                plyrEl.style.display = 'none'; iframeEl.style.display = 'block'; iframeEl.src = finalUrl;
+            } else {
+                // Server 1 purana logic
                 if (finalUrl.includes('workers.dev') || finalUrl.includes('.mp4')) {
-                    iframeEl.style.display = 'none'; 
-                    plyrEl.style.display = 'block';
+                    iframeEl.style.display = 'none'; plyrEl.style.display = 'block';
                     player.source = { type: 'video', sources: [{ src: finalUrl, type: 'video/mp4' }] };
                 } else {
-                    plyrEl.style.display = 'none'; 
-                    iframeEl.style.display = 'block'; 
-                    iframeEl.src = finalUrl;
+                    plyrEl.style.display = 'none'; iframeEl.style.display = 'block'; iframeEl.src = finalUrl;
                 }
             }
         }
 
-        function postComment() {
-            const name = document.getElementById('user-name').value || "Fan";
-            const text = document.getElementById('comment-text').value;
-            if(!text) return;
-            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            db.ref(`comments/${animeKey}/${currentSeason}_E${currentEpNum}`).push({ name, text, time: Date.now() });
-            document.getElementById('comment-text').value = "";
+        async function fetchTMDB(query) {
+            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${query.replace(/-/g, ' ')}`);
+            const data = await res.json();
+            if(data.results?.[0]) {
+                const r = data.results[0];
+                tmdbId = r.id;
+                if(!globalPoster) globalPoster = "https://image.tmdb.org/t/p/w500" + r.poster_path;
+                updateUI(r.name || r.title, globalPoster, (r.first_air_date || r.release_date || "").split('-')[0], r.overview);
+            }
         }
 
-        function listenToComments(ak, ek) {
-            db.ref(`comments/${ak}/${ek}`).on('value', snap => {
-                const list = document.getElementById('comment-list'); list.innerHTML = "";
-                if(snap.val()) Object.values(snap.val()).reverse().forEach(c => {
-                    list.innerHTML += `<div class="bg-white/5 p-4 rounded-2xl"><p class="text-[9px] font-black text-[#ff4757] uppercase mb-1">${c.name}</p><p class="text-xs text-gray-400 font-medium">${c.text}</p></div>`;
-                });
+        function updateUI(title, poster, year, desc) {
+            document.getElementById('title').innerText = title;
+            document.getElementById('poster').src = poster;
+            document.getElementById('year').innerText = year;
+            document.getElementById('desc').innerText = desc;
+        }
+
+        function setupSeasons() {
+            const seasons = Object.keys(animeEpisodes).sort();
+            document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}" ${s === currentSeason ? 'selected' : ''}>${s.replace('S', 'Season ')}</option>`).join('');
+        }
+
+        function renderEpisodes() {
+            const episodes = animeEpisodes[currentSeason];
+            if(!episodes) return;
+            const grid = document.getElementById('ep-grid');
+            grid.innerHTML = "";
+            Object.keys(episodes).sort((a,b) => parseInt(a.replace('E','')) - parseInt(b.replace('E',''))).forEach(eKey => {
+                const num = eKey.replace('E', '');
+                grid.innerHTML += `<div class="ep-card ${num == currentEpNum ? 'active' : ''}" onclick="changeEpisode(${num})">
+                    <img src="${globalPoster}" class="ep-img"><div class="ep-overlay"><div class="ep-label">EP ${num}</div></div>
+                </div>`;
             });
         }
 
         function changeSeason(s) { currentSeason = s; currentEpNum = 1; loadEpisodeData(); }
         function changeEpisode(e) { currentEpNum = e; loadEpisodeData(); }
-        function smartChange(dir) { changeEpisode(currentEpNum + dir); }
 
         init();
     </script>
