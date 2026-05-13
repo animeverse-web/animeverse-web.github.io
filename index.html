@@ -52,10 +52,24 @@
         .active-scale:active { transform: scale(0.94); }
         body.modal-open { overflow: hidden; }
         
+        /* FIX: Modal needs flex display when visible */
+        #info-modal { display: none; }
+        #info-modal.modal-visible { display: flex; }
+
         #auto-scroll-container { scroll-behavior: smooth; }
+
+        /* FIX: Featured section bg so it's not pure black while loading */
+        #featured-section { background: #1a1b22; }
+
+        /* Toast notification */
+        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1e1f26; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 24px; border-radius: 50px; font-size: 12px; font-weight: 700; z-index: 9999; opacity: 0; transition: all 0.3s ease; pointer-events: none; white-space: nowrap; }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body class="pb-32">
+
+    <!-- Toast -->
+    <div id="toast"></div>
 
     <header class="app-header fixed top-0 w-full px-6 py-4 flex justify-between items-center">
         <div class="flex flex-col">
@@ -84,8 +98,17 @@
 
     <main class="mt-28 px-5 space-y-12">
         <div id="skeleton-loader" class="space-y-12">
-            <div class="flex gap-4"><div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div><div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div></div>
+            <div class="flex gap-4">
+                <div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div>
+                <div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div>
+                <div class="w-16 h-16 rounded-full skeleton flex-shrink-0"></div>
+            </div>
             <div class="h-72 w-full rounded-[40px] skeleton"></div>
+            <div class="flex gap-4">
+                <div class="h-48 w-36 rounded-[26px] skeleton flex-shrink-0"></div>
+                <div class="h-48 w-36 rounded-[26px] skeleton flex-shrink-0"></div>
+                <div class="h-48 w-36 rounded-[26px] skeleton flex-shrink-0"></div>
+            </div>
         </div>
 
         <div id="real-content" class="hidden space-y-12">
@@ -102,7 +125,8 @@
             </section>
 
             <section id="featured-section" class="relative h-72 rounded-[40px] overflow-hidden shadow-2xl border border-white/5 group">
-                <img id="featured-img" class="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110">
+                <!-- FIX: Added placeholder src so it never shows pure black -->
+                <img id="featured-img" class="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='500'%3E%3Crect fill='%231a1b22' width='1000' height='500'/%3E%3C/svg%3E">
                 <div class="absolute inset-0 featured-gradient p-8 flex flex-col justify-end">
                     <div class="flex gap-3 items-center mb-4">
                         <span class="text-[10px] font-black bg-[#ff4757] px-3 py-1.5 rounded-lg tracking-widest uppercase">Featured Today</span>
@@ -125,11 +149,12 @@
         </div>
     </main>
 
-    <div id="info-modal" class="fixed inset-0 z-[5000] hidden items-end justify-center px-4 pb-10 transition-opacity duration-300 opacity-0">
+    <!-- FIX: Modal class changed to use modal-visible instead of removing hidden -->
+    <div id="info-modal" class="fixed inset-0 z-[5000] items-end justify-center px-4 pb-10 transition-opacity duration-300 opacity-0">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="closeInfoModal()"></div>
         <div id="modal-content" class="relative w-full max-w-lg bg-[#1e1f26] rounded-[40px] overflow-hidden shadow-2xl border border-white/10 transform translate-y-full transition-transform duration-500">
             <div class="relative h-60">
-                <img id="modal-banner" class="w-full h-full object-cover">
+                <img id="modal-banner" class="w-full h-full object-cover" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Crect fill='%231a1b22' width='800' height='400'/%3E%3C/svg%3E">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#1e1f26] via-transparent to-transparent"></div>
                 <button onclick="closeInfoModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 backdrop-blur-xl flex items-center justify-center border border-white/10 text-white active-scale"><i class="fas fa-times"></i></button>
             </div>
@@ -148,9 +173,11 @@
         </div>
     </div>
 
-    <nav class="bottom-nav fixed bottom-0 w-full flex justify-between items-center px-12 z-[3000]">
+    <!-- FIX: Added Refresh button in nav -->
+    <nav class="bottom-nav fixed bottom-0 w-full flex justify-between items-center px-8 z-[3000]">
         <a href="index.html" class="flex flex-col items-center gap-2 text-[#ff4757]"><i class="fas fa-th-large text-2xl"></i><span class="text-[9px] font-black uppercase">Browse</span></a>
         <a href="#" class="flex flex-col items-center gap-2 text-gray-500"><i class="fas fa-heart text-2xl"></i><span class="text-[9px] font-black uppercase">List</span></a>
+        <a href="#" onclick="clearCache()" class="flex flex-col items-center gap-2 text-gray-500 active-scale"><i class="fas fa-rotate-right text-2xl"></i><span class="text-[9px] font-black uppercase">Refresh</span></a>
         <a href="https://t.me/animeverse648" class="flex flex-col items-center gap-2 text-gray-500"><i class="fab fa-telegram-plane text-2xl"></i><span class="text-[9px] font-black uppercase">Join</span></a>
     </nav>
 
@@ -170,10 +197,29 @@
         let autoScrollInterval = null;
         let resumeTimeout = null;
 
-        const getCache = () => JSON.parse(localStorage.getItem('av_cache') || '[]');
-        const setCache = (data) => localStorage.setItem('av_cache', JSON.stringify(data));
+        // FIX: Safe cache read — corrupted JSON se crash nahi hoga
+        const getCache = () => {
+            try { return JSON.parse(localStorage.getItem('av_cache') || '[]'); } 
+            catch(e) { localStorage.removeItem('av_cache'); return []; }
+        };
+        const setCache = (data) => { try { localStorage.setItem('av_cache', JSON.stringify(data)); } catch(e) {} };
 
-        // Shuffle function to randomize order
+        // FIX: Cache clear function — users ke liye Refresh button
+        function clearCache() {
+            localStorage.removeItem('av_cache');
+            localStorage.removeItem('my_watchlist');
+            showToast('🔄 Refreshing...');
+            setTimeout(() => location.reload(), 800);
+        }
+
+        // Toast notification
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -194,7 +240,9 @@
                         r: tmdb.results[0].vote_average?.toFixed(1) || '8.0' 
                     };
                 }
-                
+            } catch (e) { console.warn("TMDB failed for:", title); }
+
+            try {
                 const kitsuRes = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${query}&page[limit]=1`);
                 const kitsu = await kitsuRes.json();
                 if (kitsu.data?.[0]) {
@@ -205,45 +253,79 @@
                         r: attr.averageRating ? (attr.averageRating / 10).toFixed(1) : '7.5' 
                     };
                 }
-            } catch (e) { console.error("Meta fail:", title); }
-            return { p: 'https://via.placeholder.com/500x750', b: 'https://via.placeholder.com/1000x500', r: '7.0' };
+            } catch (e) { console.warn("Kitsu failed for:", title); }
+
+            // FIX: Better placeholder with anime title shown
+            const encoded = encodeURIComponent(title.substring(0, 20));
+            return { 
+                p: `https://placehold.co/500x750/1e1f26/ff4757?text=${encoded}`, 
+                b: `https://placehold.co/1000x500/1e1f26/ff4757?text=${encoded}`, 
+                r: '7.0' 
+            };
         }
 
         async function initApp() {
+            // FIX: 10 second timeout — agar firebase response na de toh skeleton hatao
+            const skeletonTimeout = setTimeout(() => {
+                const skeleton = document.getElementById('skeleton-loader');
+                const content = document.getElementById('real-content');
+                if (!skeleton.classList.contains('hidden')) {
+                    skeleton.classList.add('hidden');
+                    content.classList.remove('hidden');
+                    showToast('⚠️ Slow connection. Try refreshing.');
+                }
+            }, 10000);
+
             const cache = getCache();
             if (cache.length > 0) {
                 allAnimeData = cache;
                 renderUIAndShow();
+                clearTimeout(skeletonTimeout); // Cache se load ho gaya, timeout cancel
             }
 
-            db.ref('all_anime').on('value', async (snap) => {
-                const data = snap.val(); 
-                
-                if (!data) {
+            try {
+                db.ref('all_anime').on('value', async (snap) => {
+                    clearTimeout(skeletonTimeout);
+                    const data = snap.val(); 
+                    
+                    if (!data) {
+                        document.getElementById('skeleton-loader').classList.add('hidden');
+                        document.getElementById('real-content').classList.remove('hidden');
+                        return;
+                    }
+
+                    const titles = Object.keys(data);
+                    
+                    const freshData = await Promise.all(titles.map(async (title) => {
+                        const existing = allAnimeData.find(a => a.title === title);
+                        if (existing && existing.poster && !existing.poster.includes('placeholder') && !existing.poster.includes('placehold')) {
+                            return { ...existing, item: data[title] };
+                        }
+                        const meta = await fetchMeta(title);
+                        return { 
+                            title, item: data[title], 
+                            slug: title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, ''), 
+                            poster: meta.p, banner: meta.b, rating: meta.r 
+                        };
+                    }));
+
+                    allAnimeData = freshData;
+                    setCache(allAnimeData);
+                    renderUIAndShow();
+                }, (error) => {
+                    // FIX: Firebase error handler
+                    clearTimeout(skeletonTimeout);
+                    console.error("Firebase error:", error);
                     document.getElementById('skeleton-loader').classList.add('hidden');
                     document.getElementById('real-content').classList.remove('hidden');
-                    return;
-                }
-
-                const titles = Object.keys(data);
-                
-                const freshData = await Promise.all(titles.map(async (title) => {
-                    const existing = allAnimeData.find(a => a.title === title);
-                    if (existing && existing.poster && !existing.poster.includes('placeholder')) {
-                        return { ...existing, item: data[title] };
-                    }
-                    const meta = await fetchMeta(title);
-                    return { 
-                        title, item: data[title], 
-                        slug: title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, ''), 
-                        poster: meta.p, banner: meta.b, rating: meta.r 
-                    };
-                }));
-
-                allAnimeData = freshData;
-                setCache(allAnimeData);
-                renderUIAndShow();
-            });
+                    showToast('⚠️ Data load failed. Try refreshing.');
+                });
+            } catch(e) {
+                clearTimeout(skeletonTimeout);
+                console.error("Firebase init error:", e);
+                document.getElementById('skeleton-loader').classList.add('hidden');
+                document.getElementById('real-content').classList.remove('hidden');
+            }
         }
 
         function renderUIAndShow() {
@@ -253,7 +335,13 @@
             if (allAnimeData.length === 0) return;
             
             if(!featuredData) featuredData = allAnimeData[Math.floor(Math.random() * allAnimeData.length)];
-            document.getElementById('featured-img').src = featuredData.banner || featuredData.poster;
+            
+            const featImg = document.getElementById('featured-img');
+            // FIX: Only update src if we have a real URL
+            if (featuredData.banner || featuredData.poster) {
+                featImg.src = featuredData.banner || featuredData.poster;
+                featImg.onerror = () => { featImg.src = featuredData.poster || ''; };
+            }
             document.getElementById('featured-title').innerText = featuredData.title;
             document.getElementById('featured-rating').innerHTML = `<i class="fas fa-star text-white"></i> ${featuredData.rating}`;
             document.getElementById('featured-section').onclick = () => openInfoModal(featuredData.title, featuredData.slug, featuredData.banner, featuredData.rating);
@@ -267,14 +355,17 @@
                   carousel = document.getElementById('auto-scroll-container'), watchlistArea = document.getElementById('watchlist-items');
             
             series.innerHTML = ''; movies.innerHTML = ''; carousel.innerHTML = ''; watchlistArea.innerHTML = '';
-            const watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]');
+            
+            // FIX: Safe watchlist read
+            let watchlist = [];
+            try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) { watchlist = []; }
 
             watchlist.forEach(t => {
                 const a = allAnimeData.find(i => i.title === t);
                 if(a) {
                     watchlistArea.innerHTML += `
                         <div class="flex-shrink-0 text-center space-y-2 cursor-pointer active-scale" onclick="openInfoModal('${a.title.replace(/'/g, "\\'")}', '${a.slug}', '${a.banner}', '${a.rating}')">
-                            <div class="w-16 h-16 rounded-full border-2 border-[#ff4757] p-0.5 shadow-xl"><img src="${a.poster}" class="w-full h-full rounded-full object-cover"></div>
+                            <div class="w-16 h-16 rounded-full border-2 border-[#ff4757] p-0.5 shadow-xl"><img src="${a.poster}" class="w-full h-full rounded-full object-cover" onerror="this.src='https://placehold.co/64x64/1e1f26/ff4757?text=?'"></div>
                             <p class="text-[9px] w-16 truncate text-gray-400 font-bold">${t}</p>
                         </div>`;
                 }
@@ -285,15 +376,14 @@
                 watchlistArea.innerHTML += `<div class="flex-shrink-0 text-center space-y-2 opacity-40"><div class="dotted-slot"><i class="fas fa-plus text-gray-600 text-xs"></i></div><p class="text-[8px] text-gray-700 font-black uppercase tracking-widest">Empty</p></div>`;
             }
 
-            // Shuffle data for For You section (carousel) only on each render/refresh
             const shuffledForYou = shuffleArray([...allAnimeData]);
 
             allAnimeData.forEach(({title, item, slug, poster, banner, rating}) => {
-                const isLiked = watchlist.includes(title), cat = item.category?.toLowerCase() || '', safeTitle = title.replace(/'/g, "\\'");
+                const isLiked = watchlist.includes(title), cat = item?.category?.toLowerCase() || '', safeTitle = title.replace(/'/g, "\\'");
                 const card = `
                     <div class="relative group flex flex-col cursor-pointer active-scale anime-card" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')">
                         <div class="relative overflow-hidden rounded-[26px] shadow-2xl">
-                            <img src="${poster}" class="anime-poster w-full group-hover:scale-110 transition duration-500">
+                            <img src="${poster}" class="anime-poster w-full group-hover:scale-110 transition duration-500" onerror="this.src='https://placehold.co/500x750/1e1f26/ff4757?text=${encodeURIComponent(title.substring(0,10))}'">
                             <div class="absolute top-3 left-3 rating-chip px-2 py-1 rounded-lg text-[9px] text-white flex items-center gap-1 shadow-md"><i class="fas fa-star text-yellow-400"></i> ${rating}</div>
                             <button onclick="event.stopPropagation(); toggleWatchlist('${safeTitle}')" class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10 z-10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button>
                         </div>
@@ -301,17 +391,16 @@
                     </div>`;
 
                 if (cat.includes('series') || cat === '' || cat.includes('latest')) series.innerHTML += card;
-                if (cat.includes('movie')) movies.innerHTML += `<div class="bg-[#1e1f26] rounded-[35px] p-4 border border-white/5 active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')"><div class="relative overflow-hidden rounded-2xl h-52"><img src="${poster}" class="w-full h-full object-cover shadow-lg"><div class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></button></div><h4 class="text-xs font-black truncate mt-4 text-gray-200">${title}</h4></div>`;
+                if (cat.includes('movie')) movies.innerHTML += `<div class="bg-[#1e1f26] rounded-[35px] p-4 border border-white/5 active-scale" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')"><div class="relative overflow-hidden rounded-2xl h-52"><img src="${poster}" class="w-full h-full object-cover shadow-lg" onerror="this.src='https://placehold.co/500x750/1e1f26/ff4757?text=${encodeURIComponent(title.substring(0,10))}'"><div class="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-black/40 backdrop-blur-md border border-white/10"><i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-regular text-white'} text-xs"></i></div></div><h4 class="text-xs font-black truncate mt-4 text-gray-200">${title}</h4></div>`;
             });
 
-            // Specific loop for Shuffled Carousel (For You)
             shuffledForYou.forEach(({title, item, slug, poster, banner, rating}) => {
-                const isLiked = watchlist.includes(title), cat = item.category?.toLowerCase() || '', safeTitle = title.replace(/'/g, "\\'");
+                const isLiked = watchlist.includes(title), cat = item?.category?.toLowerCase() || '', safeTitle = title.replace(/'/g, "\\'");
                 if (cat.includes('trending') || cat.includes('popular')) {
                     carousel.innerHTML += `<div class="w-36 flex-shrink-0 trending-item">
                         <div class="relative group flex flex-col cursor-pointer active-scale anime-card" onclick="openInfoModal('${safeTitle}', '${slug}', '${banner}', '${rating}')">
                             <div class="relative overflow-hidden rounded-[26px] shadow-2xl">
-                                <img src="${poster}" class="anime-poster w-full group-hover:scale-110 transition duration-500">
+                                <img src="${poster}" class="anime-poster w-full group-hover:scale-110 transition duration-500" onerror="this.src='https://placehold.co/500x750/1e1f26/ff4757?text=${encodeURIComponent(title.substring(0,10))}'">
                                 <div class="absolute top-3 left-3 rating-chip px-2 py-1 rounded-lg text-[9px] text-white flex items-center gap-1 shadow-md"><i class="fas fa-star text-yellow-400"></i> ${rating}</div>
                             </div>
                             <h4 class="text-[11px] font-black mt-4 truncate text-gray-400 px-1 uppercase tracking-tighter">${title}</h4>
@@ -329,7 +418,6 @@
             const trendingItems = container.querySelectorAll('.trending-item');
             if (trendingItems.length <= 1) return;
 
-            // Clone items for loop
             trendingItems.forEach(item => {
                 const clone = item.cloneNode(true);
                 container.appendChild(clone);
@@ -337,9 +425,8 @@
 
             const startScrolling = () => {
                 autoScrollInterval = setInterval(() => {
-                    const cardWidth = 144 + 20; // card + gap
+                    const cardWidth = 144 + 20;
                     const maxScroll = container.scrollWidth / 2;
-
                     if (container.scrollLeft >= maxScroll) {
                         container.style.scrollBehavior = 'auto';
                         container.scrollLeft = 0;
@@ -354,7 +441,6 @@
             const handleUserInteraction = () => {
                 clearInterval(autoScrollInterval);
                 clearTimeout(resumeTimeout);
-                // 3 second wait after user stops interacting to resume auto-scroll
                 resumeTimeout = setTimeout(startScrolling, 3000);
             };
 
@@ -370,21 +456,29 @@
             const modal = document.getElementById('info-modal'), content = document.getElementById('modal-content');
             
             document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-banner').src = banner;
+            document.getElementById('modal-status').innerText = '';
+            
+            // FIX: Banner image with fallback
+            const bannerImg = document.getElementById('modal-banner');
+            bannerImg.src = banner || '';
+            bannerImg.onerror = () => { bannerImg.src = `https://placehold.co/800x400/1e1f26/ff4757?text=${encodeURIComponent(title.substring(0,15))}`; };
+
             document.getElementById('modal-rating').innerHTML = `<i class="fas fa-star text-white text-[9px]"></i> ${rating}`;
-            document.getElementById('modal-desc').innerText = "Loading details from Kitsu...";
+            document.getElementById('modal-desc').innerText = "Loading details...";
             
             document.getElementById('modal-play-btn').onclick = () => location.href = `player.html?id=${slug}`;
             
             const updateFavBtn = (t) => {
-                const watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]');
+                let watchlist = [];
+                try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
                 const isLiked = watchlist.includes(t);
                 document.getElementById('modal-fav-btn').innerHTML = `<i class="fa-heart ${isLiked ? 'fa-solid text-[#ff4757]' : 'fa-solid text-white'}"></i>`;
                 document.getElementById('modal-fav-btn').onclick = () => { toggleWatchlist(t); updateFavBtn(t); };
             };
             updateFavBtn(title);
 
-            modal.classList.remove('hidden');
+            // FIX: Using modal-visible class instead of removing hidden
+            modal.classList.add('modal-visible');
             setTimeout(() => { modal.classList.add('opacity-100'); content.classList.remove('translate-y-full'); }, 10);
 
             try {
@@ -393,9 +487,13 @@
                 if (data.data?.[0]) {
                     const attr = data.data[0].attributes;
                     document.getElementById('modal-desc').innerText = attr.synopsis || "No description available.";
-                    document.getElementById('modal-status').innerText = attr.status.toUpperCase();
+                    document.getElementById('modal-status').innerText = attr.status ? attr.status.toUpperCase() : '';
+                } else {
+                    document.getElementById('modal-desc').innerText = "No description available.";
                 }
-            } catch (e) { console.log("Detail error"); }
+            } catch (e) { 
+                document.getElementById('modal-desc').innerText = "Could not load details.";
+            }
         }
 
         function closeInfoModal() {
@@ -403,13 +501,20 @@
             const modal = document.getElementById('info-modal'), content = document.getElementById('modal-content');
             modal.classList.remove('opacity-100');
             content.classList.add('translate-y-full');
-            setTimeout(() => modal.classList.add('hidden'), 400);
+            setTimeout(() => modal.classList.remove('modal-visible'), 400);
         }
 
         function toggleWatchlist(t) {
-            let l = JSON.parse(localStorage.getItem('my_watchlist') || '[]');
-            l.includes(t) ? (l = l.filter(x => x !== t)) : l.push(t);
-            localStorage.setItem('my_watchlist', JSON.stringify(l));
+            let l = [];
+            try { l = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
+            if (l.includes(t)) {
+                l = l.filter(x => x !== t);
+                showToast('❤️ Removed from list');
+            } else {
+                l.push(t);
+                showToast('✅ Added to list');
+            }
+            try { localStorage.setItem('my_watchlist', JSON.stringify(l)); } catch(e) {}
             renderGrids();
         }
 
@@ -418,15 +523,25 @@
             if(!term) { box.classList.add('hidden'); return; }
             const matches = allAnimeData.filter(a => a.title.toLowerCase().includes(term));
             if(matches.length > 0) {
-                box.innerHTML = matches.map(a => `<div class="flex items-center gap-5 p-5 border-b border-white/5" onclick="openInfoModal('${a.title.replace(/'/g, "\\'")}', '${a.slug}', '${a.banner}', '${a.rating}')"><img src="${a.poster}" class="w-12 h-16 rounded-lg object-cover"><div class="flex-1"><p class="text-xs font-black text-gray-200 uppercase">${a.title}</p></div><i class="fas fa-info-circle text-[#ff4757]"></i></div>`).join('');
+                box.innerHTML = matches.map(a => `<div class="flex items-center gap-5 p-5 border-b border-white/5 cursor-pointer" onclick="openInfoModal('${a.title.replace(/'/g, "\\'")}', '${a.slug}', '${a.banner}', '${a.rating}')"><img src="${a.poster}" class="w-12 h-16 rounded-lg object-cover" onerror="this.src='https://placehold.co/48x64/1e1f26/ff4757?text=?'"><div class="flex-1"><p class="text-xs font-black text-gray-200 uppercase">${a.title}</p></div><i class="fas fa-info-circle text-[#ff4757]"></i></div>`).join('');
                 box.classList.remove('hidden');
-            } else { box.innerHTML = `<div class="p-8 text-center text-gray-600 font-black text-[10px] uppercase">No Result Found</div>`; box.classList.remove('hidden'); }
+            } else { 
+                box.innerHTML = `<div class="p-8 text-center text-gray-600 font-black text-[10px] uppercase">No Result Found</div>`; 
+                box.classList.remove('hidden'); 
+            }
         }
 
         function toggleSearch() {
             const b = document.getElementById('search-box');
-            if(b.classList.contains('hidden')) { b.classList.remove('hidden'); setTimeout(() => { b.classList.add('opacity-100'); b.classList.remove('-translate-y-6'); }, 10); document.getElementById('searchInput').focus(); }
-            else { b.classList.remove('opacity-100'); b.classList.add('-translate-y-6'); setTimeout(() => b.classList.add('hidden'), 400); }
+            if(b.classList.contains('hidden')) { 
+                b.classList.remove('hidden'); 
+                setTimeout(() => { b.classList.add('opacity-100'); b.classList.remove('-translate-y-6'); }, 10); 
+                document.getElementById('searchInput').focus(); 
+            } else { 
+                b.classList.remove('opacity-100'); 
+                b.classList.add('-translate-y-6'); 
+                setTimeout(() => b.classList.add('hidden'), 400); 
+            }
         }
 
         initApp();
