@@ -52,16 +52,12 @@
         .active-scale:active { transform: scale(0.94); }
         body.modal-open { overflow: hidden; }
         
-        /* FIX: Modal needs flex display when visible */
         #info-modal { display: none; }
         #info-modal.modal-visible { display: flex; }
 
         #auto-scroll-container { scroll-behavior: smooth; }
-
-        /* FIX: Featured section bg so it's not pure black while loading */
         #featured-section { background: #1a1b22; }
 
-        /* Toast notification */
         #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1e1f26; border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 24px; border-radius: 50px; font-size: 12px; font-weight: 700; z-index: 9999; opacity: 0; transition: all 0.3s ease; pointer-events: none; white-space: nowrap; }
         #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
@@ -125,7 +121,6 @@
             </section>
 
             <section id="featured-section" class="relative h-72 rounded-[40px] overflow-hidden shadow-2xl border border-white/5 group">
-                <!-- FIX: Added placeholder src so it never shows pure black -->
                 <img id="featured-img" class="absolute inset-0 w-full h-full object-cover transition duration-1000 group-hover:scale-110" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='500'%3E%3Crect fill='%231a1b22' width='1000' height='500'/%3E%3C/svg%3E">
                 <div class="absolute inset-0 featured-gradient p-8 flex flex-col justify-end">
                     <div class="flex gap-3 items-center mb-4">
@@ -149,7 +144,6 @@
         </div>
     </main>
 
-    <!-- FIX: Modal class changed to use modal-visible instead of removing hidden -->
     <div id="info-modal" class="fixed inset-0 z-[5000] items-end justify-center px-4 pb-10 transition-opacity duration-300 opacity-0">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="closeInfoModal()"></div>
         <div id="modal-content" class="relative w-full max-w-lg bg-[#1e1f26] rounded-[40px] overflow-hidden shadow-2xl border border-white/10 transform translate-y-full transition-transform duration-500">
@@ -173,7 +167,6 @@
         </div>
     </div>
 
-    <!-- FIX: Added Refresh button in nav -->
     <nav class="bottom-nav fixed bottom-0 w-full flex justify-between items-center px-8 z-[3000]">
         <a href="index.html" class="flex flex-col items-center gap-2 text-[#ff4757]"><i class="fas fa-th-large text-2xl"></i><span class="text-[9px] font-black uppercase">Browse</span></a>
         <a href="#" class="flex flex-col items-center gap-2 text-gray-500"><i class="fas fa-heart text-2xl"></i><span class="text-[9px] font-black uppercase">List</span></a>
@@ -190,21 +183,23 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const TMDB_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
+
+        // ═══════════════════════════════════════════════════
+        // API ORDER: 1) Jikan (MyAnimeList) → 2) Kitsu → 3) AniList
+        // TMDB completely removed
+        // ═══════════════════════════════════════════════════
 
         let allAnimeData = [];
         let featuredData = null;
         let autoScrollInterval = null;
         let resumeTimeout = null;
 
-        // FIX: Safe cache read — corrupted JSON se crash nahi hoga
         const getCache = () => {
             try { return JSON.parse(localStorage.getItem('av_cache') || '[]'); } 
             catch(e) { localStorage.removeItem('av_cache'); return []; }
         };
         const setCache = (data) => { try { localStorage.setItem('av_cache', JSON.stringify(data)); } catch(e) {} };
 
-        // FIX: Cache clear function — users ke liye Refresh button
         function clearCache() {
             localStorage.removeItem('av_cache');
             localStorage.removeItem('my_watchlist');
@@ -212,7 +207,6 @@
             setTimeout(() => location.reload(), 800);
         }
 
-        // Toast notification
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg;
@@ -228,44 +222,106 @@
             return array;
         }
 
+        // ── API 1: Jikan v4 (MyAnimeList) — Best quality anime images ──
+        async function fetchFromJikan(title) {
+            try {
+                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true`);
+                if (!res.ok) throw new Error('Jikan error');
+                const data = await res.json();
+                const anime = data.data?.[0];
+                if (anime) {
+                    const poster = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url;
+                    // Use trailer/cover as banner, fallback to poster
+                    const banner = anime.trailer?.images?.maximum_image_url 
+                                || anime.images?.jpg?.large_image_url 
+                                || poster;
+                    const rating = anime.score ? anime.score.toFixed(1) : null;
+                    if (poster) {
+                        return { p: poster, b: banner, r: rating || '7.5', source: 'jikan' };
+                    }
+                }
+            } catch(e) { console.warn('Jikan failed for:', title, e.message); }
+            return null;
+        }
+
+        // ── API 2: Kitsu — Good anime database ──
+        async function fetchFromKitsu(title) {
+            try {
+                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1`);
+                if (!res.ok) throw new Error('Kitsu error');
+                const data = await res.json();
+                const anime = data.data?.[0];
+                if (anime) {
+                    const attr = anime.attributes;
+                    const poster = attr.posterImage?.large || attr.posterImage?.original;
+                    const banner = attr.coverImage?.large || attr.coverImage?.original || poster;
+                    const rating = attr.averageRating ? (parseFloat(attr.averageRating) / 10).toFixed(1) : null;
+                    if (poster) {
+                        return { p: poster, b: banner, r: rating || '7.5', source: 'kitsu' };
+                    }
+                }
+            } catch(e) { console.warn('Kitsu failed for:', title, e.message); }
+            return null;
+        }
+
+        // ── API 3: AniList (GraphQL) — Large database, high quality ──
+        async function fetchFromAniList(title) {
+            try {
+                const query = `
+                    query ($search: String) {
+                        Media(search: $search, type: ANIME) {
+                            title { romaji english }
+                            coverImage { extraLarge large }
+                            bannerImage
+                            averageScore
+                        }
+                    }
+                `;
+                const res = await fetch('https://graphql.anilist.co', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, variables: { search: title } })
+                });
+                if (!res.ok) throw new Error('AniList error');
+                const data = await res.json();
+                const anime = data.data?.Media;
+                if (anime) {
+                    const poster = anime.coverImage?.extraLarge || anime.coverImage?.large;
+                    const banner = anime.bannerImage || poster;
+                    const rating = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : null;
+                    if (poster) {
+                        return { p: poster, b: banner, r: rating || '7.5', source: 'anilist' };
+                    }
+                }
+            } catch(e) { console.warn('AniList failed for:', title, e.message); }
+            return null;
+        }
+
+        // ── Main fetchMeta: try all 3 APIs in order ──
         async function fetchMeta(title) {
-            const query = encodeURIComponent(title);
-            try {
-                const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${query}`);
-                const tmdb = await tmdbRes.json();
-                if (tmdb.results?.[0]?.poster_path) {
-                    return { 
-                        p: 'https://image.tmdb.org/t/p/w500' + tmdb.results[0].poster_path, 
-                        b: 'https://image.tmdb.org/t/p/original' + (tmdb.results[0].backdrop_path || tmdb.results[0].poster_path), 
-                        r: tmdb.results[0].vote_average?.toFixed(1) || '8.0' 
-                    };
-                }
-            } catch (e) { console.warn("TMDB failed for:", title); }
+            // API 1: Jikan (best for anime — direct MAL data)
+            const jikan = await fetchFromJikan(title);
+            if (jikan) return jikan;
 
-            try {
-                const kitsuRes = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${query}&page[limit]=1`);
-                const kitsu = await kitsuRes.json();
-                if (kitsu.data?.[0]) {
-                    const attr = kitsu.data[0].attributes;
-                    return { 
-                        p: attr.posterImage?.large || attr.posterImage?.original, 
-                        b: attr.coverImage?.large || attr.posterImage?.large, 
-                        r: attr.averageRating ? (attr.averageRating / 10).toFixed(1) : '7.5' 
-                    };
-                }
-            } catch (e) { console.warn("Kitsu failed for:", title); }
+            // API 2: Kitsu fallback
+            const kitsu = await fetchFromKitsu(title);
+            if (kitsu) return kitsu;
 
-            // FIX: Better placeholder with anime title shown
+            // API 3: AniList fallback
+            const anilist = await fetchFromAniList(title);
+            if (anilist) return anilist;
+
+            // All APIs failed — return placeholder
             const encoded = encodeURIComponent(title.substring(0, 20));
             return { 
                 p: `https://placehold.co/500x750/1e1f26/ff4757?text=${encoded}`, 
                 b: `https://placehold.co/1000x500/1e1f26/ff4757?text=${encoded}`, 
-                r: '7.0' 
+                r: '7.0',
+                source: 'placeholder'
             };
         }
 
         async function initApp() {
-            // FIX: 10 second timeout — agar firebase response na de toh skeleton hatao
             const skeletonTimeout = setTimeout(() => {
                 const skeleton = document.getElementById('skeleton-loader');
                 const content = document.getElementById('real-content');
@@ -280,7 +336,7 @@
             if (cache.length > 0) {
                 allAnimeData = cache;
                 renderUIAndShow();
-                clearTimeout(skeletonTimeout); // Cache se load ho gaya, timeout cancel
+                clearTimeout(skeletonTimeout);
             }
 
             try {
@@ -313,7 +369,6 @@
                     setCache(allAnimeData);
                     renderUIAndShow();
                 }, (error) => {
-                    // FIX: Firebase error handler
                     clearTimeout(skeletonTimeout);
                     console.error("Firebase error:", error);
                     document.getElementById('skeleton-loader').classList.add('hidden');
@@ -337,7 +392,6 @@
             if(!featuredData) featuredData = allAnimeData[Math.floor(Math.random() * allAnimeData.length)];
             
             const featImg = document.getElementById('featured-img');
-            // FIX: Only update src if we have a real URL
             if (featuredData.banner || featuredData.poster) {
                 featImg.src = featuredData.banner || featuredData.poster;
                 featImg.onerror = () => { featImg.src = featuredData.poster || ''; };
@@ -356,7 +410,6 @@
             
             series.innerHTML = ''; movies.innerHTML = ''; carousel.innerHTML = ''; watchlistArea.innerHTML = '';
             
-            // FIX: Safe watchlist read
             let watchlist = [];
             try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) { watchlist = []; }
 
@@ -458,7 +511,6 @@
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-status').innerText = '';
             
-            // FIX: Banner image with fallback
             const bannerImg = document.getElementById('modal-banner');
             bannerImg.src = banner || '';
             bannerImg.onerror = () => { bannerImg.src = `https://placehold.co/800x400/1e1f26/ff4757?text=${encodeURIComponent(title.substring(0,15))}`; };
@@ -477,19 +529,29 @@
             };
             updateFavBtn(title);
 
-            // FIX: Using modal-visible class instead of removing hidden
             modal.classList.add('modal-visible');
             setTimeout(() => { modal.classList.add('opacity-100'); content.classList.remove('translate-y-full'); }, 10);
 
+            // Modal detail: Jikan se synopsis lo (best quality)
             try {
-                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1`);
+                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1&sfw=true`);
                 const data = await res.json();
-                if (data.data?.[0]) {
-                    const attr = data.data[0].attributes;
-                    document.getElementById('modal-desc').innerText = attr.synopsis || "No description available.";
-                    document.getElementById('modal-status').innerText = attr.status ? attr.status.toUpperCase() : '';
+                const anime = data.data?.[0];
+                if (anime) {
+                    document.getElementById('modal-desc').innerText = anime.synopsis || "No description available.";
+                    const status = anime.status || '';
+                    document.getElementById('modal-status').innerText = status.toUpperCase();
                 } else {
-                    document.getElementById('modal-desc').innerText = "No description available.";
+                    // Fallback to Kitsu for description
+                    const kRes = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1`);
+                    const kData = await kRes.json();
+                    if (kData.data?.[0]) {
+                        const attr = kData.data[0].attributes;
+                        document.getElementById('modal-desc').innerText = attr.synopsis || "No description available.";
+                        document.getElementById('modal-status').innerText = attr.status ? attr.status.toUpperCase() : '';
+                    } else {
+                        document.getElementById('modal-desc').innerText = "No description available.";
+                    }
                 }
             } catch (e) { 
                 document.getElementById('modal-desc').innerText = "Could not load details.";
