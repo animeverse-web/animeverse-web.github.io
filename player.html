@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AnimeVerse | Premium Player</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <title>AnimeVerse | Player</title>
+
+    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 
@@ -14,164 +14,661 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --accent: #ff4757; --bg: #0f1014; --surface: #1e1f26; --glass: rgba(255, 255, 255, 0.03); }
-        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        
-        .app-bar { 
-            position: relative; width: 100%; z-index: 1000; 
-            padding: 50px 20px 20px 20px; 
-            display: flex; align-items: center; justify-content: space-between;
+        :root {
+            --bg: #0a0a0f;
+            --surface: #13131a;
+            --surface2: #1c1c26;
+            --accent: #f47521;
+            --accent2: #ff6b35;
+            --text: #ffffff;
+            --text-muted: #8a8a9a;
+            --text-dim: #555566;
+            --border: rgba(255,255,255,0.07);
+            --card-radius: 8px;
+            --nav-h: 60px;
         }
-        
-        /* Fixed Player Wrapper for Responsiveness */
-        .player-wrapper { 
-            width: calc(100% - 32px); 
-            margin: 0 auto; 
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            padding-top: 56px;
+            padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 8px);
+        }
+
+        /* ─── HEADER ─── */
+        .cr-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 56px;
+            background: rgba(10,10,15,0.97);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 2000;
+            border-bottom: 1px solid var(--border);
+        }
+        .cr-logo {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--text);
+        }
+        .cr-logo span { color: var(--accent); }
+        .cr-header-actions { display: flex; gap: 8px; align-items: center; }
+        .icon-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #ccc;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        .icon-btn:active { background: var(--surface); transform: scale(0.93); }
+
+        /* ─── PLAYER WRAPPER ─── */
+        .player-section {
+            width: 100%;
+            background: #000;
             position: relative;
-            background: #000; 
-            border-radius: 24px; 
-            overflow: hidden; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9); 
-            border: 1px solid rgba(255,255,255,0.08); 
+        }
+        .player-wrapper {
+            width: 100%;
             aspect-ratio: 16/9;
+            background: #000;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
-
-        /* Ensure iframe and video take full size of parent */
         #main-player, #plyr-player, .plyr {
             width: 100% !important;
             height: 100% !important;
             border: none;
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
         }
-
         .error-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 25px; animation: fadeIn 0.4s ease-in-out;
-            z-index: 10;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 25px; z-index: 10;
         }
-        .error-icon { font-size: 38px; color: #ff4757; margin-bottom: 12px; filter: drop-shadow(0 0 8px rgba(255,71,87,0.5)); }
-        .error-title { font-size: 13px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
-        .error-desc { font-size: 11px; color: #888; font-weight: 500; line-height: 1.6; max-width: 80%; }
+        .error-icon {
+            font-size: 34px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 8px rgba(244,117,33,0.4));
+        }
+        .error-title {
+            font-size: 12px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px;
+        }
+        .error-desc { font-size: 11px; color: var(--text-muted); max-width: 80%; line-height: 1.6; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        /* ─── SERVER TABS ─── */
+        .server-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .srv-btn {
+            flex: 1;
+            padding: 9px 0;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .srv-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        .srv-btn:active { transform: scale(0.97); }
 
-        #ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
-        @media (min-width: 1024px) {
-            #ep-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-            main { max-width: 1200px; margin: 0 auto !important; }
+        /* ─── MAIN CONTENT ─── */
+        main { padding: 0 0 16px; }
+
+        /* ─── ANIME INFO ─── */
+        .anime-info {
+            padding: 14px 16px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .anime-info-text { flex: 1; }
+        #title {
+            font-size: 18px;
+            font-weight: 900;
+            line-height: 1.2;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+        }
+        .anime-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .meta-badge {
+            font-size: 9px;
+            font-weight: 900;
+            padding: 3px 7px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-accent { background: var(--accent); color: white; }
+        .badge-dim { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+        .meta-text {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 4px;
+        }
+        .meta-text i { color: var(--accent); font-size: 9px; }
+        #poster {
+            width: 62px;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: var(--card-radius);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
-        .ep-card { position: relative; border-radius: 12px; overflow: hidden; background: var(--surface); border: 1px solid var(--glass); transition: 0.3s; aspect-ratio: 16/9; }
-        .ep-card.active { border-color: var(--accent); transform: scale(1.05); z-index: 2; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
-        .ep-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; transition: 0.3s; }
+        /* ─── SECTION ─── */
+        .section { margin-top: 20px; }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .section-title::before {
+            content: '';
+            display: block;
+            width: 3px; height: 14px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* ─── SEASON SELECT ─── */
+        #season-select {
+            background: var(--surface2);
+            color: var(--accent);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 900;
+            font-family: 'Nunito', sans-serif;
+            outline: none;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        /* ─── EPISODE GRID ─── */
+        #ep-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 0 16px;
+        }
+        .ep-card {
+            position: relative;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+            aspect-ratio: 16/9;
+            cursor: pointer;
+        }
+        .ep-card.active {
+            border-color: var(--accent);
+            transform: scale(1.04);
+            box-shadow: 0 4px 16px rgba(244,117,33,0.3);
+        }
+        .ep-card:active { transform: scale(0.96); }
+        .ep-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.45;
+            transition: opacity 0.2s;
+            display: block;
+        }
         .ep-card.active .ep-img { opacity: 1; }
-        
-        .ep-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 6px; }
-        .ep-label { font-size: 7px; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
-        .ep-name { font-size: 8px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
+        .ep-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%);
+            display: flex; flex-direction: column;
+            justify-content: flex-end;
+            padding: 5px 6px;
+        }
+        .ep-label {
+            font-size: 7.5px; font-weight: 900;
+            color: var(--accent);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .ep-name {
+            font-size: 7px; font-weight: 700;
+            white-space: nowrap; overflow: hidden;
+            text-overflow: ellipsis; color: #ddd;
+        }
+        .ep-play-icon {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: rgba(244,117,33,0.85);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 8px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .ep-card.active .ep-play-icon { opacity: 1; }
 
-        .tab-btn { padding: 10px 22px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid var(--glass); cursor: pointer; }
-        .tab-btn.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3); }
-        .fab-download { position: fixed; bottom: 30px; right: 25px; width: 56px; height: 56px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(255, 71, 87, 0.5); z-index: 100; }
-        .glass-card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        /* ─── PREV / NEXT NAVIGATION ─── */
+        .ep-nav {
+            display: flex;
+            gap: 10px;
+            padding: 0 16px;
+            margin-top: 14px;
+        }
+        .nav-btn {
+            flex: 1;
+            padding: 11px 0;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 900;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .nav-btn:active { background: var(--surface); transform: scale(0.97); }
+        .nav-btn i { font-size: 10px; }
+
+        /* ─── DESCRIPTION ─── */
+        .desc-box {
+            padding: 0 16px;
+        }
+        #desc {
+            font-size: 12px;
+            line-height: 1.65;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .desc-toggle {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--accent);
+            margin-top: 5px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        /* ─── COMMENT SECTION ─── */
+        .comment-section {
+            margin: 0 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .comment-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            color: var(--text);
+            outline: none;
+            margin-bottom: 8px;
+            transition: border-color 0.2s;
+        }
+        .comment-input:focus { border-color: var(--accent); }
+        .comment-input::placeholder { color: var(--text-dim); }
+        textarea.comment-input { resize: none; }
+        .post-btn {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 11px 0;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-family: 'Nunito', sans-serif;
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+        .post-btn:active { filter: brightness(0.85); transform: scale(0.98); }
+        #comment-list { margin-top: 14px; }
+        .comment-card {
+            display: flex;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .comment-card:last-child { border-bottom: none; }
+        .comment-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 900;
+            flex-shrink: 0;
+            color: white;
+        }
+        .comment-body { flex: 1; }
+        .comment-name {
+            font-size: 11px; font-weight: 900;
+            color: var(--text); margin-bottom: 3px;
+        }
+        .comment-text {
+            font-size: 11px; font-weight: 600;
+            color: var(--text-muted); line-height: 1.5;
+        }
+        .comment-time {
+            font-size: 9px; color: var(--text-dim);
+            margin-top: 3px; font-weight: 700;
+        }
+
+        /* ─── DOWNLOAD FAB ─── */
+        #dl-button {
+            position: fixed;
+            bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);
+            right: 18px;
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: var(--accent);
+            border: none;
+            color: white;
+            font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 24px rgba(244,117,33,0.45);
+            cursor: pointer;
+            z-index: 1500;
+            transition: transform 0.2s;
+        }
+        #dl-button:active { transform: scale(0.9); }
+
+        /* ─── BOTTOM NAV ─── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: calc(var(--nav-h) + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            background: rgba(13,13,20,0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-around;
+            padding-top: 8px;
+            z-index: 3000;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            padding: 0 12px;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.2s;
+            min-width: 50px;
+            background: none;
+            border: none;
+            font-family: 'Nunito', sans-serif;
+        }
+        .nav-item.active { color: var(--accent); }
+        .nav-item i { font-size: 20px; }
+        .nav-item span {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .nav-item:active { transform: scale(0.9); }
+
+        /* ─── TOAST ─── */
+        #toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 800;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.25s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ─── UTILITIES ─── */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Plyr theme overrides */
+        .plyr--full-ui input[type=range] { color: var(--accent); }
+        .plyr__control--overlaid { background: var(--accent) !important; }
+        .plyr--video .plyr__control.plyr__tab-focus,
+        .plyr--video .plyr__control:hover,
+        .plyr--video .plyr__control[aria-expanded=true] { background: var(--accent) !important; }
+        .plyr__menu__container .plyr__control[role=menuitemradio][aria-checked=true]::before { background: var(--accent) !important; }
     </style>
 </head>
-<body class="pb-24">
+<body>
 
-    <header class="app-bar">
-        <button onclick="window.location.href='./index.html'" class="w-11 h-11 glass-card flex items-center justify-center">
-            <i class="fas fa-chevron-left"></i>
+    <!-- ─── HEADER ─── -->
+    <header class="cr-header">
+        <div class="cr-header-actions">
+            <button class="icon-btn" onclick="window.location.href='./index.html'">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <div class="cr-logo">Anime<span>Verse</span></div>
+        <div class="cr-header-actions">
+            <button class="icon-btn" onclick="reportIssue()">
+                <i class="fas fa-flag"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- ─── PLAYER ─── -->
+    <div class="player-section">
+        <div class="player-wrapper" id="player-container">
+            <div id="error-display" class="error-container" style="display:none;"></div>
+            <video id="plyr-player" playsinline controls style="display:none;"></video>
+            <iframe id="main-player" src="" allowfullscreen allow="autoplay; fullscreen" style="display:none;"></iframe>
+        </div>
+
+        <!-- Server Buttons -->
+        <div class="server-tabs">
+            <button id="btn-srv1" class="srv-btn active" onclick="switchServer(1)">
+                <i class="fas fa-server"></i> Server 1
+            </button>
+            <button id="btn-srv2" class="srv-btn" onclick="switchServer(2)">
+                <i class="fas fa-server"></i> Server 2
+            </button>
+        </div>
+    </div>
+
+    <!-- ─── MAIN ─── -->
+    <main>
+
+        <!-- Anime Info -->
+        <div class="anime-info">
+            <div class="anime-info-text">
+                <h1 id="title">Loading...</h1>
+                <div class="anime-meta" style="margin-top:6px;">
+                    <span id="year-badge" class="meta-badge badge-dim" id="year">—</span>
+                    <span class="meta-badge badge-accent">HD</span>
+                    <span class="meta-text"><i class="fas fa-eye"></i><span id="ep-views">0</span> views</span>
+                </div>
+            </div>
+            <img id="poster" src="" alt="Poster" onerror="this.style.display='none'">
+        </div>
+
+        <!-- Episodes Section -->
+        <div class="section" style="margin-top:18px;">
+            <div class="section-header">
+                <div class="section-title">Episodes</div>
+                <select id="season-select" onchange="changeSeason(this.value)"></select>
+            </div>
+            <div id="ep-grid"></div>
+        </div>
+
+        <!-- Prev / Next Nav -->
+        <div class="ep-nav">
+            <button class="nav-btn" onclick="smartChange(-1)">
+                <i class="fas fa-arrow-left"></i> Previous
+            </button>
+            <button class="nav-btn" onclick="smartChange(1)">
+                Next <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Description -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">Storyline</div>
+            </div>
+            <div class="desc-box">
+                <div id="desc">Loading details...</div>
+                <span class="desc-toggle" id="desc-toggle" onclick="toggleDesc()" style="display:none;">More</span>
+            </div>
+        </div>
+
+        <!-- Comment Section -->
+        <div class="section">
+            <div class="section-header">
+                <div class="section-title">User Chat</div>
+            </div>
+            <div class="comment-section">
+                <input type="text" id="user-name" class="comment-input" placeholder="Your Name">
+                <textarea id="comment-text" class="comment-input" rows="2" placeholder="Share your thoughts..."></textarea>
+                <button class="post-btn" onclick="postComment()">
+                    <i class="fas fa-paper-plane" style="margin-right:6px;"></i>Post Comment
+                </button>
+                <div id="comment-list"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Download FAB -->
+    <button id="dl-button" onclick="downloadEp()" title="Download">
+        <i class="fas fa-download"></i>
+    </button>
+
+    <!-- ─── BOTTOM NAV ─── -->
+    <nav class="bottom-nav">
+        <button class="nav-item" onclick="window.location.href='./index.html'">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
         </button>
-        <div class="text-[12px] font-black tracking-[4px] uppercase italic">Anime<span class="text-[#ff4757]">Verse</span></div>
-        <button onclick="alert('Report Sent!')" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-flag text-xs text-red-500"></i></button>
-    </header>
+        <button class="nav-item" onclick="window.location.href='./index.html'">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+        </button>
+        <button class="nav-item active">
+            <i class="fas fa-play-circle"></i>
+            <span>Watch</span>
+        </button>
+        <button class="nav-item" onclick="window.location.href='./index.html'">
+            <i class="fas fa-bookmark"></i>
+            <span>Watchlist</span>
+        </button>
+    </nav>
 
-    <div class="player-wrapper" id="player-container">
-        <div id="error-display" class="error-container" style="display:none;"></div>
-        <video id="plyr-player" playsinline controls style="display:none;"></video>
-        <iframe id="main-player" src="" allowfullscreen style="display:none;"></iframe>
-    </div>
-
-    <div class="flex gap-2 px-5 mt-6">
-        <button id="btn-srv1" onclick="switchServer(1)" class="tab-btn active flex-1">Server 1</button>
-        <button id="btn-srv2" onclick="switchServer(2)" class="tab-btn flex-1">Server 2</button>
-    </div>
-
-    <main class="px-5 mt-8">
-        <div class="flex items-start justify-between mb-8">
-            <div class="flex-1 pr-4">
-                <h1 id="title" class="text-2xl font-black uppercase leading-tight tracking-tighter mb-2">Anime Title</h1>
-                <div class="flex items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    <span id="year">2026</span>
-                    <span class="text-white bg-[#ff4757] px-2 py-0.5 rounded-md">4K ULTRA</span>
-                    <span><i class="fas fa-eye text-[#ff4757] mr-1"></i> <span id="ep-views">0</span></span>
-                </div>
-            </div>
-            <img id="poster" src="" class="w-16 h-24 object-cover rounded-2xl shadow-2xl border border-white/10">
-        </div>
-
-        <div class="mb-10">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-500">Episode Selection</h3>
-                <select id="season-select" onchange="changeSeason(this.value)" class="bg-transparent text-[#ff4757] font-black text-[10px] outline-none uppercase"></select>
-            </div>
-            <div id="ep-grid"></div>
-        </div>
-
-        <div class="flex gap-3 mb-10">
-            <button onclick="smartChange(-1)" class="glass-card flex-1 py-5 font-black text-[10px] uppercase tracking-widest"><i class="fas fa-arrow-left mr-2"></i> Prev</button>
-            <button onclick="smartChange(1)" class="glass-card flex-1 py-5 font-black text-[10px] uppercase tracking-widest">Next <i class="fas fa-arrow-right ml-2"></i></button>
-        </div>
-
-        <div class="flex gap-2 mb-6">
-            <button class="tab-btn active">Storyline</button>
-        </div>
-        <div id="desc" class="text-[13px] text-gray-400 leading-relaxed font-medium mb-10 italic">Connecting to servers...</div>
-
-        <div class="glass-card p-6">
-            <h3 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6">User Chat</h3>
-            <div class="space-y-4">
-                <input type="text" id="user-name" placeholder="Your Name" class="w-full bg-black/30 border border-white/5 rounded-2xl px-5 py-4 text-xs outline-none focus:border-[#ff4757]/30">
-                <textarea id="comment-text" placeholder="Share your thoughts..." rows="2" class="w-full bg-black/30 border border-white/5 rounded-2xl px-5 py-4 text-xs outline-none focus:border-[#ff4757]/30"></textarea>
-                <button onclick="postComment()" class="w-full bg-[#ff4757] py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest">Post Comment</button>
-            </div>
-            <div id="comment-list" class="mt-8 space-y-4"></div>
-        </div>
-    </main>
-
-    <button id="dl-button" class="fab-download"><i class="fas fa-download"></i></button>
+    <!-- Toast -->
+    <div id="toast"></div>
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
-            databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
-            projectId: "animeverse-9eada", 
-            appId: "1:296666771306:web:df732df90b1e5e9108ff13" 
+        // ─── FIREBASE & PLAYER INIT ───
+        const firebaseConfig = {
+            apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE",
+            databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/",
+            projectId: "animeverse-9eada",
+            appId: "1:296666771306:web:df732df90b1e5e9108ff13"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const player = new Plyr('#plyr-player');
+        const player = new Plyr('#plyr-player', { hideControls: false, resetOnEnd: false });
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
 
-        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "", tmdbId = "", globalPoster = "";
+        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1;
+        let currentSeason = "", tmdbId = "", globalPoster = "";
         let currentLinks = { srv1: "", srv2: "" };
+        let descExpanded = false;
 
+        // ─── INIT ───
         async function init() {
             const params = new URLSearchParams(window.location.search);
             currentAnimeId = params.get('id');
-            currentSeason = params.get('s'); 
+            currentSeason = params.get('s');
             currentEpNum = parseInt(params.get('ep') || 1);
-            if(!currentAnimeId) return;
+            if (!currentAnimeId) return;
 
             db.ref(`animeverse_links/${currentAnimeId}`).on('value', snapshot => {
                 animeEpisodes = snapshot.val();
-                if(animeEpisodes) {
+                if (animeEpisodes) {
                     const seasons = Object.keys(animeEpisodes).sort();
                     if (!currentSeason || !animeEpisodes[currentSeason]) currentSeason = seasons[0];
                     setupSeasons();
@@ -182,211 +679,32 @@
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
                 const data = snapshot.val();
-                if(data) {
-                    globalPoster = data.poster;
-                    updateUI(data.title, data.poster, data.year, data.desc);
-                    fetchGlobalSync(data.title);
-                } else fetchGlobalSync(currentAnimeId);
-            });
-        }
-
-        async function fetchGlobalSync(query) {
-            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${query.replace(/-/g, ' ')}`);
-            const data = await res.json();
-            if(data.results?.[0]) {
-                const r = data.results[0];
-                tmdbId = r.id;
-                if(!globalPoster) globalPoster = "https://image.tmdb.org/t/p/w500" + r.poster_path;
-                updateUI(r.name || r.title, globalPoster, (r.first_air_date || r.release_date || "").split('-')[0], r.overview);
-                renderEpisodes(); 
-            }
-        }
-
-        function updateUI(title, poster, year, desc) {
-            document.getElementById('title').innerText = title;
-            document.getElementById('poster').src = poster;
-            document.getElementById('year').innerText = year;
-            document.getElementById('desc').innerText = desc;
-        }
-
-        function setupSeasons() {
-            const seasons = Object.keys(animeEpisodes).sort();
-            const select = document.getElementById('season-select');
-            select.innerHTML = seasons.map(s => `<option value="${s}" ${s === currentSeason ? 'selected' : ''}>${s.replace('S', 'Season ')}</option>`).join('');
-            renderEpisodes();
-        }
-
-        function renderEpisodes() {
-            const episodes = animeEpisodes[currentSeason];
-            if(!episodes) return;
-            const grid = document.getElementById('ep-grid');
-            const sortedEps = Object.keys(episodes).sort((a,b) => parseInt(a.replace('E','')) - parseInt(b.replace('E','')));
-            grid.innerHTML = "";
-            sortedEps.forEach(eKey => {
-                const num = eKey.replace('E', '');
-                const sNum = currentSeason.replace('S', '');
-                const card = document.createElement('div');
-                card.className = `ep-card ${num == currentEpNum ? 'active' : ''}`;
-                card.onclick = () => changeEpisode(num);
-                card.innerHTML = `<img id="thumb-${num}" src="${globalPoster}" class="ep-img"><div class="ep-overlay"><div class="ep-label">EP ${num}</div><div id="name-${num}" class="ep-name">Episode ${num}</div></div>`;
-                grid.appendChild(card);
-                if(tmdbId) {
-                    fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${sNum}/episode/${num}?api_key=${tmdbKey}`)
-                    .then(r => r.json()).then(data => {
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AnimeVerse | Premium Player</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-
-    <style>
-        :root { --accent: #ff4757; --bg: #0f1014; --surface: #1e1f26; --glass: rgba(255, 255, 255, 0.03); }
-        body { background: var(--bg); color: #fff; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
-        
-        .app-bar { position: relative; width: 100%; z-index: 1000; padding: 50px 20px 20px 20px; display: flex; align-items: center; justify-content: space-between; }
-        
-        .player-wrapper { 
-            width: calc(100% - 32px); margin: 0 auto; position: relative; background: #000; border-radius: 24px; 
-            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.08); 
-            aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;
-        }
-
-        #main-player, #plyr-player, .plyr { width: 100% !important; height: 100% !important; border: none; position: absolute; top: 0; left: 0; }
-
-        .error-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 25px; z-index: 10; }
-        .error-icon { font-size: 38px; color: #ff4757; margin-bottom: 12px; }
-        .error-title { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
-        .error-desc { font-size: 11px; color: #888; max-width: 80%; }
-
-        #ep-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
-        .ep-card { position: relative; border-radius: 12px; overflow: hidden; background: var(--surface); border: 1px solid var(--glass); transition: 0.3s; aspect-ratio: 16/9; }
-        .ep-card.active { border-color: var(--accent); transform: scale(1.05); }
-        .ep-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
-        .ep-card.active .ep-img { opacity: 1; }
-        
-        .ep-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; flex-direction: column; justify-content: flex-end; padding: 6px; }
-        .ep-label { font-size: 7px; font-weight: 900; color: var(--accent); text-transform: uppercase; }
-        .ep-name { font-size: 8px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #eee; }
-
-        .tab-btn { padding: 10px 22px; border-radius: 30px; font-size: 11px; font-weight: 800; text-transform: uppercase; border: 1px solid var(--glass); cursor: pointer; }
-        .tab-btn.active { background: var(--accent); border-color: var(--accent); }
-        .glass-card { background: var(--glass); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
-    </style>
-</head>
-<body class="pb-24">
-
-    <header class="app-bar">
-        <button onclick="window.location.href='./index.html'" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-chevron-left"></i></button>
-        <div class="text-[12px] font-black tracking-[4px] uppercase italic">Anime<span class="text-[#ff4757]">Verse</span></div>
-        <button onclick="alert('Report Sent!')" class="w-11 h-11 glass-card flex items-center justify-center"><i class="fas fa-flag text-xs text-red-500"></i></button>
-    </header>
-
-    <div class="player-wrapper" id="player-container">
-        <div id="error-display" class="error-container" style="display:none;"></div>
-        <video id="plyr-player" playsinline controls style="display:none;"></video>
-        <iframe id="main-player" src="" allowfullscreen style="display:none;"></iframe>
-    </div>
-
-    <div class="flex gap-2 px-5 mt-6">
-        <button id="btn-srv1" onclick="switchServer(1)" class="tab-btn active flex-1">Server 1</button>
-        <button id="btn-srv2" onclick="switchServer(2)" class="tab-btn flex-1">Server 2</button>
-    </div>
-
-    <main class="px-5 mt-8">
-        <div class="flex items-start justify-between mb-8">
-            <div class="flex-1 pr-4">
-                <h1 id="title" class="text-2xl font-black uppercase tracking-tighter mb-2">Anime Title</h1>
-                <div class="flex items-center gap-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
-                    <span id="year">2026</span>
-                    <span class="text-white bg-[#ff4757] px-2 py-0.5 rounded-md">4K ULTRA</span>
-                    <span><i class="fas fa-eye text-[#ff4757] mr-1"></i> <span id="ep-views">0</span></span>
-                </div>
-            </div>
-            <img id="poster" src="" class="w-16 h-24 object-cover rounded-2xl shadow-2xl border border-white/10">
-        </div>
-
-        <div class="mb-10">
-            <div class="flex justify-between items-center mb-5">
-                <h3 class="text-[10px] font-black uppercase tracking-[3px] text-gray-400">Episodes</h3>
-                <select id="season-select" onchange="changeSeason(this.value)" class="bg-transparent text-[#ff4757] font-black text-[10px] outline-none uppercase"></select>
-            </div>
-            <div id="ep-grid"></div>
-        </div>
-
-        <div id="desc" class="text-[13px] text-gray-400 leading-relaxed mb-10 italic">Loading details...</div>
-    </main>
-
-    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-    <script>
-        const firebaseConfig = { 
-            apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE", 
-            databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/", 
-            projectId: "animeverse-9eada", 
-            appId: "1:296666771306:web:df732df90b1e5e9108ff13" 
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const player = new Plyr('#plyr-player');
-        const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
-
-        let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1, currentSeason = "", tmdbId = "", globalPoster = "";
-        let currentLinks = { srv1: "", srv2: "" };
-
-        async function init() {
-            const params = new URLSearchParams(window.location.search);
-            currentAnimeId = params.get('id');
-            currentSeason = params.get('s'); 
-            currentEpNum = parseInt(params.get('ep') || 1);
-            if(!currentAnimeId) return;
-
-            // Load Episodes List from Server 1 folder
-            db.ref(`animeverse_links/${currentAnimeId}`).on('value', snapshot => {
-                animeEpisodes = snapshot.val();
-                if(animeEpisodes) {
-                    const seasons = Object.keys(animeEpisodes).sort();
-                    if (!currentSeason || !animeEpisodes[currentSeason]) currentSeason = seasons[0];
-                    setupSeasons();
-                    loadEpisodeData();
-                }
-            });
-
-            // Load Details
-            const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
-            db.ref(`anime_details/${animeKey}`).once('value', snapshot => {
-                const data = snapshot.val();
-                if(data) {
+                if (data) {
                     globalPoster = data.poster;
                     updateUI(data.title, data.poster, data.year, data.desc);
                     fetchTMDB(data.title);
-                } else fetchTMDB(currentAnimeId);
+                } else {
+                    fetchTMDB(currentAnimeId);
+                }
             });
+
+            loadComments();
         }
 
+        // ─── LOAD EPISODE DATA ───
         async function loadEpisodeData() {
             const epKey = `E${currentEpNum}`;
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             currentLinks = { srv1: "", srv2: "" };
 
-            // SERVER 1 FETCH (animeverse_links)
             const s1Snap = await db.ref(`animeverse_links/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
-            if(s1Snap.exists()) currentLinks.srv1 = s1Snap.val().url || s1Snap.val().link;
+            if (s1Snap.exists()) currentLinks.srv1 = s1Snap.val().url || s1Snap.val().link;
 
-            // SERVER 2 FETCH (Animes)
             const s2Snap = await db.ref(`Animes/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
-            if(s2Snap.exists()) currentLinks.srv2 = s2Snap.val().link;
+            if (s2Snap.exists()) currentLinks.srv2 = s2Snap.val().link;
 
             switchServer(1);
 
-            // Views logic
             const epViewKey = `${currentSeason}_E${currentEpNum}`;
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).on('value', snap => {
@@ -397,76 +715,266 @@
             renderEpisodes();
         }
 
+        // ─── SWITCH SERVER ───
         function switchServer(srvNum) {
             const plyrEl = document.getElementById('plyr-player');
             const iframeEl = document.getElementById('main-player');
             const errorEl = document.getElementById('error-display');
-            
+
             document.getElementById('btn-srv1').classList.toggle('active', srvNum === 1);
             document.getElementById('btn-srv2').classList.toggle('active', srvNum === 2);
 
             let finalUrl = (srvNum === 1) ? currentLinks.srv1 : currentLinks.srv2;
 
             if (!finalUrl) {
-                plyrEl.style.display = 'none'; iframeEl.style.display = 'none'; errorEl.style.display = 'flex';
-                errorEl.innerHTML = `<i class="fas fa-tools error-icon"></i><div class="error-title">Updating Server ${srvNum}</div><div class="error-desc">Please try another server.</div>`;
+                plyrEl.style.display = 'none';
+                iframeEl.style.display = 'none';
+                errorEl.style.display = 'flex';
+                errorEl.innerHTML = `
+                    <i class="fas fa-tools error-icon"></i>
+                    <div class="error-title">Server ${srvNum} Unavailable</div>
+                    <div class="error-desc">Please try another server or check back later.</div>`;
                 return;
             }
 
             errorEl.style.display = 'none';
             if (srvNum === 2) {
-                // Server 2 (Animes/Hosting) hamesha iframe
-                plyrEl.style.display = 'none'; iframeEl.style.display = 'block'; iframeEl.src = finalUrl;
+                plyrEl.style.display = 'none';
+                iframeEl.style.display = 'block';
+                iframeEl.src = finalUrl;
             } else {
-                // Server 1 purana logic
                 if (finalUrl.includes('workers.dev') || finalUrl.includes('.mp4')) {
-                    iframeEl.style.display = 'none'; plyrEl.style.display = 'block';
+                    iframeEl.style.display = 'none';
+                    plyrEl.style.display = 'block';
                     player.source = { type: 'video', sources: [{ src: finalUrl, type: 'video/mp4' }] };
                 } else {
-                    plyrEl.style.display = 'none'; iframeEl.style.display = 'block'; iframeEl.src = finalUrl;
+                    plyrEl.style.display = 'none';
+                    iframeEl.style.display = 'block';
+                    iframeEl.src = finalUrl;
                 }
             }
         }
 
+        // ─── TMDB ───
         async function fetchTMDB(query) {
-            const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${query.replace(/-/g, ' ')}`);
-            const data = await res.json();
-            if(data.results?.[0]) {
-                const r = data.results[0];
-                tmdbId = r.id;
-                if(!globalPoster) globalPoster = "https://image.tmdb.org/t/p/w500" + r.poster_path;
-                updateUI(r.name || r.title, globalPoster, (r.first_air_date || r.release_date || "").split('-')[0], r.overview);
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbKey}&query=${query.replace(/-/g, ' ')}`);
+                const data = await res.json();
+                if (data.results?.[0]) {
+                    const r = data.results[0];
+                    tmdbId = r.id;
+                    if (!globalPoster) globalPoster = "https://image.tmdb.org/t/p/w500" + r.poster_path;
+                    updateUI(
+                        r.name || r.title,
+                        globalPoster,
+                        (r.first_air_date || r.release_date || "").split('-')[0],
+                        r.overview
+                    );
+                    renderEpisodes();
+                }
+            } catch(e) {}
+        }
+
+        // ─── UPDATE UI ───
+        function updateUI(title, poster, year, desc) {
+            document.title = `${title} | AnimeVerse`;
+            document.getElementById('title').innerText = title || '';
+            document.getElementById('poster').src = poster || '';
+            if (year) document.getElementById('year-badge').innerText = year;
+            if (desc) {
+                document.getElementById('desc').innerText = desc;
+                document.getElementById('desc-toggle').style.display = 'inline-block';
             }
         }
 
-        function updateUI(title, poster, year, desc) {
-            document.getElementById('title').innerText = title;
-            document.getElementById('poster').src = poster;
-            document.getElementById('year').innerText = year;
-            document.getElementById('desc').innerText = desc;
-        }
-
+        // ─── SETUP SEASONS ───
         function setupSeasons() {
             const seasons = Object.keys(animeEpisodes).sort();
-            document.getElementById('season-select').innerHTML = seasons.map(s => `<option value="${s}" ${s === currentSeason ? 'selected' : ''}>${s.replace('S', 'Season ')}</option>`).join('');
+            const select = document.getElementById('season-select');
+            select.innerHTML = seasons.map(s =>
+                `<option value="${s}" ${s === currentSeason ? 'selected' : ''}>${s.replace('S', 'Season ')}</option>`
+            ).join('');
+            renderEpisodes();
         }
 
+        // ─── RENDER EPISODES ───
         function renderEpisodes() {
             const episodes = animeEpisodes[currentSeason];
-            if(!episodes) return;
+            if (!episodes) return;
             const grid = document.getElementById('ep-grid');
+            const sortedEps = Object.keys(episodes).sort((a, b) => parseInt(a.replace('E', '')) - parseInt(b.replace('E', '')));
             grid.innerHTML = "";
-            Object.keys(episodes).sort((a,b) => parseInt(a.replace('E','')) - parseInt(b.replace('E',''))).forEach(eKey => {
+            sortedEps.forEach(eKey => {
                 const num = eKey.replace('E', '');
-                grid.innerHTML += `<div class="ep-card ${num == currentEpNum ? 'active' : ''}" onclick="changeEpisode(${num})">
-                    <img src="${globalPoster}" class="ep-img"><div class="ep-overlay"><div class="ep-label">EP ${num}</div></div>
-                </div>`;
+                const sNum = currentSeason.replace('S', '');
+                const isActive = num == currentEpNum;
+                const card = document.createElement('div');
+                card.className = `ep-card ${isActive ? 'active' : ''}`;
+                card.onclick = () => changeEpisode(num);
+                card.innerHTML = `
+                    <img id="thumb-${num}" src="${globalPoster}" class="ep-img" alt="EP ${num}">
+                    <div class="ep-play-icon"><i class="fas fa-play"></i></div>
+                    <div class="ep-overlay">
+                        <div class="ep-label">EP ${num}</div>
+                        <div id="name-${num}" class="ep-name">Episode ${num}</div>
+                    </div>`;
+                grid.appendChild(card);
+
+                // Fetch episode thumb + name from TMDB
+                if (tmdbId) {
+                    fetch(`https://api.themoviedb.org/3/tv/${tmdbId}/season/${sNum}/episode/${num}?api_key=${tmdbKey}`)
+                        .then(r => r.json())
+                        .then(epData => {
+                            if (epData.still_path) {
+                                const thumb = document.getElementById(`thumb-${num}`);
+                                if (thumb) thumb.src = `https://image.tmdb.org/t/p/w300${epData.still_path}`;
+                            }
+                            if (epData.name) {
+                                const nameEl = document.getElementById(`name-${num}`);
+                                if (nameEl) nameEl.innerText = epData.name;
+                            }
+                        }).catch(() => {});
+                }
             });
+
+            // Scroll active card into view
+            setTimeout(() => {
+                const activeCard = grid.querySelector('.ep-card.active');
+                if (activeCard) activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            }, 300);
         }
 
+        // ─── SEASON / EPISODE CHANGE ───
         function changeSeason(s) { currentSeason = s; currentEpNum = 1; loadEpisodeData(); }
-        function changeEpisode(e) { currentEpNum = e; loadEpisodeData(); }
+        function changeEpisode(e) { currentEpNum = parseInt(e); loadEpisodeData(); }
 
+        // ─── SMART PREV / NEXT ───
+        function smartChange(delta) {
+            const episodes = animeEpisodes[currentSeason];
+            if (!episodes) return;
+            const epNums = Object.keys(episodes)
+                .map(k => parseInt(k.replace('E', '')))
+                .sort((a, b) => a - b);
+            const currIdx = epNums.indexOf(currentEpNum);
+            const nextIdx = currIdx + delta;
+
+            if (nextIdx >= 0 && nextIdx < epNums.length) {
+                currentEpNum = epNums[nextIdx];
+                loadEpisodeData();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (delta > 0) {
+                // Try next season
+                const seasons = Object.keys(animeEpisodes).sort();
+                const currSeasonIdx = seasons.indexOf(currentSeason);
+                if (currSeasonIdx < seasons.length - 1) {
+                    currentSeason = seasons[currSeasonIdx + 1];
+                    document.getElementById('season-select').value = currentSeason;
+                    currentEpNum = 1;
+                    loadEpisodeData();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    showToast('Next Season →');
+                } else {
+                    showToast('Last episode reached!');
+                }
+            } else {
+                showToast('Already at first episode!');
+            }
+        }
+
+        // ─── DESCRIPTION TOGGLE ───
+        function toggleDesc() {
+            const el = document.getElementById('desc');
+            const toggle = document.getElementById('desc-toggle');
+            descExpanded = !descExpanded;
+            el.style.webkitLineClamp = descExpanded ? 'unset' : '4';
+            el.style.overflow = descExpanded ? 'visible' : 'hidden';
+            toggle.innerText = descExpanded ? 'Less' : 'More';
+        }
+
+        // ─── DOWNLOAD ───
+        function downloadEp() {
+            const url = currentLinks.srv1 || currentLinks.srv2;
+            if (!url || (!url.includes('.mp4') && !url.includes('workers.dev'))) {
+                showToast('Download not available for this server');
+                return;
+            }
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${currentAnimeId}_${currentSeason}_E${currentEpNum}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast('Download started!');
+        }
+
+        // ─── REPORT ───
+        function reportIssue() {
+            showToast('Report sent! Thank you.');
+        }
+
+        // ─── COMMENTS ───
+        function getStorageKey() {
+            return `av_comments_${currentAnimeId}_${currentSeason}_E${currentEpNum}`;
+        }
+
+        function loadComments() {
+            const key = getStorageKey();
+            let comments = [];
+            try { comments = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+            renderComments(comments);
+        }
+
+        function renderComments(comments) {
+            const list = document.getElementById('comment-list');
+            if (!comments.length) { list.innerHTML = ''; return; }
+            list.innerHTML = comments.slice(0, 20).map(c => `
+                <div class="comment-card">
+                    <div class="comment-avatar">${(c.name || 'A')[0].toUpperCase()}</div>
+                    <div class="comment-body">
+                        <div class="comment-name">${c.name || 'Anonymous'}</div>
+                        <div class="comment-text">${c.text}</div>
+                        <div class="comment-time">${timeAgo(c.time)}</div>
+                    </div>
+                </div>`).join('');
+        }
+
+        function postComment() {
+            const name = document.getElementById('user-name').value.trim() || 'Anonymous';
+            const text = document.getElementById('comment-text').value.trim();
+            if (!text) { showToast('Please write something first'); return; }
+
+            const key = getStorageKey();
+            let comments = [];
+            try { comments = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+
+            comments.unshift({ name, text, time: Date.now() });
+            if (comments.length > 50) comments = comments.slice(0, 50);
+
+            try { localStorage.setItem(key, JSON.stringify(comments)); } catch(e) {}
+            document.getElementById('comment-text').value = '';
+            renderComments(comments);
+            showToast('Comment posted!');
+        }
+
+        function timeAgo(ts) {
+            const diff = Date.now() - ts;
+            const m = Math.floor(diff / 60000);
+            if (m < 1) return 'just now';
+            if (m < 60) return `${m}m ago`;
+            const h = Math.floor(m / 60);
+            if (h < 24) return `${h}h ago`;
+            return `${Math.floor(h / 24)}d ago`;
+        }
+
+        // ─── TOAST ───
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2200);
+        }
+
+        // ─── START ───
         init();
     </script>
 </body>
