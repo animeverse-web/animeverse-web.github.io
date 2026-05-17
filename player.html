@@ -503,6 +503,21 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* ─── DOWNLOAD POPUP BTN ─── */
+        .dl-opt-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-decoration: none;
+            color: var(--text);
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .dl-opt-btn:active { background: var(--surface); border-color: var(--accent); }
+
         /* Plyr theme overrides */
         .plyr--full-ui input[type=range] { color: var(--accent); }
         .plyr__control--overlaid { background: var(--accent) !important; }
@@ -639,6 +654,18 @@
     <!-- Toast -->
     <div id="toast"></div>
 
+    <!-- Download Popup -->
+    <div id="dl-popup" onclick="if(event.target===this)closeDlPopup()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;">
+        <div style="background:var(--surface);width:100%;max-width:500px;border-radius:20px 20px 0 0;padding:24px 16px calc(24px + env(safe-area-inset-bottom));border:1px solid var(--border);border-bottom:none;">
+            <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;"></div>
+            <div style="font-size:10px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;padding:0 4px;">
+                <i class="fas fa-download" style="color:var(--accent);margin-right:8px;"></i>Download Episode
+            </div>
+            <div id="dl-options" style="display:flex;flex-direction:column;gap:10px;"></div>
+            <button onclick="closeDlPopup()" style="width:100%;margin-top:14px;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);font-size:12px;font-weight:900;cursor:pointer;font-family:'Nunito',sans-serif;">Cancel</button>
+        </div>
+    </div>
+
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
         // ─── FIREBASE & PLAYER INIT ───
@@ -710,6 +737,11 @@
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).on('value', snap => {
                 document.getElementById('ep-views').innerText = (snap.val() || 0).toLocaleString();
             });
+
+            // Fetch bot download links (anime_links/)
+            currentDlData = null;
+            const dlSnap = await db.ref(`anime_links/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
+            if (dlSnap.exists()) currentDlData = dlSnap.val();
 
             window.history.pushState({}, '', `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`);
             renderEpisodes();
@@ -892,19 +924,58 @@
         }
 
         // ─── DOWNLOAD ───
-        function downloadEp() {
-            const url = currentLinks.srv1 || currentLinks.srv2;
-            if (!url || (!url.includes('.mp4') && !url.includes('workers.dev'))) {
-                showToast('Download not available for this server');
+        let currentDlData = null;
+
+        async function downloadEp() {
+            const epKey = `E${currentEpNum}`;
+            // Pehle new bot system check karo (anime_links/)
+            if (currentDlData && (currentDlData['480p'] || currentDlData['720p'] || currentDlData['1080p'])) {
+                showDownloadPopup(currentDlData);
                 return;
             }
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${currentAnimeId}_${currentSeason}_E${currentEpNum}.mp4`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showToast('Download started!');
+            // Purana system fallback
+            const url = currentLinks.srv1 || currentLinks.srv2;
+            if (url && (url.includes('.mp4') || url.includes('workers.dev'))) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${currentAnimeId}_${currentSeason}_E${currentEpNum}.mp4`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast('Download started!');
+            } else {
+                window.location.href = `download.html?id=${currentAnimeId}_s${currentSeason.replace('S','')}_e${currentEpNum}`;
+            }
+        }
+
+        function showDownloadPopup(dlData) {
+            const qualities = ['1080p','720p','480p'];
+            const icons = {'1080p':'🔵','720p':'🟢','480p':'🟡'};
+            const labels = {'1080p':'Full HD · 1080p','720p':'HD · 720p','480p':'SD · 480p'};
+            const opts = document.getElementById('dl-options');
+            opts.innerHTML = '';
+            qualities.forEach(q => {
+                if (!dlData[q]) return;
+                const btn = document.createElement('a');
+                btn.href = dlData[q];
+                btn.target = '_blank';
+                btn.className = 'dl-opt-btn';
+                btn.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:22px;">${icons[q]}</span>
+                        <div>
+                            <div style="font-size:13px;font-weight:900;color:#fff;">${labels[q]}</div>
+                            <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">Via Telegram Bot</div>
+                        </div>
+                    </div>
+                    <i class="fab fa-telegram" style="color:#229ED9;font-size:20px;"></i>`;
+                opts.appendChild(btn);
+            });
+            document.getElementById('dl-popup').style.display = 'flex';
+        }
+
+        function closeDlPopup() {
+            document.getElementById('dl-popup').style.display = 'none';
         }
 
         // ─── REPORT ───
