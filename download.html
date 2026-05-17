@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Center | AnimeVerse Neon</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --neon: #00D4FF; --bg: #020508; }
@@ -132,20 +134,30 @@
     </footer>
 
     <script>
+        // ─── FIREBASE INIT ───
+        const firebaseConfig = {
+            apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE",
+            databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/",
+            projectId: "animeverse-9eada",
+            appId: "1:296666771306:web:df732df90b1e5e9108ff13"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         const sheetURL = "https://docs.google.com/spreadsheets/d/1hQ60uPpZ7v6kHpfUMK8IzE8V7EdT1U4OrFTIIsb8yFk/export?format=csv";
         let countdown = 5;
         let foundData = null;
+        let dataSource = null; // 'sheet' ya 'firebase'
 
         async function fetchAnimeBackground(animeName) {
             try {
-                const cleanName = animeName.split('_')[0].split(' ')[0];
+                const cleanName = animeName.split('_')[0].split('-')[0];
                 const response = await fetch(`https://api.jikan.moe/v4/anime?q=${cleanName}&limit=1`);
                 const data = await response.json();
                 if (data.data && data.data[0]) {
-                    // HD Image set karna
                     document.body.style.backgroundImage = `url('${data.data[0].images.jpg.large_image_url}')`;
                 }
-            } catch (err) { console.log("BG Error"); }
+            } catch (err) {}
         }
 
         function startTimer() {
@@ -164,57 +176,138 @@
             else document.getElementById('error-view').classList.remove('hidden');
         }
 
-        async function init() {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
-            if(!id) { showContent(); return; }
-            fetchAnimeBackground(id);
-            startTimer();
+        // ─── GOOGLE SHEET CHECK ───
+        async function checkSheet(id) {
             try {
                 const res = await fetch(sheetURL);
                 const text = await res.text();
                 const rows = text.split('\n').slice(1);
-                for(let row of rows) {
+                for (let row of rows) {
                     const col = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                    if(col[0]?.replace(/"/g, '').trim() === id) {
-                        foundData = {
-                            p480: col[1]?.replace(/"/g, '').trim(),
-                            p720: col[2]?.replace(/"/g, '').trim(),
-                            p1080: col[3]?.replace(/"/g, '').trim()
-                        };
-                        renderButtons(foundData, id);
-                        break;
+                    if (col[0]?.replace(/"/g, '').trim() === id) {
+                        const p480  = col[1]?.replace(/"/g, '').trim();
+                        const p720  = col[2]?.replace(/"/g, '').trim();
+                        const p1080 = col[3]?.replace(/"/g, '').trim();
+                        if (p480 || p720 || p1080) {
+                            return { p480, p720, p1080 };
+                        }
                     }
                 }
-            } catch (e) { console.log("Fetch Error"); }
+            } catch (e) {}
+            return null;
         }
 
-        function renderButtons(links, id) {
-            const container = document.getElementById('links-container');
-            document.getElementById('ep-title').innerText = id.replace(/_/g, ' ');
-            const qualities = [
-                { key: 'p480', label: 'Lite Stream', res: '480P', icon: 'SD' },
-                { key: 'p720', label: 'High Quality', res: '720P', icon: 'HD' },
-                { key: 'p1080', label: 'Master Grade', res: '1080P', icon: '4K' }
-            ];
-            qualities.forEach((q, index) => {
-                if(links[q.key] && links[q.key] !== "" && links[q.key] !== "#") {
-                    container.innerHTML += `
-                        <button onclick="window.location.href='${links[q.key]}'" class="quality-btn" style="animation-delay: ${index * 0.15}s">
-                            <div class="flex items-center gap-5">
-                                <div class="icon-box text-sm">${q.icon}</div>
-                                <div class="text-left">
-                                    <div class="text-base font-bold text-white">${q.res} Server</div>
-                                    <div class="text-[9px] text-[#00D4FF] font-black tracking-widest uppercase">${q.label}</div>
-                                </div>
-                            </div>
-                            <div class="bg-blue-500/10 p-2 rounded-full border border-blue-500/20">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="3" stroke-linecap="round"><path d="M7 13l5 5 5-5M12 18V6"/></svg>
-                            </div>
-                        </button>`;
+        // ─── FIREBASE CHECK ───
+        async function checkFirebase(id) {
+            try {
+                // id format: "anime-id_s1_e5"
+                const parts = id.split('_');
+                // anime id me underscore bhi ho sakta hai, isliye last 2 parts season/ep hain
+                const epPart   = parts[parts.length - 1]; // e5
+                const sPart    = parts[parts.length - 2]; // s1
+                const animeId  = parts.slice(0, parts.length - 2).join('_'); // anime-id
+
+                const season = 'S' + sPart.replace(/[^0-9]/g, '');
+                const epNum  = epPart.replace(/[^0-9]/g, '');
+                const epKey  = 'E' + epNum.padStart(2, '0');
+
+                const snap = await db.ref(`anime_links/${animeId}/${season}/${epKey}`).once('value');
+                if (snap.exists()) {
+                    const val = snap.val();
+                    if (val['480p'] || val['720p'] || val['1080p']) {
+                        return val;
+                    }
                 }
-            });
+            } catch (e) {}
+            return null;
         }
+
+        // ─── MAIN INIT ───
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (!id) { showContent(); return; }
+
+            fetchAnimeBackground(id);
+            startTimer();
+
+            // Step 1: Google Sheet check
+            const sheetData = await checkSheet(id);
+            if (sheetData) {
+                foundData = sheetData;
+                dataSource = 'sheet';
+                renderButtons(id);
+                return;
+            }
+
+            // Step 2: Firebase check
+            const fbData = await checkFirebase(id);
+            if (fbData) {
+                foundData = fbData;
+                dataSource = 'firebase';
+                renderButtons(id);
+                return;
+            }
+
+            // Step 3: Dono mein nahi mila → error
+            foundData = null;
+        }
+
+        // ─── RENDER BUTTONS ───
+        function renderButtons(id) {
+            const container = document.getElementById('links-container');
+            document.getElementById('ep-title').innerText = id.replace(/_/g, ' ').replace(/-/g, ' ');
+
+            if (dataSource === 'sheet') {
+                // Google Sheet links — direct download/stream
+                const qualities = [
+                    { key: 'p480',  label: 'Lite Stream',   res: '480P',  icon: 'SD' },
+                    { key: 'p720',  label: 'High Quality',  res: '720P',  icon: 'HD' },
+                    { key: 'p1080', label: 'Master Grade',  res: '1080P', icon: '4K' }
+                ];
+                qualities.forEach((q, index) => {
+                    if (foundData[q.key] && foundData[q.key] !== '' && foundData[q.key] !== '#') {
+                        container.innerHTML += `
+                            <button onclick="window.location.href='${foundData[q.key]}'" class="quality-btn" style="animation-delay:${index * 0.15}s">
+                                <div class="flex items-center gap-5">
+                                    <div class="icon-box text-sm">${q.icon}</div>
+                                    <div class="text-left">
+                                        <div class="text-base font-bold text-white">${q.res} Server</div>
+                                        <div class="text-[9px] text-[#00D4FF] font-black tracking-widest uppercase">${q.label}</div>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-500/10 p-2 rounded-full border border-blue-500/20">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="3" stroke-linecap="round"><path d="M7 13l5 5 5-5M12 18V6"/></svg>
+                                </div>
+                            </button>`;
+                    }
+                });
+
+            } else if (dataSource === 'firebase') {
+                // Firebase bot links — Telegram se milega
+                const qualities = [
+                    { key: '1080p', label: 'Master Grade',  res: '1080P', icon: '4K',  tgIcon: true },
+                    { key: '720p',  label: 'High Quality',  res: '720P',  icon: 'HD',  tgIcon: true },
+                    { key: '480p',  label: 'Lite Stream',   res: '480P',  icon: 'SD',  tgIcon: true }
+                ];
+                qualities.forEach((q, index) => {
+                    if (foundData[q.key]) {
+                        container.innerHTML += `
+                            <a href="${foundData[q.key]}" target="_blank" class="quality-btn" style="animation-delay:${index * 0.15}s;text-decoration:none;">
+                                <div class="flex items-center gap-5">
+                                    <div class="icon-box text-sm">${q.icon}</div>
+                                    <div class="text-left">
+                                        <div class="text-base font-bold text-white">${q.res} — Telegram</div>
+                                        <div class="text-[9px] text-[#00D4FF] font-black tracking-widest uppercase">${q.label} · Via @D0file_Bot</div>
+                                    </div>
+                                </div>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>
+                            </a>`;
+                    }
+                });
+            }
+        }
+
         init();
     </script>
 </body>
