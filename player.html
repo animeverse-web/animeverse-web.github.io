@@ -626,6 +626,17 @@
 
     </main>
 
+    <!-- ─── DISCLAIMER ─── -->
+    <div style="margin: 8px 16px 20px; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+            <i class="fas fa-shield-alt" style="color:var(--accent); font-size:12px;"></i>
+            <span style="font-size:9px; font-weight:900; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted);">Disclaimer</span>
+        </div>
+        <p style="font-size:10px; font-weight:600; color:var(--text-dim); line-height:1.7; margin:0;">
+            AnimeVerse does not host, upload, or store any video content on its servers. All media is sourced from third-party platforms and is displayed for informational and entertainment purposes only. This platform is intended solely for personal, non-commercial use. If you are the rightful copyright owner of any content displayed here and wish to have it removed, please contact us and we will act promptly. AnimeVerse holds no responsibility for the accuracy, legality, or quality of content provided by external sources.
+        </p>
+    </div>
+
     <!-- Download FAB -->
     <button id="dl-button" onclick="downloadEp()" title="Download">
         <i class="fas fa-download"></i>
@@ -693,20 +704,19 @@
             currentEpNum = parseInt(params.get('ep') || 1);
             if (!currentAnimeId) return;
 
-            // Load episodes from both sources and merge
-            db.ref(`animeverse_links/${currentAnimeId}`).on('value', async snapshot => {
+            // Load episodes from Animes/ (Server 1 = primary source)
+            db.ref(`Animes/${currentAnimeId}`).on('value', async snapshot => {
                 animeEpisodes = snapshot.val() || {};
 
-                // Merge episodes from Animes/ path (server 2 source)
+                // Merge episodes from animeverse_links/ path (server 2 source)
                 try {
-                    const animesSnap = await db.ref(`Animes/${currentAnimeId}`).once('value');
-                    const animesData = animesSnap.val();
-                    if (animesData) {
-                        Object.keys(animesData).forEach(season => {
+                    const altSnap = await db.ref(`animeverse_links/${currentAnimeId}`).once('value');
+                    const altData = altSnap.val();
+                    if (altData) {
+                        Object.keys(altData).forEach(season => {
                             if (!animeEpisodes[season]) animeEpisodes[season] = {};
-                            Object.keys(animesData[season]).forEach(epKey => {
+                            Object.keys(altData[season]).forEach(epKey => {
                                 if (!animeEpisodes[season][epKey]) {
-                                    // Episode sirf Animes/ mein hai, placeholder add karo
                                     animeEpisodes[season][epKey] = { _srv2only: true };
                                 }
                             });
@@ -744,25 +754,34 @@
             const animeKey = currentAnimeId.replace(/[.#$[\]]/g, "_");
             currentLinks = { srv1: "", srv2: "" };
 
-            const s1Snap = await db.ref(`animeverse_links/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
-            if (s1Snap.exists()) currentLinks.srv1 = s1Snap.val().url || s1Snap.val().link;
+            // Server 1: Animes/ folder se fetch karo (padded key: E01, E02...)
+            const s1Snap = await db.ref(`Animes/${currentAnimeId}/${currentSeason}/${epKeyPadded}`).once('value');
+            if (s1Snap.exists()) {
+                const s1Data = s1Snap.val();
+                currentLinks.srv1 = s1Data.link || '';
+                currentLinks.srv1Name = s1Data.server || 'Server 1';
+            }
 
-            const s2Snap = await db.ref(`Animes/${currentAnimeId}/${currentSeason}/${epKeyPadded}`).once('value');
+            // Server 2: animeverse_links/ folder se fetch karo (plain key: E1, E2...)
+            const s2Snap = await db.ref(`animeverse_links/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
             if (s2Snap.exists()) {
-                const s2Data = s2Snap.val();
-                currentLinks.srv2 = s2Data.link || '';
-                currentLinks.srv2Name = s2Data.server || 'Server 2';
+                currentLinks.srv2 = s2Snap.val().url || s2Snap.val().link || '';
+                currentLinks.srv2Name = 'Server 2';
             }
 
             switchServer(1);
 
-            // Server 2 button ka label update karo Firebase ke server field se
-            const btn2 = document.getElementById('btn-srv2');
-            if (currentLinks.srv2Name && currentLinks.srv2Name !== 'Server 2') {
-                btn2.innerHTML = `<i class="fas fa-server"></i> ${currentLinks.srv2Name}`;
+            // Server 1 button ka label update karo
+            const btn1 = document.getElementById('btn-srv1');
+            if (currentLinks.srv1Name && currentLinks.srv1Name !== 'Server 1') {
+                btn1.innerHTML = `<i class="fas fa-server"></i> ${currentLinks.srv1Name}`;
             } else {
-                btn2.innerHTML = `<i class="fas fa-server"></i> Server 2`;
+                btn1.innerHTML = `<i class="fas fa-server"></i> Server 1`;
             }
+
+            // Server 2 button label
+            const btn2 = document.getElementById('btn-srv2');
+            btn2.innerHTML = `<i class="fas fa-server"></i> Server 2`;
 
             const epViewKey = `${currentSeason}_E${currentEpNum}`;
             db.ref(`animeverse/${animeKey}/${epViewKey}/total_clicks`).transaction(c => (c || 0) + 1);
@@ -802,11 +821,13 @@
             }
 
             errorEl.style.display = 'none';
-            if (srvNum === 2) {
+            if (srvNum === 1) {
+                // Server 1 = Animes/ (iframe embed)
                 plyrEl.style.display = 'none';
                 iframeEl.style.display = 'block';
                 iframeEl.src = finalUrl;
             } else {
+                // Server 2 = animeverse_links/ (plyr for mp4, iframe for others)
                 if (finalUrl.includes('workers.dev') || finalUrl.includes('.mp4')) {
                     iframeEl.style.display = 'none';
                     plyrEl.style.display = 'block';
