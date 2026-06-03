@@ -692,6 +692,42 @@
         /* Hidden utility */
         .hidden { display: none !important; }
 
+        /* ─── PAGINATION ─── */
+        .pagination-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            padding: 18px 16px 10px;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            min-width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: var(--surface2);
+            border: 1.5px solid var(--border);
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0 8px;
+            transition: all 0.2s;
+            font-family: 'Nunito', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .page-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        .page-btn:active { transform: scale(0.92); }
+        .page-btn.disabled { opacity: 0.3; pointer-events: none; }
+
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(0.7); }
@@ -1132,6 +1168,7 @@
                 </div>
             </div>
             <div class="v-grid" id="filter-grid"></div>
+            <div class="pagination-wrap" id="pagination-wrap"></div>
         </div>
 
     </main>
@@ -1331,7 +1368,7 @@
                         r: attr.averageRating ? (attr.averageRating / 10).toFixed(1) : '7.5' 
                     };
                 }
-            } catch (e) { console.warn("Kitsu failed for:", title); }
+                } catch (e) { console.warn("Kitsu failed for:", title); }
 
             const encoded = encodeURIComponent(title.substring(0, 20));
             return { 
@@ -1567,7 +1604,7 @@
             initInfiniteAutoScroll(carousel);
 
             // ── MUST WATCH SERIES ──
-            seriesGrid.innerHTML = allAnimeData.map(({title, slug, poster, banner, rating, item}) => {
+            seriesGrid.innerHTML = allAnimeData.slice(0, 12).map(({title, slug, poster, banner, rating, item}) => {
                 const isLiked = watchlist.includes(title);
                 return makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
             }).join('');
@@ -1595,7 +1632,7 @@
                     const bTime = b.item?.lastUpdated || b.addedAt || b.firebaseIndex || 0;
                     return bTime - aTime;
                 });
-                recentGrid.innerHTML = recentSorted.map(({title, slug, poster, banner, rating, item}) => {
+                recentGrid.innerHTML = recentSorted.slice(0, 12).map(({title, slug, poster, banner, rating, item}) => {
                     const isLiked = watchlist.includes(title);
                     return makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
                 }).join('');
@@ -1679,8 +1716,7 @@
                     rafId = requestAnimationFrame(autoStep);
                 }
             });
-
-            rafId = requestAnimationFrame(autoStep);
+        rafId = requestAnimationFrame(autoStep);
         }
 
         async function openInfoModal(title, slug, banner, rating) {
@@ -2105,8 +2141,12 @@
         }
 
         // ════════════════════════════════
-        // 👁 SEE ALL — full page grid
+        // 👁 SEE ALL — full page grid with pagination
         // ════════════════════════════════
+        let seeAllCurrentPage = 1;
+        let seeAllAllData = [];
+     const SEE_ALL_PER_PAGE = 12;
+
         function seeAll(section) {
             const sectionMap = {
                 foryou:    { title: 'For You',        getData: () => shuffleArray([...allAnimeData]) },
@@ -2122,35 +2162,109 @@
             const info = sectionMap[section];
             if (!info) return;
 
-            // filter-page reuse karo
+            seeAllAllData = info.getData();
+            seeAllCurrentPage = 1;
+
             document.getElementById('real-content').style.display = 'none';
             document.getElementById('filter-page').style.display = '';
 
-            // Title mein back button bhi add karo
             document.getElementById('filter-page-title').innerHTML =
                 `<span onclick="closeSeeAll()" style="cursor:pointer; margin-right:10px; color:var(--accent);">
                     <i class="fas fa-arrow-left"></i>
                 </span>${info.title}`;
 
-            const filtered = info.getData();
-            document.getElementById('filter-count').innerText = `${filtered.length} anime`;
+            document.getElementById('filter-count').innerText = `${seeAllAllData.length} anime`;
+
+            renderSeeAllPage(1);
+            window.scrollTo(0, 0);
+        }
+
+        function renderSeeAllPage(page) {
+            seeAllCurrentPage = page;
+            const totalPages = Math.ceil(seeAllAllData.length / SEE_ALL_PER_PAGE);
+            const start = (page - 1) * SEE_ALL_PER_PAGE;
+            const end = start + SEE_ALL_PER_PAGE;
+            const pageData = seeAllAllData.slice(start, end);
 
             let watchlist = [];
             try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
 
             const grid = document.getElementById('filter-grid');
             grid.innerHTML = '';
-            filtered.forEach(({title, slug, poster, banner, rating, item}) => {
+            pageData.forEach(({title, slug, poster, banner, rating, item}) => {
                 const isLiked = watchlist.includes(title);
                 grid.innerHTML += makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
             });
 
-            window.scrollTo(0, 0);
+            // Pagination render
+            const wrap = document.getElementById('pagination-wrap');
+            wrap.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Prev button
+            const prevBtn = document.createElement('div');
+            prevBtn.className = 'page-btn' + (page === 1 ? ' disabled' : '');
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left" style="font-size:10px;"></i>';
+            prevBtn.onclick = () => { if (page > 1) { renderSeeAllPage(page - 1); window.scrollTo(0, 0); } };
+            wrap.appendChild(prevBtn);
+
+            // Page number buttons (show max 5 around current)
+            let startP = Math.max(1, page - 2);
+            let endP = Math.min(totalPages, startP + 4);
+            if (endP - startP < 4) startP = Math.max(1, endP - 4);
+
+            if (startP > 1) {
+                const firstBtn = document.createElement('div');
+                firstBtn.className = 'page-btn';
+                firstBtn.innerText = '1';
+                firstBtn.onclick = () => { renderSeeAllPage(1); window.scrollTo(0, 0); };
+                wrap.appendChild(firstBtn);
+                if (startP > 2) {
+                    const dots = document.createElement('div');
+                    dots.className = 'page-btn disabled';
+                    dots.innerText = '…';
+                    wrap.appendChild(dots);
+                }
+            }
+
+            for (let i = startP; i <= endP; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'page-btn' + (i === page ? ' active' : '');
+                btn.innerText = i;
+                const pg = i;
+                btn.onclick = () => { renderSeeAllPage(pg); window.scrollTo(0, 0); };
+                wrap.appendChild(btn);
+            }
+
+            if (endP < totalPages) {
+                if (endP < totalPages - 1) {
+                    const dots = document.createElement('div');
+                    dots.className = 'page-btn disabled';
+                    dots.innerText = '…';
+                    wrap.appendChild(dots);
+                }
+                const lastBtn = document.createElement('div');
+                lastBtn.className = 'page-btn';
+                lastBtn.innerText = totalPages;
+                lastBtn.onclick = () => { renderSeeAllPage(totalPages); window.scrollTo(0, 0); };
+                wrap.appendChild(lastBtn);
+            }
+
+            // Next button
+            const nextBtn = document.createElement('div');
+            nextBtn.className = 'page-btn' + (page === totalPages ? ' disabled' : '');
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right" style="font-size:10px;"></i>';
+            nextBtn.onclick = () => { if (page < totalPages) { renderSeeAllPage(page + 1); window.scrollTo(0, 0); } };
+            wrap.appendChild(nextBtn);
         }
 
         function closeSeeAll() {
             document.getElementById('filter-page').style.display = 'none';
             document.getElementById('real-content').style.display = '';
+            document.getElementById('pagination-wrap').innerHTML = '';
+            seeAllAllData = [];
+            seeAllCurrentPage = 1;
             // Tabs reset to Home
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.querySelector('.tab-item').classList.add('active');
