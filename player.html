@@ -525,6 +525,58 @@
         .plyr--video .plyr__control:hover,
         .plyr--video .plyr__control[aria-expanded=true] { background: var(--accent) !important; }
         .plyr__menu__container .plyr__control[role=menuitemradio][aria-checked=true]::before { background: var(--accent) !important; }
+
+        /* ─── LOADING SPINNER ─── */
+        #video-loading-spinner {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            pointer-events: none;
+        }
+        #video-loading-spinner.active { display: flex; align-items: center; justify-content: center; }
+        .spinner-ring {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            border: 3.5px solid rgba(255,255,255,0.12);
+            border-top-color: var(--accent);
+            animation: spin 0.75s linear infinite;
+            box-shadow: 0 0 18px rgba(244,117,33,0.35);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ─── PORTRAIT / VERTICAL MODE FIXES ─── */
+        @media (orientation: portrait) {
+            /* Controls mein volume bar ko compact karo */
+            .plyr__volume {
+                max-width: 60px !important;
+                min-width: 40px !important;
+            }
+            /* Progress bar poora width le */
+            .plyr__progress {
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
+            }
+            /* Controls row adjust */
+            .plyr__controls {
+                padding: 6px 8px !important;
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+            }
+            /* Time display chhota */
+            .plyr__time {
+                font-size: 10px !important;
+            }
+        }
+        /* Extra small screens */
+        @media (max-width: 400px) {
+            .plyr__volume {
+                max-width: 55px !important;
+                min-width: 36px !important;
+            }
+            .plyr__time--duration { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -550,6 +602,10 @@
             <div id="error-display" class="error-container" style="display:none;"></div>
             <video id="plyr-player" playsinline controls style="display:none;"></video>
             <iframe id="main-player" src="" allowfullscreen allow="autoplay; fullscreen" style="display:none;"></iframe>
+            <!-- Loading Spinner -->
+            <div id="video-loading-spinner">
+                <div class="spinner-ring"></div>
+            </div>
         </div>
 
         <!-- Server Buttons -->
@@ -687,6 +743,19 @@
         const player = new Plyr('#plyr-player', { hideControls: false, resetOnEnd: false });
         const tmdbKey = "eef0f9c16ca61d6c843e7d43ddc5e1d8";
 
+        // ─── LOADING SPINNER LOGIC ───
+        const spinner = document.getElementById('video-loading-spinner');
+        function showSpinner() { spinner.classList.add('active'); }
+        function hideSpinner() { spinner.classList.remove('active'); }
+
+        player.on('waiting', showSpinner);
+        player.on('seeking', showSpinner);
+        player.on('stalled', showSpinner);
+        player.on('playing', hideSpinner);
+        player.on('canplay', hideSpinner);
+        player.on('seeked', hideSpinner);
+        player.on('error', hideSpinner);
+
         let animeEpisodes = {}, currentAnimeId = "", currentEpNum = 1;
         let currentSeason = "", tmdbId = "", globalPoster = "";
         let currentLinks = { srv1: "", srv2: "" };
@@ -778,7 +847,18 @@
             }
 
             updateQualityBtn();
-            switchServer(1);
+
+            // ─── SMART AUTO-SERVER SELECTION ───
+            // Sirf srv1 → srv1 | Sirf srv2 → srv2 | Dono → srv2 priority | Koi nahi → error
+            if (currentLinks.srv1 && !currentLinks.srv2) {
+                switchServer(1);
+            } else if (!currentLinks.srv1 && currentLinks.srv2) {
+                switchServer(2);
+            } else if (currentLinks.srv1 && currentLinks.srv2) {
+                switchServer(2);  // Dono present: Player server (srv2) ko priority
+            } else {
+                switchServer(1);  // Koi nahi: error show hoga
+            }
 
             // Server 2 button ka label update karo Firebase ke server field se
             const btn2 = document.getElementById('btn-srv2');
@@ -799,7 +879,7 @@
             const dlSnap = await db.ref(`anime_links/${currentAnimeId}/${currentSeason}/${epKey}`).once('value');
             if (dlSnap.exists()) currentDlData = dlSnap.val();
 
-        window.history.pushState({}, '', `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`);
+            window.history.pushState({}, '', `?id=${currentAnimeId}&s=${currentSeason}&ep=${currentEpNum}`);
             renderEpisodes();
         }
 
@@ -903,6 +983,7 @@
                 iframeEl.style.display = 'none';
                 iframeEl.src = '';
                 plyrEl.style.display = 'block';
+                showSpinner();
                 player.source = { type: 'video', sources: [{ src: finalUrl, type: 'video/mp4' }] };
                 player.play().catch(() => {});
             } else {
