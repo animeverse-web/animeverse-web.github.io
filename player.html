@@ -1,0 +1,2429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AnimeVerse | Player</title>
+
+    <link rel="icon" type="image/png" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-6XVHNP2C9G');
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    <script src="analytics-tracker.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.15/hls.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #08080c;
+            --surface: #121218;
+            --surface2: #191922;
+            --surface3: #22222d;
+            --accent: #2fe6c9;
+            --accent2: #ff3e7f;
+            --accent-dim: rgba(47,230,201,0.13);
+            --accent-border: rgba(47,230,201,0.35);
+            --accent2-dim: rgba(255,62,127,0.13);
+            --text: #f4f4f7;
+            --text-muted: #86868f;
+            --text-dim: #3c3c46;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --nav-h: 58px;
+            --radius: 10px;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background:
+                repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+                var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 20px);
+        }
+
+        /* Chromatic-aberration text treatment — the signature VHS-ghost effect,
+           used sparingly on the few labels that should feel like a tape overlay. */
+        .vhs-text {
+            font-family: var(--font-display);
+            text-shadow: -1px 0 rgba(255,62,127,0.55), 1px 0 rgba(47,230,201,0.55);
+        }
+
+        /* ─── HEADER ─── */
+        .cr-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 54px;
+            background: rgba(8,8,12,0.94);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            z-index: 2000;
+            border-bottom: 1px solid var(--border);
+        }
+        .cr-logo {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text);
+            text-shadow: -1px 0 rgba(255,62,127,0.5), 1px 0 rgba(47,230,201,0.5);
+        }
+        .cr-logo span { color: var(--accent); text-shadow: none; }
+        .icon-btn {
+            width: 34px; height: 34px;
+            border-radius: 5px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: #aaa;
+            font-size: 13px;
+            text-decoration: none;
+            touch-action: manipulation;
+            transition: all 0.18s;
+        }
+        .icon-btn:active { background: var(--surface3); transform: scale(0.9); border-color: var(--accent-border); color: var(--accent); }
+        .header-actions { display: flex; gap: 8px; align-items: center; }
+
+        /* ─── VIDEO PLAYER ─── */
+        .player-wrap {
+            margin-top: 54px;
+            width: 100%;
+            background: #000;
+            position: relative;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border2);
+        }
+        .player-wrap::after {
+            /* faint CRT scanline texture — the signature tape-deck detail */
+            content: '';
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(180deg, rgba(255,255,255,0.035) 0px, transparent 1px, transparent 3px);
+            pointer-events: none;
+            z-index: 6;
+            mix-blend-mode: overlay;
+        }
+        .player-wrap iframe {
+            width: 100%; height: 100%;
+            border: none;
+            display: block;
+        }
+        .player-loading {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: #000;
+            gap: 12px; z-index: 5;
+        }
+        .loader-spinner {
+            width: 38px; height: 38px;
+            border: 3px solid #1c1c22;
+            border-top-color: var(--accent);
+            border-right-color: var(--accent2);
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: #555; letter-spacing: 1px; text-transform: uppercase; }
+        .player-placeholder {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: #0a0a0d;
+            gap: 10px; text-align: center; padding: 24px;
+        }
+        .placeholder-icon {
+            width: 54px; height: 54px;
+            border-radius: 5px;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: var(--accent);
+        }
+        .placeholder-text { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: #777; }
+        .placeholder-sub { font-family: var(--font-mono); font-size: 10px; font-weight: 500; color: #3a3a3a; margin-top: -2px; }
+
+        /* ─── MAIN CONTENT ─── */
+        .main-content { padding: 0; }
+
+        /* ─── FOOTER ─── */
+        .site-footer {
+            margin-top: 24px;
+            padding: 22px 16px calc(20px + env(safe-area-inset-bottom));
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+        .site-footer .footer-brand {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .site-footer .footer-brand span { color: var(--accent); }
+        .site-footer .footer-desc {
+            font-family: var(--font-body);
+            font-size: 11.5px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            max-width: 520px;
+        }
+        .site-footer .footer-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 10px 12px;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-border);
+            border-radius: var(--radius);
+        }
+        .site-footer .footer-note i {
+            color: var(--accent);
+            font-size: 12px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+        .site-footer .footer-note span {
+            font-family: var(--font-body);
+            font-size: 10.5px;
+            line-height: 1.55;
+            color: var(--text-muted);
+        }
+        .site-footer .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 16px;
+        }
+        .site-footer .footer-links a {
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.18s;
+        }
+        .site-footer .footer-links a:hover,
+        .site-footer .footer-links a:active { color: var(--accent); }
+        .site-footer .footer-bottom {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            color: var(--text-dim);
+            letter-spacing: 0.3px;
+        }
+
+        /* ─── TITLE BLOCK ─── */
+        .title-block {
+            padding: 16px 16px 0;
+            background: linear-gradient(180deg, rgba(47,230,201,0.05) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        .now-playing-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .now-playing-label::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent2);
+            animation: pulse 1.5s ease infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+        .anime-title {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.25;
+            letter-spacing: -0.2px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        .meta-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .meta-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .meta-chip.accent {
+            background: var(--accent-dim);
+            border-color: var(--accent-border);
+            color: var(--accent);
+        }
+        .meta-chip i { font-size: 8px; }
+
+        /* ─── ACTION BUTTONS ─── */
+        .action-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 11px 6px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-body);
+            touch-action: manipulation;
+            color: var(--text-muted);
+            transition: all 0.18s;
+        }
+        .action-btn:active { transform: scale(0.93); background: var(--surface3); }
+        .action-btn.active {
+            background: var(--accent-dim);
+            border-color: var(--accent-border);
+            color: var(--accent);
+        }
+        .action-btn i { font-size: 16px; }
+        .action-btn span { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.3px; }
+
+        /* ─── DESCRIPTION ─── */
+        .desc-block {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .desc-text {
+            font-size: 12.5px;
+            line-height: 1.7;
+            color: var(--text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .desc-text.expanded {
+            -webkit-line-clamp: unset;
+            display: block;
+        }
+        .desc-toggle {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ─── SECTION ─── */
+        .section {
+            padding: 16px 16px 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        .section-label {
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #ccc;
+        }
+        .section-label-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-label-left::before {
+            content: '';
+            display: block;
+            width: 3px; height: 13px;
+            background: linear-gradient(180deg, var(--accent), var(--accent2));
+            border-radius: 1px;
+        }
+
+        /* ─── SERVER TABS ─── */
+        .server-tabs {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .server-tabs::-webkit-scrollbar { display: none; }
+        .server-tab {
+            flex-shrink: 0;
+            padding: 7px 16px;
+            border-radius: 6px;
+            background: var(--surface2);
+            border: 1.5px solid var(--border2);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            touch-action: manipulation;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+        .server-tab:active { transform: scale(0.94); }
+        .server-tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #06110f;
+        }
+
+        /* ─── SEASON TABS ─── */
+        .season-tabs {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            margin-bottom: 12px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .season-tabs::-webkit-scrollbar { display: none; }
+        .season-tab {
+            flex-shrink: 0;
+            padding: 5px 14px;
+            border-radius: 4px;
+            background: var(--surface2);
+            border: 1.5px solid var(--border2);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.18s;
+            letter-spacing: 0.3px;
+        }
+        .season-tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #06110f;
+        }
+
+        /* ─── EPISODE GRID - 3 COLUMN THUMBNAIL ─── */
+        .ep-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .ep-thumb-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--surface2);
+            border: 1.5px solid var(--border2);
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.18s;
+        }
+        .ep-thumb-card:active { transform: scale(0.96); }
+        .ep-thumb-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-border); }
+        .ep-thumb-img {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            background: #0f0f13;
+        }
+        .ep-thumb-img img {
+            width: 100%; height: 100%;
+            object-fit: cover; display: block;
+        }
+        .ep-thumb-placeholder {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            background: #15151b;
+            background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 8px);
+        }
+        .ep-thumb-num {
+            /* tape-counter LCD readout */
+            position: absolute;
+            bottom: 4px; left: 4px;
+            background: rgba(0,0,0,0.85);
+            border: 1px solid rgba(47,230,201,0.3);
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 9px; font-weight: 700;
+            min-width: 20px; height: 18px;
+            padding: 0 4px;
+            border-radius: 3px;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .ep-thumb-playing {
+            position: absolute;
+            inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(47,230,201,0.22);
+            backdrop-filter: blur(1px);
+        }
+        .ep-thumb-playing i { font-size: 14px; color: #fff; }
+        .ep-thumb-watched {
+            position: absolute;
+            top: 3px; right: 3px;
+            width: 16px; height: 16px;
+            border-radius: 3px;
+            background: var(--accent2);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ep-thumb-watched i { font-size: 7px; color: #fff; }
+        .ep-thumb-label {
+            padding: 5px 6px 6px;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #a0a0aa;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .ep-thumb-card.active .ep-thumb-label { color: var(--accent); }
+
+        /* ─── EP CARD (large) ─── */
+        .ep-card {
+            display: flex; gap: 12px;
+            padding: 10px; background: var(--surface2);
+            border-radius: var(--radius); border: 1px solid var(--border);
+            cursor: pointer; margin-bottom: 8px;
+            touch-action: manipulation; transition: background 0.15s;
+        }
+        .ep-card:active { background: var(--surface3); }
+        .ep-card.active { border-color: var(--accent); background: var(--accent-dim); }
+        .ep-card-thumb {
+            width: 100px; flex-shrink: 0;
+            aspect-ratio: 16/9; border-radius: 6px;
+            overflow: hidden; background: var(--surface); position: relative;
+        }
+        .ep-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .ep-card-play {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.4);
+        }
+        .ep-card-play i { font-size: 16px; color: white; }
+        .ep-card-info { flex: 1; min-width: 0; }
+        .ep-card-num { font-size: 9px; font-weight: 900; color: var(--accent); letter-spacing: 0.5px; margin-bottom: 3px; text-transform: uppercase; }
+        .ep-card-title { font-size: 12px; font-weight: 800; color: #ddd; line-height: 1.3; margin-bottom: 3px;
+            display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+        .ep-card-meta { font-size: 10px; font-weight: 700; color: var(--text-dim); display: flex; align-items: center; gap: 6px; }
+
+        /* ─── RELATED ANIME ─── */
+        .related-grid {
+            display: flex; gap: 10px;
+            overflow-x: auto; padding-bottom: 4px;
+            -ms-overflow-style: none; scrollbar-width: none;
+        }
+        .related-grid::-webkit-scrollbar { display: none; }
+        .rel-card { flex-shrink: 0; width: 95px; cursor: pointer; }
+        .rel-card:active .rel-img { transform: scale(0.94); border-color: var(--accent-border); }
+        .rel-img {
+            width: 100%; aspect-ratio: 2/3;
+            border-radius: 6px; overflow: hidden;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            transition: transform 0.15s, border-color 0.15s;
+        }
+        .rel-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .rel-title {
+            font-size: 9.5px;
+            font-weight: 600;
+            color: #b0b0b8;
+            margin-top: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.35;
+        }
+
+        /* ─── DOWNLOAD QUALITY POPUP ─── */
+        #dl-popup-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 8000;
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.22s ease;
+        }
+        #dl-popup-overlay.open {
+            opacity: 1; pointer-events: all;
+        }
+        #dl-popup {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-top: 2px solid var(--accent);
+            border-radius: 14px 14px 0 0;
+            width: 100%; max-width: 480px;
+            padding: 0 0 calc(env(safe-area-inset-bottom) + 16px);
+            transform: translateY(100%);
+            transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
+        }
+        #dl-popup-overlay.open #dl-popup {
+            transform: translateY(0);
+        }
+        .dl-popup-handle {
+            width: 36px; height: 4px;
+            background: var(--surface3);
+            border-radius: 2px;
+            margin: 12px auto 0;
+        }
+        .dl-popup-title {
+            font-family: var(--font-display);
+            font-size: 13px; font-weight: 700;
+            color: var(--text);
+            padding: 14px 18px 6px;
+            letter-spacing: -0.1px;
+        }
+        .dl-popup-sub {
+            font-family: var(--font-mono);
+            font-size: 10px; font-weight: 500;
+            color: var(--text-muted);
+            padding: 0 18px 14px;
+        }
+        .dl-divider { height: 1px; background: var(--border); margin: 0 0 10px; }
+        .dl-quality-btn {
+            display: flex; align-items: center;
+            gap: 14px;
+            width: 100%;
+            padding: 13px 18px;
+            background: none; border: none;
+            cursor: pointer; font-family: var(--font-body);
+            color: var(--text);
+            transition: background 0.15s;
+            text-align: left;
+        }
+        .dl-quality-btn:active { background: var(--surface2); }
+        .dl-quality-icon {
+            width: 38px; height: 38px;
+            border-radius: 7px;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: var(--accent);
+            flex-shrink: 0;
+        }
+        .dl-quality-info { flex: 1; }
+        .dl-quality-label {
+            font-family: var(--font-mono);
+            font-size: 13px; font-weight: 700;
+            color: var(--text); line-height: 1.2;
+        }
+        .dl-quality-desc {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-muted); margin-top: 1px;
+        }
+        .dl-quality-btn.unavailable { opacity: 0.35; pointer-events: none; }
+        .dl-quality-btn.unavailable .dl-quality-icon {
+            background: var(--surface2);
+            border-color: var(--border2);
+            color: var(--text-muted);
+        }
+        .dl-cancel-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: calc(100% - 32px);
+            margin: 6px 16px 0;
+            padding: 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            font-size: 12px; font-weight: 900;
+            color: var(--text-muted);
+            cursor: pointer; font-family: var(--font-body);
+            transition: background 0.15s;
+        }
+        .dl-cancel-btn:active { background: var(--surface3); }
+
+        /* ─── TOAST ─── */
+        #toast {
+            position: fixed;
+            bottom: 75px; left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-left: 2px solid var(--accent);
+            color: white;
+            padding: 9px 20px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.25s ease;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ─── BOTTOM NAV ─── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: calc(var(--nav-h) + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            background: rgba(8,8,12,0.96);
+            backdrop-filter: blur(24px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-around;
+            padding-top: 9px;
+            z-index: 3000;
+        }
+        .nav-item {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 3px;
+            cursor: pointer; padding: 0 10px;
+            color: #3a3a42;
+            text-decoration: none; min-width: 48px;
+            touch-action: manipulation;
+            transition: color 0.18s;
+        }
+        .nav-item.active { color: var(--accent); }
+        .nav-item i { font-size: 19px; }
+        .nav-item span { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+        .nav-item:active { transform: scale(0.88); }
+
+        /* ─── SKELETON ─── */
+        .skeleton {
+            background: linear-gradient(90deg, #131318 25%, #1c1c24 50%, #131318 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite linear;
+            border-radius: 5px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        #skeleton-player { margin-top: 54px; width: 100%; aspect-ratio: 16/9; background: #0c0c10; border-radius: 0; }
+        #skeleton-info { padding: 16px 16px 0; }
+        .sk-title { height: 18px; width: 65%; margin-bottom: 10px; }
+        .sk-meta { height: 11px; width: 40%; margin-bottom: 16px; }
+        .sk-ep { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+        .sk-ep-btn { aspect-ratio: 1; border-radius: 8px; }
+
+        /* ─── ANIMATIONS ─── */
+        .fade-in { animation: fadeUp 0.25s ease forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* ─── QUALITY BADGE ─── */
+        .quality-badge {
+            position: absolute; top: 8px; left: 8px;
+            background: rgba(0,0,0,0.75);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 3px; padding: 2px 6px;
+            font-family: var(--font-mono);
+            font-size: 9px; font-weight: 700; color: white;
+            backdrop-filter: blur(4px);
+        }
+
+        /* ─── EP PROGRESS ─── */
+        .ep-progress-wrap { height: 2px; background: var(--border); border-radius: 1px; margin-top: 5px; }
+        .ep-progress-bar { height: 100%; background: var(--accent); border-radius: 1px; }
+
+        /* ─── CUSTOM VIDEO PLAYER (Server 2) ─── */
+        #custom-player-wrap {
+            position: absolute; inset: 0;
+            display: none;
+            flex-direction: column;
+            background: #000;
+            z-index: 4;
+        }
+        #custom-player-wrap.active { display: flex; }
+        #cv-video {
+            width: 100%; height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        /* Controls overlay */
+        #cv-controls {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.92));
+            padding: 28px 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.25s;
+            z-index: 10;
+        }
+        #custom-player-wrap.show-controls #cv-controls { opacity: 1; }
+        @media (hover: hover) and (pointer: fine) {
+            #custom-player-wrap:hover #cv-controls { opacity: 1; }
+        }
+        /* Progress bar */
+        #cv-progress-wrap {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+            touch-action: none;
+        }
+        #cv-progress-wrap:hover { height: 7px; }
+        #cv-buffered {
+            position: absolute; left: 0; top: 0; height: 100%;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px; pointer-events: none;
+        }
+        #cv-progress {
+            position: absolute; left: 0; top: 0; height: 100%;
+            background: var(--accent);
+            border-radius: 2px; pointer-events: none;
+            transition: width 0.1s linear;
+        }
+        #cv-thumb {
+            position: absolute; top: 50%; right: -6px;
+            transform: translateY(-50%) scale(0);
+            width: 13px; height: 13px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            transition: transform 0.15s;
+        }
+        #cv-progress-wrap:hover #cv-thumb { transform: translateY(-50%) scale(1); }
+        /* Time tooltip */
+        #cv-time-tip {
+            position: absolute; bottom: 14px;
+            background: rgba(0,0,0,0.8);
+            color: #fff; font-size: 9px; font-weight: 800;
+            padding: 2px 6px; border-radius: 3px;
+            pointer-events: none; display: none;
+            white-space: nowrap; transform: translateX(-50%);
+        }
+        /* Bottom controls row */
+        #cv-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        #cv-left, #cv-right { display: flex; align-items: center; gap: 4px; }
+        .cv-btn {
+            background: none; border: none;
+            color: #fff; font-size: 14px;
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border-radius: 5px;
+            transition: background 0.15s;
+            touch-action: manipulation;
+        }
+        .cv-btn:hover { background: rgba(255,255,255,0.12); }
+        .cv-btn:active { transform: scale(0.85); }
+        .cv-btn i { pointer-events: none; }
+        #cv-time {
+            font-family: var(--font-mono);
+            font-size: 9.5px; font-weight: 700;
+            color: rgba(255,255,255,0.85);
+            white-space: nowrap; min-width: 70px;
+            text-align: center;
+        }
+        /* Volume slider */
+        #cv-vol-wrap {
+            display: flex; align-items: center; gap: 4px;
+            overflow: hidden; max-width: 0;
+            transition: max-width 0.25s ease;
+        }
+        #cv-vol-wrap.open { max-width: 80px; }
+        #cv-volume {
+            -webkit-appearance: none; appearance: none;
+            width: 68px; height: 3px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px; outline: none; cursor: pointer;
+        }
+        #cv-volume::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 11px; height: 11px;
+            border-radius: 50%;
+            background: var(--accent); cursor: pointer;
+        }
+        /* Speed selector */
+        #cv-speed {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; font-size: 9px; font-weight: 700;
+            font-family: var(--font-mono);
+            border-radius: 4px; padding: 3px 4px;
+            cursor: pointer; outline: none;
+        }
+        #cv-speed option { background: #1a1a1a; }
+        /* Audio track selector */
+        #cv-audio-wrap { position: relative; display: none; }
+        #cv-audio-wrap.has-tracks { display: inline-flex; }
+        #cv-btn-audio.active-track { color: var(--accent); }
+        #cv-audio-menu {
+            position: absolute;
+            bottom: 38px; right: 0;
+            background: rgba(20,20,20,0.97);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 6px;
+            min-width: 140px;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 20;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        #cv-audio-menu.open { display: flex; }
+        #cv-audio-menu .cv-audio-label {
+            font-size: 8px; font-weight: 900; color: var(--text-muted);
+            letter-spacing: 0.5px; text-transform: uppercase;
+            padding: 4px 8px 2px;
+        }
+        .cv-audio-opt {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 8px;
+            padding: 7px 8px;
+            border-radius: 5px;
+            font-size: 11px; font-weight: 700;
+            color: #ddd;
+            cursor: pointer;
+            background: none; border: none; width: 100%;
+            text-align: left;
+            font-family: var(--font-body);
+        }
+        .cv-audio-opt:hover { background: rgba(255,255,255,0.08); }
+        .cv-audio-opt.selected { color: var(--accent); background: var(--accent-dim); }
+        .cv-audio-opt.selected i { display: inline-block; }
+        .cv-audio-opt i { font-size: 9px; display: none; }
+        /* Center play/pause overlay */
+        #cv-center-overlay {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; z-index: 9;
+        }
+        #cv-center-icon {
+            width: 54px; height: 54px;
+            background: rgba(0,0,0,0.55);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: #fff;
+            opacity: 0; transform: scale(0.7);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        #cv-center-icon.pop {
+            opacity: 1; transform: scale(1);
+        }
+        /* Loading spinner inside player */
+        #cv-spinner {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.5); z-index: 8; display: none;
+        }
+        /* Pip / fullscreen badge */
+        .cv-badge {
+            font-size: 9px; font-weight: 900;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast"></div>
+
+    <!-- ─── DOWNLOAD QUALITY POPUP ─── -->
+    <div id="dl-popup-overlay" onclick="closeDlPopup(event)">
+        <div id="dl-popup">
+            <div class="dl-popup-handle"></div>
+            <div class="dl-popup-title">Download Episode</div>
+            <div class="dl-popup-sub" id="dl-popup-sub">S1 · E1 · Select quality</div>
+            <div class="dl-divider"></div>
+            <div id="dl-quality-list"></div>
+            <button class="dl-cancel-btn" onclick="closeDlPopup()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- ─── HEADER ─── -->
+    <header class="cr-header">
+        <a href="index.html" class="icon-btn" style="text-decoration:none;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="cr-logo">Anime<span>Verse</span></div>
+        <div class="header-actions">
+            <div class="icon-btn" onclick="shareAnime()" title="Share">
+                <i class="fas fa-share-nodes"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- ─── SKELETON ─── -->
+    <div id="skeleton-loader">
+        <div id="skeleton-player" class="skeleton"></div>
+        <div id="skeleton-info">
+            <div class="sk-title skeleton"></div>
+            <div class="sk-meta skeleton"></div>
+            <div class="sk-ep">
+                <div class="sk-ep-btn skeleton"></div><div class="sk-ep-btn skeleton"></div>
+                <div class="sk-ep-btn skeleton"></div><div class="sk-ep-btn skeleton"></div>
+                <div class="sk-ep-btn skeleton"></div><div class="sk-ep-btn skeleton"></div>
+                <div class="sk-ep-btn skeleton"></div><div class="sk-ep-btn skeleton"></div>
+                <div class="sk-ep-btn skeleton"></div><div class="sk-ep-btn skeleton"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── REAL CONTENT ─── -->
+    <div id="real-content" style="display:none;">
+
+        <!-- VIDEO PLAYER -->
+        <div class="player-wrap" id="player-wrap">
+            <div class="player-loading" id="player-loading">
+                <div class="loader-spinner"></div>
+                <div class="loader-text">Loading · · ·</div>
+            </div>
+            <div class="player-placeholder" id="player-placeholder" style="display:none;">
+                <div class="placeholder-icon"><i class="fas fa-film"></i></div>
+                <div class="placeholder-text">Video not available</div>
+                <div class="placeholder-sub">Try another server or episode</div>
+            </div>
+            <iframe id="main-iframe" src="" allowfullscreen allow="fullscreen; autoplay; encrypted-media" style="display:none;"></iframe>
+
+            <!-- ─── CUSTOM PLAYER (Server 2) ─── -->
+            <div id="custom-player-wrap">
+                <video id="cv-video" preload="metadata" playsinline></video>
+
+                <!-- Center tap area -->
+                <div id="cv-tap-area" style="position:absolute;inset:0;z-index:5;cursor:pointer;"></div>
+
+                <!-- Center pop icon -->
+                <div id="cv-center-overlay">
+                    <div id="cv-center-icon"><i class="fas fa-play" id="cv-center-fa"></i></div>
+                </div>
+
+                <!-- Spinner -->
+                <div id="cv-spinner"><div class="loader-spinner"></div></div>
+
+                <!-- Controls -->
+                <div id="cv-controls">
+                    <!-- Progress bar -->
+                    <div id="cv-progress-wrap">
+                        <div id="cv-buffered"></div>
+                        <div id="cv-progress"></div>
+                        <div id="cv-thumb"></div>
+                        <div id="cv-time-tip"></div>
+                    </div>
+                    <!-- Bottom row -->
+                    <div id="cv-bottom">
+                        <div id="cv-left">
+                            <button class="cv-btn" id="cv-btn-play" title="Play/Pause">
+                                <i class="fas fa-play" id="cv-play-icon"></i>
+                            </button>
+                            <button class="cv-btn" id="cv-btn-back" title="-10s">
+                                <i class="fas fa-rotate-left" style="font-size:12px;"></i>
+                            </button>
+                            <button class="cv-btn" id="cv-btn-fwd" title="+10s">
+                                <i class="fas fa-rotate-right" style="font-size:12px;"></i>
+                            </button>
+                            <button class="cv-btn" id="cv-btn-mute" title="Mute">
+                                <i class="fas fa-volume-high" id="cv-mute-icon"></i>
+                            </button>
+                            <div id="cv-vol-wrap">
+                                <input type="range" id="cv-volume" min="0" max="1" step="0.02" value="1">
+                            </div>
+                            <span id="cv-time">0:00 / 0:00</span>
+                        </div>
+                        <div id="cv-right">
+                            <div id="cv-audio-wrap">
+                                <button class="cv-btn" id="cv-btn-audio" title="Audio Track">
+                                    <i class="fas fa-headphones" style="font-size:12px;"></i>
+                                </button>
+                                <div id="cv-audio-menu">
+                                    <div class="cv-audio-label">Audio</div>
+                                    <div id="cv-audio-list"></div>
+                                </div>
+                            </div>
+                            <select id="cv-speed" title="Playback speed">
+                                <option value="0.5">0.5×</option>
+                                <option value="0.75">0.75×</option>
+                                <option value="1" selected>1×</option>
+                                <option value="1.25">1.25×</option>
+                                <option value="1.5">1.5×</option>
+                                <option value="2">2×</option>
+                            </select>
+                            <button class="cv-btn" id="cv-btn-pip" title="Picture-in-Picture" style="font-size:11px;">
+                                <i class="fas fa-window-restore"></i>
+                            </button>
+                            <button class="cv-btn" id="cv-btn-fs" title="Fullscreen">
+                                <i class="fas fa-expand" id="cv-fs-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ─── END CUSTOM PLAYER ─── -->
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content fade-in">
+
+            <!-- ── TITLE BLOCK ── -->
+            <div class="title-block">
+                <div class="now-playing-label">Now Playing</div>
+                <div class="anime-title" id="anime-title">Loading...</div>
+                <div class="meta-row" id="meta-row">
+                    <div class="meta-chip accent"><i class="fas fa-star"></i> <span id="rating-val">—</span></div>
+                    <div class="meta-chip" id="chip-season">S1</div>
+                    <div class="meta-chip" id="chip-episode">E1</div>
+                    <div class="meta-chip" id="chip-status"></div>
+                </div>
+                <!-- Action Buttons -->
+                <div class="action-row">
+                    <button class="action-btn" id="btn-watchlist" onclick="toggleWatchlist()">
+                        <i class="fas fa-heart" id="heart-icon"></i>
+                        <span>My List</span>
+                    </button>
+                    <button class="action-btn" id="btn-download" onclick="downloadEp()">
+                        <i class="fas fa-download"></i>
+                        <span>Download</span>
+                    </button>
+                    <button class="action-btn" onclick="shareAnime()">
+                        <i class="fas fa-share-nodes"></i>
+                        <span>Share</span>
+                    </button>
+                    <button class="action-btn" onclick="reportIssue()">
+                        <i class="fas fa-flag"></i>
+                        <span>Report</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── DESCRIPTION ── -->
+            <div class="desc-block">
+                <div class="desc-text" id="anime-desc">Loading description...</div>
+                <span class="desc-toggle" id="desc-toggle" onclick="toggleDesc()">
+                    Show more <i class="fas fa-chevron-down" style="font-size:8px;"></i>
+                </span>
+            </div>
+
+            <!-- ── SERVERS ── -->
+            <div class="section">
+                <div class="section-label">
+                    <span class="section-label-left">Servers</span>
+                </div>
+                <div class="server-tabs" id="server-tabs"></div>
+            </div>
+
+            <!-- ── EPISODES ── -->
+            <div class="section">
+                <div class="section-label">
+                    <span class="section-label-left">Episodes</span>
+                </div>
+                <div class="season-tabs" id="season-tabs"></div>
+                <div class="ep-grid" id="ep-grid"></div>
+            </div>
+
+            <!-- ── RELATED ── -->
+            <div class="section" style="border-bottom:none;">
+                <div class="section-label">
+                    <span class="section-label-left">More Anime</span>
+                </div>
+                <div class="related-grid no-scrollbar" id="related-grid"></div>
+            </div>
+
+        </div>
+
+        <!-- ─── FOOTER ─── -->
+        <footer class="site-footer">
+            <div class="footer-brand">Anime<span>Verse</span></div>
+            <p class="footer-desc">
+                AnimeVerse is a free anime streaming platform that brings you the latest anime episodes, movies, and series in Hindi dubbed &amp; English subbed formats. We simply organize and index content from third-party sources to give you the best possible viewing experience.
+            </p>
+            <div class="footer-note">
+                <i class="fas fa-shield-halved"></i>
+                <span>Privacy first: we do not store any of your personal or viewing data on our own servers. Everything stays on your device — we only provide a streaming interface.</span>
+            </div>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="https://t.me/animeverse648" target="_blank" rel="noopener">Telegram</a>
+                <a href="#" onclick="reportIssue(); return false;">Report an Issue</a>
+            </div>
+            <div class="footer-bottom">&copy; <span id="footer-year"></span> AnimeVerse — All content belongs to their respective owners.</div>
+        </footer>
+
+    </div>
+
+    <!-- ─── BOTTOM NAV ─── -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="fas fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-play-circle"></i>
+            <span>Watch</span>
+        </a>
+        <a href="#" class="nav-item" onclick="clearCache()">
+            <i class="fas fa-rotate-right"></i>
+            <span>Refresh</span>
+        </a>
+        <a href="https://t.me/animeverse648" class="nav-item" target="_blank" onclick="if(window.AVAnalytics) window.AVAnalytics.trackJoinClick('nav')">
+            <i class="fab fa-telegram-plane"></i>
+            <span>Join</span>
+        </a>
+    </nav>
+
+    <script>
+        // ─── FIREBASE INIT ───
+        const firebaseConfig = {
+            apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE",
+            databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/",
+            projectId: "animeverse-9eada",
+            appId: "1:296666771306:web:df732df90b1e5e9108ff13"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ─── STATE ───
+        let animeSlug   = '';
+        let animeTitle  = '';
+        let animeData   = null;
+        let allAnimeArr = [];
+        let currentSeason  = 1;
+        let currentEpisode = 1;
+        let currentServer  = 1;   // 1 = animeverse_links, 2 = anime_links
+        let currentQuality = '1080p';
+        let totalSeasons   = 1;
+        let totalEpisodes  = {};
+        let watchedEps     = {};
+        let posterUrl = '';
+        let bannerUrl = '';
+
+        // Firebase data stores
+        // srv1Data['S1']['E1'] = { url, bot, time }
+        // srv2Data['S1']['E1'] = { '1080p': {link, dl_link, server, time}, ... }
+        let srv1Data = {};
+        let srv2Data = {};
+        let hlsInstance = null;   // active Hls.js instance (for multi-audio HLS streams)
+
+        // ─── WATCH DURATION TRACKING ───
+        // wdCtx = which episode the accumulated seconds belong to (set only once
+        // playback for that episode has actually started, so we never attribute
+        // watched time to the wrong episode).
+        let wdCtx = null;           // { slug, title, season, episode }
+        let wdAccum = 0;            // seconds accumulated since last flush
+        let wdLastTimeupdate = null;
+        let wdFlushTimer = null;
+
+        function wdFlush() {
+            if (wdCtx && wdAccum > 0.5 && window.AVAnalytics) {
+                window.AVAnalytics.trackWatchDuration(wdCtx.slug, wdCtx.title, wdCtx.season, wdCtx.episode, Math.round(wdAccum));
+            }
+            wdAccum = 0;
+        }
+        function wdStartTimer() {
+            clearInterval(wdFlushTimer);
+            wdFlushTimer = setInterval(wdFlush, 20000); // flush every 20s while playing
+        }
+        // Flush whatever's pending if the tab is hidden/closed/navigated away
+        document.addEventListener('visibilitychange', () => { if (document.hidden) wdFlush(); });
+        window.addEventListener('pagehide', wdFlush);
+
+        // ─── URL PARAMS ───
+        const params = new URLSearchParams(location.search);
+        animeSlug = params.get('id') || '';
+
+        // ─── CACHE HELPERS ───
+        function getCachedAnime() {
+            try { return JSON.parse(localStorage.getItem('av_cache') || '[]'); } catch(e) { return []; }
+        }
+
+        // ─── SHOW / HIDE ───
+        function showContent() {
+            document.getElementById('skeleton-loader').style.display = 'none';
+            document.getElementById('real-content').style.display = '';
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // ─── WATCHLIST ───
+        function getWatchlist() {
+            try { return JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) { return []; }
+        }
+        function updateWatchlistBtn() {
+            const list = getWatchlist();
+            const isIn = list.includes(animeTitle);
+            const btn  = document.getElementById('btn-watchlist');
+            const icon = document.getElementById('heart-icon');
+            if (isIn) {
+                btn.classList.add('active');
+                icon.style.color = 'var(--accent)';
+            } else {
+                btn.classList.remove('active');
+                icon.style.color = '';
+            }
+        }
+        function toggleWatchlist() {
+            let list = getWatchlist();
+            if (list.includes(animeTitle)) {
+                list = list.filter(x => x !== animeTitle);
+                showToast('Removed from list');
+            } else {
+                list.push(animeTitle);
+                showToast('Added to list ✓');
+                if (window.AVAnalytics) window.AVAnalytics.trackWatchlistAdd(animeSlug, animeTitle);
+            }
+            try { localStorage.setItem('my_watchlist', JSON.stringify(list)); } catch(e) {}
+            updateWatchlistBtn();
+        }
+
+        // ─── WATCHED TRACKER ───
+        function loadWatched() {
+            try { watchedEps = JSON.parse(localStorage.getItem('watched_' + animeSlug) || '{}'); } catch(e) { watchedEps = {}; }
+        }
+        function markWatched(s, e) {
+            watchedEps[`S${s}E${e}`] = true;
+            try { localStorage.setItem('watched_' + animeSlug, JSON.stringify(watchedEps)); } catch(e) {}
+        }
+        function isWatched(s, e) { return !!watchedEps[`S${s}E${e}`]; }
+
+        // ─── CONTINUE WATCHING ───
+        function saveContinueWatching() {
+            try {
+                let cw = JSON.parse(localStorage.getItem('continue_watching') || '[]');
+                cw = cw.filter(t => t !== animeTitle);
+                cw.unshift(animeTitle);
+                if (cw.length > 10) cw = cw.slice(0, 10);
+                localStorage.setItem('continue_watching', JSON.stringify(cw));
+                // Save episode progress
+                localStorage.setItem('cw_ep_' + animeSlug, JSON.stringify({ s: currentSeason, e: currentEpisode }));
+            } catch(e) {}
+        }
+        function getLastProgress() {
+            try { return JSON.parse(localStorage.getItem('cw_ep_' + animeSlug) || 'null'); } catch(e) { return null; }
+        }
+
+        // ─── DESC TOGGLE ───
+        let descExpanded = false;
+        function toggleDesc() {
+            descExpanded = !descExpanded;
+            const el = document.getElementById('anime-desc');
+            const toggle = document.getElementById('desc-toggle');
+            el.classList.toggle('expanded', descExpanded);
+            toggle.textContent = descExpanded ? 'Show less' : 'Show more';
+        }
+
+        // ─── URL REWRITER ───
+        // Automatically replaces any occurrence of the old base URL with the new one,
+        // no matter where it appears in the Firebase data (link, dl_link, url, etc).
+        const OLD_BASE_URL = 'https://versebot-syvy.onrender.com';
+        const NEW_BASE_URL = 'https://ep-7crf.onrender.com';
+        function fixLinksDeep(obj) {
+            if (!obj) return obj;
+            try {
+                const str = JSON.stringify(obj).split(OLD_BASE_URL).join(NEW_BASE_URL);
+                return JSON.parse(str);
+            } catch (e) {
+                return obj;
+            }
+        }
+
+        // ─── LOAD BOTH FIREBASE SERVERS ───
+        function loadFirebaseServers() {
+            return new Promise((resolve) => {
+                let done = 0;
+                function check() { if (++done === 2) resolve(); }
+
+                // SERVER 1 — anime_links/{slug}
+                // Structure: S1 > E1 > { '1080p': {link, dl_link, server, time}, '720p': {...}, '480p': {...} }
+                db.ref('anime_links/' + animeSlug).once('value', snap => {
+                    const data = fixLinksDeep(snap.val());
+                    if (data && typeof data === 'object') {
+                        Object.entries(data).forEach(([sKey, eps]) => {
+                            if (!sKey.startsWith('S') || typeof eps !== 'object') return;
+                            srv1Data[sKey] = {};
+                            Object.entries(eps).forEach(([eKey, qualities]) => {
+                                if (eKey.startsWith('E') && qualities && typeof qualities === 'object') {
+                                    srv1Data[sKey][eKey] = qualities;
+                                }
+                            });
+                        });
+                    }
+                    check();
+                }, () => { if (window.AVAnalytics) window.AVAnalytics.trackServerError('anime_links_load'); check(); });
+
+                // (Server 2 removed — only one server now)
+                check();
+            });
+        }
+
+        // ─── BUILD SEASON/EP MAP from both servers (union) ───
+        function buildSeasonMap() {
+            const seasonSet = new Set();
+            Object.keys(srv1Data).forEach(s => seasonSet.add(parseInt(s.replace('S',''))));
+            Object.keys(srv2Data).forEach(s => seasonSet.add(parseInt(s.replace('S',''))));
+
+            totalEpisodes = {};
+            seasonSet.forEach(n => {
+                const sKey = 'S' + n;
+                const epSet = new Set();
+                Object.keys(srv1Data[sKey] || {}).forEach(e => { if (e.startsWith('E')) epSet.add(parseInt(e.replace('E',''))); });
+                Object.keys(srv2Data[sKey] || {}).forEach(e => { if (e.startsWith('E')) epSet.add(parseInt(e.replace('E',''))); });
+                // Store max ep number
+                const maxEp = epSet.size > 0 ? Math.max(...epSet) : 0;
+                if (maxEp > 0) totalEpisodes[n] = maxEp;
+            });
+
+            totalSeasons = Object.keys(totalEpisodes).length;
+        }
+
+        // ─── RENDER SERVER TABS ───
+        function renderServers() {
+            const wrap = document.getElementById('server-tabs');
+            const qualityHtml = `
+                <div style="display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);border:1.5px solid var(--accent-border);border-radius:6px;padding:6px 10px;height:36px;position:relative;">
+                    <i class="fas fa-film" style="font-size:10px;color:var(--accent);flex-shrink:0;"></i>
+                    <select id="quality-select" onchange="selectQuality(this.value)" style="background:transparent;border:none;outline:none;color:var(--accent);font-family:var(--font-mono);font-size:11px;font-weight:800;cursor:pointer;-webkit-appearance:none;appearance:none;padding-right:16px;">
+                        <option value="1080p" ${currentQuality==='1080p'?'selected':''} style="background:#1e1e1e;color:#fff;">1080p</option>
+                        <option value="720p"  ${currentQuality==='720p' ?'selected':''} style="background:#1e1e1e;color:#fff;">720p</option>
+                        <option value="480p"  ${currentQuality==='480p' ?'selected':''} style="background:#1e1e1e;color:#fff;">480p</option>
+                    </select>
+                    <i class="fas fa-chevron-down" style="font-size:8px;color:var(--accent);pointer-events:none;position:absolute;right:10px;"></i>
+                </div>`;
+            wrap.innerHTML = `
+                <div class="server-tab active">
+                    <i class="fas fa-play"></i> Server 1
+                </div>
+                ${qualityHtml}`;
+        }
+
+
+
+        function selectServer(n) {
+            currentServer = n;
+            renderServers();
+            renderEpisodes(true); // true = skip scroll
+            loadVideo();
+        }
+
+        function selectQuality(q) {
+            currentQuality = q;
+            renderServers();
+            loadVideo();
+        }
+
+        // ─── RENDER SEASON TABS ───
+        function renderSeasons() {
+            const wrap = document.getElementById('season-tabs');
+            wrap.innerHTML = Object.keys(totalEpisodes).sort((a,b)=>a-b).map(s => `
+                <div class="season-tab ${parseInt(s) === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
+                    Season ${s}
+                </div>`).join('');
+        }
+
+        function selectSeason(s) {
+            currentSeason = parseInt(s);
+            currentEpisode = 1;
+            renderSeasons();
+            renderEpisodes();
+            loadVideo();
+            updateChips();
+        }
+
+        // ─── Episode Thumbnails: AniList primary, TMDB fallback ───
+        // AniList is anime-native and its `streamingEpisodes` field carries real
+        // per-episode thumbnails when present — but that field is only populated
+        // for a subset of shows (it relied on an old Crunchyroll data partnership
+        // that's no longer actively maintained), so many titles return it empty.
+        // When AniList comes back empty we fall back to TMDB so episodes still
+        // get a real thumbnail instead of staying blank.
+        let tmdbEpCache = {}; // { 'S1E1': { thumb, name } }
+        const ANILIST_ENDPOINT = 'https://graphql.anilist.co';
+        const ANILIST_QUERY = `
+            query ($search: String) {
+                Media(search: $search, type: ANIME) {
+                    id
+                    streamingEpisodes { title thumbnail url }
+                }
+            }`;
+        const TMDB_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
+        let tmdbShowId = null;
+
+        async function fetchAniListSeasonEps(title, season) {
+            const searchTerm = season > 1 ? `${title} Season ${season}` : title;
+            try {
+                const r = await fetch(ANILIST_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ query: ANILIST_QUERY, variables: { search: searchTerm } })
+                });
+                const d = await r.json();
+                const eps = d?.data?.Media?.streamingEpisodes || [];
+                let found = 0;
+                eps.forEach(ep => {
+                    const m = ep.title && ep.title.match(/Episode\s*(\d+)/i);
+                    const epNum = m ? parseInt(m[1], 10) : null;
+                    if (!epNum || !ep.thumbnail) return; // only count real thumbnails as a hit
+                    const key = `S${season}E${epNum}`;
+                    const cleanName = ep.title.replace(/^Episode\s*\d+\s*[-–:]?\s*/i, '').trim();
+                    tmdbEpCache[key] = { thumb: ep.thumbnail, name: cleanName || `Episode ${epNum}` };
+                    found++;
+                });
+                return found;
+            } catch(e) { return 0; }
+        }
+
+        async function fetchTmdbShowId(title) {
+            if (tmdbShowId) return tmdbShowId;
+            try {
+                const r = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}&language=en-US`);
+                const d = await r.json();
+                if (d.results?.[0]) { tmdbShowId = d.results[0].id; return tmdbShowId; }
+            } catch(e) {}
+            return null;
+        }
+
+        async function fetchTmdbSeasonEps(showId, season) {
+            try {
+                const r = await fetch(`https://api.themoviedb.org/3/tv/${showId}/season/${season}?api_key=${TMDB_KEY}&language=en-US`);
+                const d = await r.json();
+                (d.episodes || []).forEach(ep => {
+                    const key = `S${season}E${ep.episode_number}`;
+                    if (tmdbEpCache[key]?.thumb) return; // AniList already covered this one
+                    tmdbEpCache[key] = {
+                        thumb: ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : '',
+                        name: ep.name || `Episode ${ep.episode_number}`
+                    };
+                });
+            } catch(e) {}
+        }
+
+        async function fetchKitsuSeasonEps(title, season) {
+            try {
+                const searchTerm = season > 1 ? `${title} Season ${season}` : title;
+                const sr = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(searchTerm)}&page[limit]=1`);
+                const sd = await sr.json();
+                const showId = sd?.data?.[0]?.id;
+                if (!showId) return 0;
+
+                let found = 0;
+                let offset = 0;
+                const pageLimit = 20;
+                // Walk up to 5 pages (100 eps) — enough for the vast majority of seasons
+                for (let page = 0; page < 5; page++) {
+                    const er = await fetch(`https://kitsu.io/api/edge/anime/${showId}/episodes?page[limit]=${pageLimit}&page[offset]=${offset}`);
+                    const ed = await er.json();
+                    const eps = ed?.data || [];
+                    if (!eps.length) break;
+                    eps.forEach(ep => {
+                        const num = ep.attributes?.number;
+                        const thumb = ep.attributes?.thumbnail?.original || ep.attributes?.thumbnail?.large || '';
+                        if (!num || !thumb) return;
+                        const key = `S${season}E${num}`;
+                        if (tmdbEpCache[key]?.thumb) return; // AniList already covered this one
+                        tmdbEpCache[key] = {
+                            thumb,
+                            name: ep.attributes?.canonicalTitle || `Episode ${num}`
+                        };
+                        found++;
+                    });
+                    if (eps.length < pageLimit) break; // reached the end
+                    offset += pageLimit;
+                }
+                return found;
+            } catch(e) { return 0; }
+        }
+
+        let epThumbSeasonsDone = {}; // 'S1' -> true, once all sources have been tried
+        async function fetchEpisodeThumbs(title, season) {
+            const cKey = `S${season}`;
+            if (epThumbSeasonsDone[cKey]) return;
+
+            // 1) AniList — best anime-native match when it has data
+            let hits = await fetchAniListSeasonEps(title, season);
+
+            // 2) Kitsu — fills gaps AniList missed
+            if (hits === 0) hits = await fetchKitsuSeasonEps(title, season);
+
+            // 3) TMDB — last resort, mainly helps popular/Western-listed titles
+            if (hits === 0) {
+                const showId = await fetchTmdbShowId(title);
+                if (showId) await fetchTmdbSeasonEps(showId, season);
+            }
+
+            epThumbSeasonsDone[cKey] = true;
+        }
+
+        // ─── RENDER EPISODES ───
+        function renderEpisodes(skipScroll) {
+            const epCount = totalEpisodes[currentSeason] || 1;
+            const sKey = 'S' + currentSeason;
+            const primaryData = currentServer === 1 ? srv1Data : srv2Data;
+            const grid = document.getElementById('ep-grid');
+
+            // Build cards with placeholders first
+            let html = '';
+            for (let e = 1; e <= epCount; e++) {
+                const eKey = 'E' + e;
+                const hasData = !!(primaryData[sKey]?.[eKey]);
+                const isActive = (e === currentEpisode);
+                const isDone   = isWatched(currentSeason, e);
+                const cacheKey = `S${currentSeason}E${e}`;
+                const epInfo   = tmdbEpCache[cacheKey];
+                const thumb    = epInfo?.thumb || posterUrl || '';
+                const epName   = epInfo?.name  || '';
+                const opacity  = '';
+                const activeBorder = isActive ? 'border-color:var(--accent);box-shadow:0 0 0 2px rgba(244,117,33,0.3);' : '';
+
+                html += `
+                <div class="ep-thumb-card ${isActive?'active':''}" id="epcard-${e}" style="${opacity}${activeBorder}" onclick="selectEpisode(${e})">
+                    <div class="ep-thumb-img" id="epimg-${e}">
+                        ${thumb
+                            ? `<img src="${thumb}" loading="lazy" onerror="this.style.display='none'">`
+                            : `<div class="ep-thumb-placeholder"><i class="fas fa-play" style="font-size:14px;color:rgba(255,255,255,0.15);"></i></div>`
+                        }
+                        <div class="ep-thumb-num">${e}</div>
+                        ${isActive ? `<div class="ep-thumb-playing"><i class="fas fa-play"></i></div>` : ''}
+                    </div>
+                    <div class="ep-thumb-label">${epName || 'Episode ' + e}</div>
+                </div>`;
+            }
+            grid.innerHTML = html;
+
+            setTimeout(() => {
+                if (!skipScroll) {
+                    const active = grid.querySelector('.ep-thumb-card.active');
+                    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            }, 100);
+
+            // Fetch real episode thumbnails (AniList primary, TMDB fallback) and update cards
+            if (animeTitle) {
+                fetchEpisodeThumbs(animeTitle, currentSeason).then(() => {
+                    for (let e = 1; e <= epCount; e++) {
+                        const cacheKey = `S${currentSeason}E${e}`;
+                        const epInfo = tmdbEpCache[cacheKey];
+                        const imgDiv = document.getElementById(`epimg-${e}`);
+                        const card   = document.getElementById(`epcard-${e}`);
+                        if (!imgDiv || !card) continue;
+                        const thumb = epInfo?.thumb || posterUrl || '';
+                        if (!thumb && !(epInfo && epInfo.name)) continue; // nothing new to show
+                        const isAct = (e === currentEpisode);
+                        imgDiv.innerHTML = `
+                            ${thumb ? `<img src="${thumb}" loading="lazy" onerror="this.style.display='none'">` : `<div class="ep-thumb-placeholder"><i class="fas fa-play" style="font-size:14px;color:rgba(255,255,255,0.15);"></i></div>`}
+                            <div class="ep-thumb-num">${e}</div>
+                            ${isAct ? `<div class="ep-thumb-playing"><i class="fas fa-play"></i></div>` : ''}
+                        `;
+                        // Update label
+                        const label = card.querySelector('.ep-thumb-label');
+                        if (label && epInfo?.name) label.textContent = epInfo.name;
+                    }
+                });
+            }
+        }
+
+        function selectEpisode(e) {
+            currentEpisode = e;
+            saveContinueWatching();
+
+            renderServers();
+            renderEpisodes();
+            loadVideo();
+            updateChips();
+            // Scroll to player
+            document.getElementById('player-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ─── UPDATE META CHIPS ───
+        function updateChips() {
+            document.getElementById('chip-season').textContent = `S${currentSeason}`;
+            document.getElementById('chip-episode').textContent = `E${currentEpisode}`;
+        }
+
+        // ─── LOAD VIDEO ───
+        function loadVideo() {
+            // Flush any watch-duration accumulated for the episode we're leaving,
+            // then stop the periodic flush timer until the new episode starts playing.
+            wdFlush();
+            wdCtx = null;
+            clearInterval(wdFlushTimer);
+
+            const sKey = 'S' + currentSeason;
+            const eKey = 'E' + currentEpisode;
+
+            const iframe      = document.getElementById('main-iframe');
+            const loading     = document.getElementById('player-loading');
+            const placeholder = document.getElementById('player-placeholder');
+            const customWrap  = document.getElementById('custom-player-wrap');
+
+            // Remove existing dl-bar if any
+            let dlBar = document.getElementById('dl-bar-inline');
+            if (dlBar) dlBar.remove();
+
+            let videoUrl = null;
+            let dlUrl    = null;
+            let metaText = '';
+
+            const epData = srv1Data[sKey]?.[eKey];
+            if (epData) {
+                const tryOrder = [currentQuality, '1080p', '720p', '480p'];
+                for (const q of tryOrder) {
+                    if (epData[q]?.link) {
+                        videoUrl = epData[q].link;
+                        dlUrl    = epData[q].dl_link || null;
+                        metaText = q + (epData[q].server ? ' · ' + epData[q].server : ' · Server 1');
+                        break;
+                    }
+                }
+            }
+
+            if (!videoUrl) {
+                if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+                resetAudioBtn();
+                iframe.style.display      = 'none';
+                iframe.src                = '';
+                loading.style.display     = 'none';
+                customWrap.classList.remove('active');
+                placeholder.style.display = 'flex';
+                placeholder.querySelector('.placeholder-text').textContent = 'Not available';
+                placeholder.querySelector('.placeholder-sub').textContent  = 'Try another episode';
+                showToast('⚠️ Episode nahi mila');
+                if (window.AVAnalytics) window.AVAnalytics.trackBrokenLink(animeSlug, animeTitle || animeSlug, currentSeason, currentEpisode);
+                return;
+            }
+
+            placeholder.style.display = 'none';
+
+            if (window.AVAnalytics) {
+                window.AVAnalytics.trackEpisodeWatch(animeSlug, animeTitle || animeSlug, currentSeason, currentEpisode);
+            }
+            // From here on, any watched seconds belong to this episode
+            wdCtx = { slug: animeSlug, title: animeTitle || animeSlug, season: currentSeason, episode: currentEpisode };
+            wdAccum = 0;
+            wdLastTimeupdate = null;
+
+            const isDirectVideo = (
+                videoUrl.includes('.mp4') || videoUrl.includes('.m3u8') ||
+                videoUrl.includes('.mkv') || videoUrl.includes('.webm') ||
+                videoUrl.includes('googlevideo') || videoUrl.includes('drive.google')
+            );
+
+            if (!isDirectVideo) {
+                if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+                resetAudioBtn();
+                customWrap.classList.remove('active');
+                loading.style.display     = 'flex';
+                iframe.style.display      = 'none';
+                iframe.src = videoUrl;
+                iframe.onload = () => {
+                    loading.style.display = 'none';
+                    iframe.style.display  = 'block';
+                };
+                setTimeout(() => {
+                    if (loading.style.display !== 'none') {
+                        loading.style.display = 'none';
+                        iframe.style.display  = 'block';
+                    }
+                }, 7000);
+            } else {
+                iframe.style.display  = 'none';
+                iframe.src            = '';
+                loading.style.display = 'none';
+                customWrap.classList.add('active');
+                initCustomPlayer(videoUrl);
+            }
+
+            // Download link bar
+            if (dlUrl) {
+                const bar = document.createElement('div');
+                bar.id = 'dl-bar-inline';
+                bar.style.cssText = 'padding:0 16px 14px;';
+                const dlQualityLabel = metaText.split('·')[0].trim();
+                bar.innerHTML = `<a href="${dlUrl}" target="_blank" rel="noopener" onclick="if(window.AVAnalytics) window.AVAnalytics.trackDownload(animeSlug, animeTitle || animeSlug, currentSeason, currentEpisode, '${dlQualityLabel}')" style="
+                    display:flex;align-items:center;justify-content:center;gap:8px;
+                    width:100%;background:var(--surface2);
+                    border:1.5px solid rgba(244,117,33,0.35);border-radius:8px;
+                    padding:10px 0;font-size:12px;font-weight:800;
+                    color:var(--accent);text-decoration:none;font-family:inherit;">
+                    <i class="fas fa-download"></i> Download Episode (${dlQualityLabel})
+                </a>`;
+                const pw = document.getElementById('player-wrap');
+                pw.parentNode.insertBefore(bar, pw.nextSibling);
+            }
+        }
+
+        // ─── CUSTOM PLAYER LOGIC ───
+        let cvControlsTimer = null;
+        let cvListenersAdded = false;
+        let cvOrientationListenerAdded = false;
+
+        function showCvControls() {
+            const wrap  = document.getElementById('custom-player-wrap');
+            const video = document.getElementById('cv-video');
+            wrap.classList.add('show-controls');
+            clearTimeout(cvControlsTimer);
+            if (!video.paused) {
+                cvControlsTimer = setTimeout(() => wrap.classList.remove('show-controls'), 3000);
+            }
+        }
+
+        function initCustomPlayer(src) {
+            const video    = document.getElementById('cv-video');
+            const wrap     = document.getElementById('custom-player-wrap');
+            const spinner  = document.getElementById('cv-spinner');
+            const tapArea  = document.getElementById('cv-tap-area');
+
+            // Reset previous source / hls instance
+            video.pause();
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+            hideAudioMenu();
+            resetAudioBtn();
+
+            const isHls = src.includes('.m3u8');
+
+            if (isHls && window.Hls && Hls.isSupported()) {
+                // ─ HLS.js: exposes multiple audio tracks when present in the manifest ─
+                hlsInstance = new Hls({ enableWorker: true });
+                hlsInstance.loadSource(src);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    setupAudioTracks(hlsInstance);
+                });
+                hlsInstance.on(Hls.Events.ERROR, (evt, data) => {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                hlsInstance.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                hlsInstance.recoverMediaError();
+                                break;
+                            default:
+                                hlsInstance.destroy();
+                                hlsInstance = null;
+                                break;
+                        }
+                    }
+                });
+            } else {
+                // Native playback (mp4 / direct links, or Safari's built-in HLS support)
+                video.src = src;
+                video.load();
+                if (isHls) {
+                    // Safari exposes multiple audio renditions via video.audioTracks
+                    video.addEventListener('loadedmetadata', () => setupNativeAudioTracks(video), { once: true });
+                }
+            }
+
+            // Autoplay as soon as enough data is ready
+            video.oncanplay = () => {
+                spinner.style.display = 'none';
+                video.play().catch(() => {});
+            };
+
+            // Show spinner while buffering
+            spinner.style.display = 'flex';
+            video.onwaiting = () => { spinner.style.display = 'flex'; };
+            video.onplaying = () => { spinner.style.display = 'none'; };
+
+            // Auto-show controls on start
+            showCvControls();
+
+            // ─ Play/Pause ─
+            const btnPlay   = document.getElementById('cv-btn-play');
+            const playIcon  = document.getElementById('cv-play-icon');
+            const centerFa  = document.getElementById('cv-center-fa');
+            const centerIco = document.getElementById('cv-center-icon');
+
+            function updatePlayBtn() {
+                if (video.paused) {
+                    playIcon.className = 'fas fa-play';
+                    centerFa.className = 'fas fa-play';
+                } else {
+                    playIcon.className = 'fas fa-pause';
+                    centerFa.className = 'fas fa-pause';
+                }
+            }
+            function popCenter() {
+                updatePlayBtn();
+                centerIco.classList.add('pop');
+                setTimeout(() => centerIco.classList.remove('pop'), 600);
+            }
+            function togglePlay() {
+                if (video.paused) { video.play().catch(()=>{}); }
+                else { video.pause(); }
+                popCenter();
+                showCvControls();
+            }
+            btnPlay.onclick = togglePlay;
+            tapArea.onclick = togglePlay;
+            video.onplay  = () => { updatePlayBtn(); showCvControls(); wdLastTimeupdate = video.currentTime; wdStartTimer(); };
+            video.onpause = () => { updatePlayBtn(); wrap.classList.add('show-controls'); clearTimeout(cvControlsTimer); clearInterval(wdFlushTimer); wdFlush(); };
+            video.onended = () => { clearInterval(wdFlushTimer); wdFlush(); };
+
+            // ─ Seek ─
+            const progWrap = document.getElementById('cv-progress-wrap');
+            const progBar  = document.getElementById('cv-progress');
+            const bufBar   = document.getElementById('cv-buffered');
+            const timeTip  = document.getElementById('cv-time-tip');
+            const timeEl   = document.getElementById('cv-time');
+
+            function fmtTime(s) {
+                if (isNaN(s)) return '0:00';
+                const h = Math.floor(s/3600);
+                const m = Math.floor((s%3600)/60);
+                const sec = Math.floor(s%60);
+                if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+                return `${m}:${String(sec).padStart(2,'0')}`;
+            }
+
+            video.ontimeupdate = () => {
+                if (!video.duration) return;
+                const pct = video.currentTime / video.duration * 100;
+                progBar.style.width = pct + '%';
+                timeEl.textContent  = fmtTime(video.currentTime) + ' / ' + fmtTime(video.duration);
+                // Buffer
+                if (video.buffered.length > 0) {
+                    const bPct = video.buffered.end(video.buffered.length-1) / video.duration * 100;
+                    bufBar.style.width = bPct + '%';
+                }
+                // Accumulate actually-watched seconds (ignore seeks/jumps so a skip
+                // to the end doesn't get counted as "watched")
+                if (wdLastTimeupdate !== null && !video.paused) {
+                    const delta = video.currentTime - wdLastTimeupdate;
+                    if (delta > 0 && delta < 2) wdAccum += delta;
+                }
+                wdLastTimeupdate = video.currentTime;
+            };
+
+            let seeking = false;
+            function seekFromEvent(e) {
+                const rect = progWrap.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                video.currentTime = pct * video.duration;
+                progBar.style.width = (pct * 100) + '%';
+                showCvControls();
+            }
+            function tipFromEvent(e) {
+                if (!video.duration) return;
+                const rect = progWrap.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+                const t = pct * video.duration;
+                timeTip.textContent  = fmtTime(t);
+                timeTip.style.left   = (pct * 100) + '%';
+                timeTip.style.display = 'block';
+            }
+            progWrap.onmousedown  = e => { seeking = true; seekFromEvent(e); };
+            progWrap.onmousemove  = e => { tipFromEvent(e); if (seeking) seekFromEvent(e); };
+            progWrap.onmouseup    = () => { seeking = false; };
+            progWrap.onmouseleave = () => { seeking = false; timeTip.style.display='none'; };
+            progWrap.ontouchstart = e => { seeking = true; seekFromEvent(e); };
+            progWrap.ontouchmove  = e => { tipFromEvent(e); if (seeking) seekFromEvent(e); };
+            progWrap.ontouchend   = () => { seeking = false; timeTip.style.display='none'; };
+
+            // ─ Skip ─
+            document.getElementById('cv-btn-back').onclick = () => { video.currentTime = Math.max(0, video.currentTime - 10); showCvControls(); };
+            document.getElementById('cv-btn-fwd').onclick  = () => { video.currentTime = Math.min(video.duration||Infinity, video.currentTime + 10); showCvControls(); };
+
+            // ─ Volume ─
+            const volSlider = document.getElementById('cv-volume');
+            const muteBtn   = document.getElementById('cv-btn-mute');
+            const muteIcon  = document.getElementById('cv-mute-icon');
+            const volWrap   = document.getElementById('cv-vol-wrap');
+
+            muteBtn.onclick = () => {
+                video.muted = !video.muted;
+                updateVolIcon();
+                volWrap.classList.toggle('open');
+                showCvControls();
+            };
+            volSlider.oninput = () => {
+                video.volume = parseFloat(volSlider.value);
+                video.muted  = video.volume === 0;
+                updateVolIcon();
+                showCvControls();
+            };
+            function updateVolIcon() {
+                if (video.muted || video.volume === 0) muteIcon.className = 'fas fa-volume-xmark';
+                else if (video.volume < 0.5)           muteIcon.className = 'fas fa-volume-low';
+                else                                   muteIcon.className = 'fas fa-volume-high';
+                volSlider.value = video.muted ? 0 : video.volume;
+            }
+
+            // ─ Speed ─
+            document.getElementById('cv-speed').onchange = e => {
+                video.playbackRate = parseFloat(e.target.value);
+                showCvControls();
+            };
+
+            // ─ PiP ─
+            document.getElementById('cv-btn-pip').onclick = () => {
+                if (document.pictureInPictureEnabled && video !== document.pictureInPictureElement) {
+                    video.requestPictureInPicture().catch(()=>{});
+                } else if (document.pictureInPictureElement) {
+                    document.exitPictureInPicture().catch(()=>{});
+                } else {
+                    showToast('PiP not supported on this device');
+                }
+            };
+
+            // ─ Fullscreen (+ auto horizontal/landscape flip) ─
+            const fsBtn  = document.getElementById('cv-btn-fs');
+            const fsIcon = document.getElementById('cv-fs-icon');
+
+            // Screen ko landscape (horizontal) me lock karne ki koshish karta hai.
+            // Kai browsers is API ko sirf fullscreen ke andar hi allow karte hain,
+            // isliye ye fullscreen ho jaane ke baad call hota hai. Agar device/browser
+            // support nahi karta to silently ignore ho jayega (video fullscreen to rahega hi).
+            function lockLandscape() {
+                try {
+                    if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+                        window.screen.orientation.lock('landscape').catch(() => {});
+                    }
+                } catch (e) {}
+            }
+            function unlockOrientation() {
+                try {
+                    if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+                        window.screen.orientation.unlock();
+                    }
+                } catch (e) {}
+            }
+
+            fsBtn.onclick = () => {
+                const el = wrap;
+                if (!document.fullscreenElement) {
+                    const req = (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen).call(el);
+                    if (req && req.then) {
+                        req.then(lockLandscape).catch(() => {});
+                    } else {
+                        // Older browsers (webkit/moz prefixed) don't return a promise — try right away.
+                        lockLandscape();
+                    }
+                } else {
+                    (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen).call(document).catch(()=>{});
+                    unlockOrientation();
+                }
+                showCvControls();
+            };
+            document.addEventListener('fullscreenchange', () => {
+                const isFs = !!document.fullscreenElement;
+                fsIcon.className = isFs ? 'fas fa-compress' : 'fas fa-expand';
+                if (!isFs) unlockOrientation();
+                showCvControls();
+            });
+
+            // ─ Orientation change (portrait <-> landscape) ─
+            // Show controls briefly on rotate, then let the normal auto-hide timer take over.
+            if (!cvOrientationListenerAdded) {
+                const onOrientationChange = () => {
+                    const cw = document.getElementById('custom-player-wrap');
+                    if (cw && cw.classList.contains('active')) showCvControls();
+                };
+                window.addEventListener('orientationchange', onOrientationChange);
+                if (window.screen && window.screen.orientation) {
+                    window.screen.orientation.addEventListener('change', onOrientationChange);
+                }
+                cvOrientationListenerAdded = true;
+            }
+
+            // ─ Auto-hide controls (listeners added only once) ─
+            if (!cvListenersAdded) {
+                wrap.addEventListener('mousemove', showCvControls);
+                wrap.addEventListener('touchstart', showCvControls, {passive:true});
+                cvListenersAdded = true;
+            }
+
+            // ─ End ─
+            video.onended = () => {
+                updatePlayBtn();
+                wrap.classList.add('show-controls');
+            };
+
+            // ─ Audio track menu toggle ─
+            document.getElementById('cv-btn-audio').onclick = (e) => {
+                e.stopPropagation();
+                document.getElementById('cv-audio-menu').classList.toggle('open');
+                showCvControls();
+            };
+
+            // Close audio menu on outside click (listener added only once)
+            if (!cvAudioOutsideListenerAdded) {
+                document.addEventListener('click', (e) => {
+                    const wrapEl = document.getElementById('cv-audio-wrap');
+                    if (wrapEl && !wrapEl.contains(e.target)) hideAudioMenu();
+                });
+                cvAudioOutsideListenerAdded = true;
+            }
+        }
+
+        // ─── AUDIO TRACK SUPPORT (multi-audio / dual-audio HLS streams) ───
+        let cvAudioOutsideListenerAdded = false;
+
+        function hideAudioMenu() {
+            const menu = document.getElementById('cv-audio-menu');
+            if (menu) menu.classList.remove('open');
+        }
+
+        function resetAudioBtn() {
+            const wrap = document.getElementById('cv-audio-wrap');
+            const list = document.getElementById('cv-audio-list');
+            if (wrap) wrap.classList.remove('has-tracks');
+            if (list) list.innerHTML = '';
+        }
+
+        function renderAudioList(tracks, activeIdx, onSelect) {
+            const list = document.getElementById('cv-audio-list');
+            list.innerHTML = tracks.map((t, i) => {
+                const label = t.name || t.lang || t.label || t.language || `Track ${i + 1}`;
+                const isActive = i === activeIdx;
+                return `
+                <button class="cv-audio-opt ${isActive ? 'selected' : ''}" data-idx="${i}">
+                    <span>${label}</span><i class="fas fa-check"></i>
+                </button>`;
+            }).join('');
+            list.querySelectorAll('.cv-audio-opt').forEach(btn => {
+                btn.onclick = () => {
+                    const idx = parseInt(btn.dataset.idx);
+                    const label = tracks[idx].name || tracks[idx].lang || tracks[idx].label || tracks[idx].language || `Track ${idx + 1}`;
+                    onSelect(idx);
+                    hideAudioMenu();
+                    showToast('🔊 Audio: ' + label);
+                };
+            });
+        }
+
+        // HLS.js path — used when the .m3u8 manifest contains multiple audio renditions
+        function setupAudioTracks(hls) {
+            const tracks = hls.audioTracks || [];
+            const wrap = document.getElementById('cv-audio-wrap');
+            if (tracks.length <= 1) { resetAudioBtn(); return; }
+
+            wrap.classList.add('has-tracks');
+            renderAudioList(tracks, hls.audioTrack, (idx) => { hls.audioTrack = idx; });
+
+            hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (evt, data) => {
+                renderAudioList(hls.audioTracks, data.id, (idx) => { hls.audioTrack = idx; });
+            });
+        }
+
+        // Native fallback (e.g. Safari playing HLS natively) — uses the video.audioTracks API
+        function setupNativeAudioTracks(video) {
+            const tracks = video.audioTracks;
+            const wrap = document.getElementById('cv-audio-wrap');
+            if (!tracks || tracks.length <= 1) { resetAudioBtn(); return; }
+
+            wrap.classList.add('has-tracks');
+            const arr = Array.from(tracks);
+            const activeIdx = arr.findIndex(t => t.enabled);
+            renderAudioList(arr, activeIdx, (idx) => {
+                arr.forEach((t, i) => { t.enabled = (i === idx); });
+            });
+        }
+
+
+        // ─── RELATED ANIME ───
+        function renderRelated() {
+            const grid = document.getElementById('related-grid');
+            const others = allAnimeArr.filter(a => a.slug !== animeSlug).slice(0, 14);
+            grid.innerHTML = others.map(a => {
+                const safeTitle = a.title.replace(/'/g, "\\'");
+                return `
+                <div class="rel-card" onclick="goToAnime('${a.slug}')">
+                    <div class="rel-img">
+                        <img src="${a.poster}" loading="lazy" 
+                            onerror="this.src='https://placehold.co/300x450/121218/2fe6c9?text=${encodeURIComponent(a.title.substring(0,8))}'">
+                    </div>
+                    <div class="rel-title">${a.title}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function goToAnime(slug) {
+            location.href = `player.html?id=${slug}`;
+        }
+
+        // ─── SHARE ───
+        function shareAnime() {
+            const url = location.href;
+            if (navigator.share) {
+                navigator.share({ title: animeTitle, text: `Watch ${animeTitle} on AnimeVerse!`, url })
+                    .catch(() => {});
+            } else {
+                navigator.clipboard?.writeText(url).then(() => showToast('Link copied!')).catch(() => showToast('Copy the URL to share'));
+            }
+        }
+
+        // ─── DOWNLOAD ───
+        // ─── DOWNLOAD POPUP ───
+        function openDlPopup() {
+            const sKey = 'S' + currentSeason;
+            const eKey = 'E' + currentEpisode;
+            const epData = srv1Data[sKey]?.[eKey];
+
+            const qualities = ['1080p', '720p', '480p'];
+            const qualityMeta = {
+                '1080p': { label: '1080p Full HD', icon: 'fa-film',   desc: 'Best quality · Large file' },
+                '720p':  { label: '720p HD',       icon: 'fa-tv',     desc: 'Good quality · Medium file' },
+                '480p':  { label: '480p SD',        icon: 'fa-mobile', desc: 'Data saver · Small file' },
+            };
+
+            document.getElementById('dl-popup-sub').textContent =
+                `S${currentSeason} · E${currentEpisode} · ${animeTitle || 'Episode'}`;
+
+            const list = document.getElementById('dl-quality-list');
+            list.innerHTML = qualities.map(q => {
+                const qData  = epData?.[q];
+                const url    = qData?.dl_link || qData?.link || null;
+                const meta   = qualityMeta[q];
+                const unavail = !url ? 'unavailable' : '';
+                return `
+                <button class="dl-quality-btn ${unavail}" onclick="triggerDownload('${url}', '${q}')">
+                    <div class="dl-quality-icon"><i class="fas ${meta.icon}"></i></div>
+                    <div class="dl-quality-info">
+                        <div class="dl-quality-label">${meta.label}</div>
+                        <div class="dl-quality-desc">${url ? meta.desc : 'Not available'}</div>
+                    </div>
+                    <i class="fas fa-download" style="font-size:13px;color:var(--accent);opacity:${url?1:0};"></i>
+                </button>`;
+            }).join('');
+
+            document.getElementById('dl-popup-overlay').classList.add('open');
+        }
+
+        function closeDlPopup(e) {
+            if (e && e.target !== document.getElementById('dl-popup-overlay')) return;
+            document.getElementById('dl-popup-overlay').classList.remove('open');
+        }
+
+        function triggerDownload(url, quality) {
+            if (!url || url === 'null') return;
+            window.open(url, '_blank');
+            showToast('Opening download...');
+            document.getElementById('dl-popup-overlay').classList.remove('open');
+            if (window.AVAnalytics) {
+                window.AVAnalytics.trackDownload(animeSlug, animeTitle || animeSlug, currentSeason, currentEpisode, quality || '');
+            }
+        }
+
+        function downloadEp() {
+            const sKey = 'S' + currentSeason;
+            const eKey = 'E' + currentEpisode;
+
+            const epData = srv1Data[sKey]?.[eKey];
+            if (epData) {
+                const hasAny = ['1080p','720p','480p'].some(q => epData[q]?.dl_link || epData[q]?.link);
+                if (hasAny) {
+                    openDlPopup();
+                    return;
+                }
+            }
+            showToast('No download available');
+        }
+
+        // ─── REPORT ───
+        function reportIssue() {
+            const msg = encodeURIComponent(`Issue with: ${animeTitle} S${currentSeason}E${currentEpisode}`);
+            window.open(`https://t.me/animeverse648?text=${msg}`, '_blank');
+        }
+
+        // ─── CLEAR CACHE ───
+        function clearCache() {
+            localStorage.removeItem('av_cache');
+            showToast('🔄 Refreshing...');
+            setTimeout(() => location.reload(), 800);
+        }
+
+        // ─── FETCH META FROM KITSU ───
+        async function fetchKitsuMeta(title) {
+            try {
+                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1`);
+                const data = await res.json();
+                if (data.data?.[0]) {
+                    const attr = data.data[0].attributes;
+                    return {
+                        desc: attr.synopsis || '',
+                        status: attr.status || '',
+                        epCount: attr.episodeCount || null,
+                        poster: attr.posterImage?.large || '',
+                        banner: attr.coverImage?.large || '',
+                    };
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        // ─── MAIN INIT ───
+        async function initPlayer() {
+            if (!animeSlug) {
+                showToast('⚠️ No anime specified');
+                showContent();
+                return;
+            }
+
+            // Load from cache first (for title, poster, related)
+            allAnimeArr = getCachedAnime();
+            const cached = allAnimeArr.find(a => a.slug === animeSlug);
+            if (cached) {
+                animeTitle = cached.title;
+                posterUrl  = cached.poster || '';
+                bannerUrl  = cached.banner || '';
+                document.getElementById('anime-title').textContent = animeTitle;
+                document.getElementById('rating-val').textContent = cached.rating || '—';
+                renderRelated();
+                updateWatchlistBtn();
+            }
+
+            document.title = `AnimeVerse | ${animeTitle || animeSlug}`;
+
+            // Load watched & progress
+            loadWatched();
+            const lastProg = getLastProgress();
+            if (lastProg) {
+                currentSeason  = lastProg.s || 1;
+                currentEpisode = lastProg.e || 1;
+            }
+
+            // Load both Firebase server paths in parallel
+            await loadFirebaseServers();
+            buildSeasonMap();
+
+            if (Object.keys(totalEpisodes).length === 0) {
+                // fallback: try all_anime for title/meta, show empty state
+                showContent();
+                showToast('Episodes not found');
+                return;
+            }
+
+            // Clamp currentSeason to available
+            if (!totalEpisodes[currentSeason]) currentSeason = parseInt(Object.keys(totalEpisodes).sort((a,b)=>a-b)[0]);
+            // Clamp currentEpisode
+            if (currentEpisode > (totalEpisodes[currentSeason] || 1)) currentEpisode = 1;
+
+            // Render UI
+            renderServers();
+            renderSeasons();
+            renderEpisodes();
+            updateChips();
+            showContent();
+            markWatched(currentSeason, currentEpisode);
+            saveContinueWatching();
+            loadVideo();
+            updateWatchlistBtn();
+
+            // Title from all_anime Firebase (if not cached)
+            if (!animeTitle) {
+                db.ref('all_anime').once('value', snap => {
+                    const allData = snap.val();
+                    if (!allData) return;
+                    const matchTitle = Object.keys(allData).find(t =>
+                        t.toLowerCase().replace(/ /g,'-').replace(/[:']/g,'') === animeSlug
+                    );
+                    if (matchTitle) {
+                        animeTitle = matchTitle;
+                        animeData  = allData[matchTitle];
+                        document.getElementById('anime-title').textContent = animeTitle;
+                        document.title = `AnimeVerse | ${animeTitle}`;
+                        if (animeData?.status) document.getElementById('chip-status').textContent = animeData.status.toUpperCase();
+                        updateWatchlistBtn();
+                    }
+                });
+            }
+
+            // Fetch Kitsu meta for description
+            const kitsu = await fetchKitsuMeta(animeTitle || animeSlug.replace(/-/g,' '));
+            if (kitsu) {
+                document.getElementById('anime-desc').textContent = kitsu.desc || 'No description available.';
+                if (kitsu.status) document.getElementById('chip-status').textContent = kitsu.status.toUpperCase();
+            } else {
+                document.getElementById('anime-desc').textContent = 'No description available.';
+            }
+            const descEl = document.getElementById('anime-desc');
+            if (descEl.scrollHeight <= descEl.clientHeight + 4) {
+                document.getElementById('desc-toggle').style.display = 'none';
+            }
+
+            // Timeout fallback for skeleton
+            setTimeout(() => {
+                if (document.getElementById('skeleton-loader').style.display !== 'none') {
+                    showContent();
+                }
+            }, 5000);
+        }
+
+        const footerYearEl = document.getElementById('footer-year');
+        if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
+
+        if (window.AVAnalytics) window.AVAnalytics.trackPageview('player');
+
+        initPlayer().then(() => {
+            if (window.AVAnalytics) window.AVAnalytics.trackAnimeView(animeSlug, animeTitle || animeSlug);
+        });
+    </script>
+</body>
+</html>
