@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<title>AnimeVerse | Analytics</title>
+
+<link rel="icon" type="image/png" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+
+<style>
+    :root {
+        --bg: #0a0a0f;
+        --surface: #13131a;
+        --surface2: #1c1c26;
+        --accent: #f47521;
+        --accent2: #ff6b35;
+        --text: #ffffff;
+        --text-muted: #8a8a9a;
+        --text-dim: #555566;
+        --border: rgba(255,255,255,0.07);
+        --radius: 12px;
+        --good: #2ecc71;
+        --bad: #ff4d4d;
+        --blue: #5a96ff;
+        --purple: #a56bff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Nunito', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        min-height: 100vh;
+        padding-bottom: 40px;
+    }
+
+    /* ── GATE ── */
+    #gate {
+        position: fixed; inset: 0; z-index: 5000;
+        background: var(--bg);
+        display: flex; align-items: center; justify-content: center;
+        flex-direction: column; gap: 18px; padding: 24px;
+    }
+    #gate .logo { font-size: 26px; font-weight: 900; }
+    #gate .logo span { color: var(--accent); }
+    #gate-box {
+        width: 100%; max-width: 320px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        text-align: center;
+    }
+    #gate-box i { font-size: 26px; color: var(--accent); margin-bottom: 10px; }
+    #gate-box p { color: var(--text-muted); font-size: 13px; margin-bottom: 16px; }
+    #gate-input {
+        width: 100%; padding: 12px 14px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: inherit;
+        font-size: 14px;
+        margin-bottom: 10px;
+        outline: none;
+    }
+    #gate-input:focus { border-color: var(--accent); }
+    #gate-btn {
+        width: 100%; padding: 12px;
+        background: var(--accent);
+        border: none; border-radius: 8px;
+        color: #fff; font-weight: 800; font-size: 14px;
+        cursor: pointer;
+    }
+    #gate-btn:active { transform: scale(0.97); }
+    #gate-error { color: var(--bad); font-size: 12px; margin-top: 8px; min-height: 14px; }
+
+    /* ── HEADER ── */
+    .top-bar {
+        position: sticky; top: 0; z-index: 100;
+        background: rgba(10,10,15,0.96);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        padding: 14px 16px;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .top-bar .logo { font-size: 19px; font-weight: 900; letter-spacing: -0.3px; }
+    .top-bar .logo span { color: var(--accent); }
+    .top-bar .sub { font-size: 11px; color: var(--text-dim); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+    .live-dot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: var(--good);
+        box-shadow: 0 0 0 0 rgba(46,204,113,0.6);
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+        70% { box-shadow: 0 0 0 6px rgba(46,204,113,0); }
+        100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+    }
+    .icon-btn {
+        width: 34px; height: 34px; border-radius: 50%;
+        background: var(--surface2); border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--text-muted); cursor: pointer; font-size: 13px;
+    }
+    .icon-btn:active { transform: scale(0.9); }
+    #refresh-btn:active { transform: scale(0.9) rotate(90deg); }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 18px 16px 0; }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+    @media (min-width: 680px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+    .stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card::before {
+        content: '';
+        position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .stat-card.alt::before { background: linear-gradient(90deg, var(--blue), var(--purple)); }
+    .stat-icon {
+        width: 32px; height: 32px; border-radius: 8px;
+        background: rgba(244,117,33,0.12);
+        color: var(--accent);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; margin-bottom: 10px;
+    }
+    .stat-card.alt .stat-icon { background: rgba(90,150,255,0.12); color: var(--blue); }
+    .stat-val { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
+    .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 3px; }
+    .stat-sub { font-size: 11px; color: var(--text-dim); margin-top: 6px; }
+    .stat-sub.up { color: var(--good); }
+    .stat-sub.warn { color: var(--bad); }
+
+    /* ── SECTIONS ── */
+    .section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    .section-head {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .section-title { font-size: 14px; font-weight: 800; }
+    .section-title i { color: var(--accent); margin-right: 6px; }
+    .section-tag { font-size: 10px; color: var(--text-dim); font-weight: 700; text-transform: uppercase; }
+    .chart-wrap { position: relative; height: 220px; }
+
+    .two-col { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 780px) { .two-col { grid-template-columns: 1.3fr 1fr; } }
+    .two-col-even { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 780px) { .two-col-even { grid-template-columns: 1fr 1fr; } }
+
+    /* ── RANGE SELECTOR ── */
+    .range-btns { display: flex; gap: 6px; background: var(--surface2); padding: 3px; border-radius: 8px; }
+    .range-btn {
+        padding: 5px 10px; font-size: 11px; font-weight: 800;
+        color: var(--text-muted); cursor: pointer; border-radius: 6px;
+    }
+    .range-btn.active { background: var(--accent); color: #fff; }
+
+    /* ── PAGE TABS (Overview / Today) ── */
+    .page-tabs {
+        position: sticky; top: 63px; z-index: 90;
+        display: flex; gap: 8px;
+        background: rgba(10,10,15,0.96); backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 16px;
+    }
+    .page-tab {
+        padding: 8px 16px; border-radius: 8px;
+        font-size: 12.5px; font-weight: 800;
+        color: var(--text-muted); cursor: pointer;
+        display: flex; align-items: center; gap: 6px;
+        background: var(--surface2);
+    }
+    .page-tab.active { background: var(--accent); color: #fff; }
+    .page-tab:active { transform: scale(0.97); }
+    .tab-page { display: none; }
+    .tab-page.active { display: block; }
+
+    /* ── CUSTOM RANGE / DATE PICKERS ── */
+    .range-controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .date-input {
+        padding: 7px 9px; background: var(--surface2); border: 1px solid var(--border);
+        border-radius: 6px; color: var(--text); font-family: inherit; font-size: 12px; outline: none;
+    }
+    .date-input:focus { border-color: var(--accent); }
+    .apply-btn {
+        padding: 7px 12px; background: var(--accent); border: none; border-radius: 6px;
+        color: #fff; font-weight: 800; font-size: 11px; cursor: pointer; white-space: nowrap;
+    }
+    .apply-btn:active { transform: scale(0.96); }
+    .data-note { font-size: 10px; color: var(--text-dim); margin-top: 10px; }
+
+    /* ── LISTS ── */
+    .rank-row {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .rank-row:last-child { border-bottom: none; }
+    .rank-num {
+        width: 22px; height: 22px; border-radius: 6px;
+        background: var(--surface2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 800; color: var(--text-muted);
+        flex-shrink: 0;
+    }
+    .rank-row:nth-child(1) .rank-num { background: rgba(244,117,33,0.18); color: var(--accent); }
+    .rank-info { flex: 1; min-width: 0; }
+    .rank-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rank-bar-wrap { height: 4px; background: var(--surface2); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+    .rank-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; }
+    .rank-bar.blue { background: linear-gradient(90deg, var(--blue), var(--purple)); }
+    .rank-count { font-size: 12px; font-weight: 800; color: var(--text-muted); flex-shrink: 0; }
+
+    .device-legend { display: flex; justify-content: center; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
+    .device-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); font-weight: 700; }
+    .device-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+    /* ── HEALTH GRID ── */
+    .health-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (min-width: 500px) { .health-grid { grid-template-columns: repeat(4, 1fr); } }
+    .health-item {
+        background: var(--surface2); border-radius: 10px; padding: 12px;
+        text-align: center;
+    }
+    .health-item .hv { font-size: 20px; font-weight: 900; }
+    .health-item .hl { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-top: 3px; }
+    .health-item.ok .hv { color: var(--good); }
+    .health-item.warn .hv { color: var(--bad); }
+
+    /* ── ACTIVITY FEED ── */
+    .activity-row {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 12.5px;
+    }
+    .activity-row:last-child { border-bottom: none; }
+    .activity-icon {
+        width: 26px; height: 26px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 10px; flex-shrink: 0;
+    }
+    .activity-icon.pageview { background: rgba(90,150,255,0.15); color: var(--blue); }
+    .activity-icon.anime_view { background: rgba(244,117,33,0.15); color: var(--accent); }
+    .activity-icon.episode_watch { background: rgba(46,204,113,0.15); color: var(--good); }
+    .activity-icon.modal_open { background: rgba(165,107,255,0.15); color: var(--purple); }
+    .activity-icon.search { background: rgba(255,255,255,0.1); color: var(--text-muted); }
+    .activity-icon.watchlist_add { background: rgba(255,77,157,0.15); color: #ff4d9d; }
+    .activity-icon.broken_link, .activity-icon.server_error { background: rgba(255,77,77,0.15); color: var(--bad); }
+    .activity-icon.join_click { background: rgba(34,158,217,0.15); color: #229ED9; }
+    .activity-icon.notif_permission { background: rgba(244,117,33,0.15); color: var(--accent); }
+    .activity-icon.download { background: rgba(165,107,255,0.15); color: var(--purple); }
+    .activity-text { flex: 1; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .activity-text b { color: var(--text); font-weight: 700; }
+    .activity-time { font-size: 11px; color: var(--text-dim); flex-shrink: 0; }
+
+    .empty-state { text-align: center; padding: 30px 10px; color: var(--text-dim); font-size: 12.5px; }
+    .empty-state i { font-size: 22px; margin-bottom: 8px; display: block; opacity: 0.5; }
+
+    /* ── MODALS (episode detail / clear-data confirm) ── */
+    .modal-overlay {
+        position: fixed; inset: 0; z-index: 4000;
+        background: rgba(0,0,0,0.7);
+        display: none; align-items: center; justify-content: center;
+        padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+        width: 100%; max-width: 420px; max-height: 80vh; overflow-y: auto;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 18px;
+    }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
+    .modal-title { font-size: 15px; font-weight: 800; }
+    .modal-close {
+        width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+        background: var(--surface2); display: flex; align-items: center; justify-content: center;
+        cursor: pointer; color: var(--text-muted);
+    }
+    .modal-close:active { transform: scale(0.9); }
+    .danger-btn {
+        padding: 10px 14px; background: var(--bad); border: none; border-radius: 8px;
+        color: #fff; font-weight: 800; font-size: 13px; cursor: pointer;
+    }
+    .danger-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .danger-btn:active:not(:disabled) { transform: scale(0.97); }
+    .cancel-btn {
+        padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+        color: var(--text); font-weight: 800; font-size: 13px; cursor: pointer;
+    }
+    .cancel-btn:active { transform: scale(0.97); }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ─── PASSWORD GATE ─── -->
+<div id="gate">
+    <div class="logo">Anime<span>Verse</span></div>
+    <div id="gate-box">
+        <i class="fas fa-shield-halved"></i>
+        <p>Admin analytics — enter password to continue</p>
+        <input type="password" id="gate-input" placeholder="Password" autocomplete="off">
+        <button id="gate-btn">Unlock Dashboard</button>
+        <div id="gate-error"></div>
+    </div>
+</div>
+
+<!-- ─── DASHBOARD ─── -->
+<div id="dash" style="display:none;">
+    <div class="top-bar">
+        <div>
+            <div class="logo">Anime<span>Verse</span></div>
+            <div class="sub">Analytics Dashboard</div>
+        </div>
+        <div class="top-actions">
+            <span class="live-dot" title="Live"></span>
+            <div class="icon-btn" id="export-btn" title="Export CSV"><i class="fas fa-download"></i></div>
+            <div class="icon-btn" id="refresh-btn" title="Refresh"><i class="fas fa-rotate-right"></i></div>
+            <div class="icon-btn" id="clear-btn" title="Clear all analytics data" style="color:var(--bad);"><i class="fas fa-trash-can"></i></div>
+        </div>
+    </div>
+
+    <div class="page-tabs">
+        <div class="page-tab active" id="tab-btn-overview" onclick="switchTab('overview')"><i class="fas fa-chart-simple"></i>Overview</div>
+        <div class="page-tab" id="tab-btn-today" onclick="switchTab('today')"><i class="fas fa-calendar-day"></i>Today</div>
+    </div>
+
+    <div class="wrap">
+      <div id="tab-overview" class="tab-page tab-overview-part active">
+        <!-- STAT CARDS — ROW 1 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-eye"></i></div>
+                <div class="stat-val" id="stat-total-views">–</div>
+                <div class="stat-label">Total Views</div>
+                <div class="stat-sub up" id="stat-today-views">–</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-user-group"></i></div>
+                <div class="stat-val" id="stat-visitors">–</div>
+                <div class="stat-label">Unique Visitors</div>
+                <div class="stat-sub" id="stat-sessions">–</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-play"></i></div>
+                <div class="stat-val" id="stat-watches">–</div>
+                <div class="stat-label">Episode Watches</div>
+                <div class="stat-sub" id="stat-today-watches">–</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-tv"></i></div>
+                <div class="stat-val" id="stat-anime-count">–</div>
+                <div class="stat-label">Anime Tracked</div>
+                <div class="stat-sub" id="stat-top-page">–</div>
+            </div>
+        </div>
+
+        <!-- STAT CARDS — ROW 2 (new) -->
+        <div class="stats-grid">
+            <div class="stat-card alt">
+                <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+                <div class="stat-val" id="stat-watch-rate">–</div>
+                <div class="stat-label">Watch Rate</div>
+                <div class="stat-sub" id="stat-watch-rate-sub">modal open → watch</div>
+            </div>
+            <div class="stat-card alt">
+                <div class="stat-icon"><i class="fas fa-repeat"></i></div>
+                <div class="stat-val" id="stat-returning">–</div>
+                <div class="stat-label">Returning Sessions</div>
+                <div class="stat-sub" id="stat-new-sessions">–</div>
+            </div>
+            <div class="stat-card alt">
+                <div class="stat-icon"><i class="fas fa-bell"></i></div>
+                <div class="stat-val" id="stat-notif-rate">–</div>
+                <div class="stat-label">Notif Opt-in Rate</div>
+                <div class="stat-sub" id="stat-notif-sub">–</div>
+            </div>
+            <div class="stat-card alt">
+                <div class="stat-icon"><i class="fas fa-heart"></i></div>
+                <div class="stat-val" id="stat-watchlist">–</div>
+                <div class="stat-label">Watchlist Adds</div>
+                <div class="stat-sub" id="stat-join-clicks">–</div>
+            </div>
+        </div>
+      </div><!-- /tab-overview (part 1) -->
+
+      <div id="tab-today" class="tab-page">
+        <!-- DAY EXPLORER (defaults to today; pick any date for that day's numbers) -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-calendar-day"></i><span id="de-heading">Today's Analytics</span></div>
+                <div class="range-controls">
+                    <input type="date" id="de-date" class="date-input">
+                    <div class="apply-btn" id="de-today-btn">Today</div>
+                </div>
+            </div>
+            <div class="health-grid">
+                <div class="health-item ok"><div class="hv" id="de-views">–</div><div class="hl">Views</div></div>
+                <div class="health-item ok"><div class="hv" id="de-watches">–</div><div class="hl">Watches</div></div>
+                <div class="health-item ok"><div class="hv" id="de-downloads">–</div><div class="hl">Downloads</div></div>
+                <div class="health-item ok"><div class="hv" id="de-visitors">–</div><div class="hl">Visitors</div></div>
+            </div>
+            <div style="height:12px;"></div>
+            <div class="section-tag" style="margin-bottom:8px;">Top anime that day · Total watch time: <b id="de-watchtime" style="color:var(--text);">–</b></div>
+            <div id="de-topanime-list"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div></div>
+
+            <div style="height:16px;"></div>
+            <div class="section-tag" style="margin-bottom:8px;">Most watched episode that day · avg / max watch duration</div>
+            <div id="de-topepisode-list"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div></div>
+
+            <div style="height:16px;"></div>
+            <div class="section-tag" style="margin-bottom:8px;">Downloads that day, by episode & quality</div>
+            <div id="de-downloads-list"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div></div>
+        </div>
+
+        <!-- LAST 24 HOURS (rolling) -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-hourglass-half"></i>Last 24 Hours</div>
+                <div class="section-tag">Rolling window, right now</div>
+            </div>
+            <div class="health-grid">
+                <div class="health-item ok"><div class="hv" id="h24-views">–</div><div class="hl">Views</div></div>
+                <div class="health-item ok"><div class="hv" id="h24-watches">–</div><div class="hl">Watches</div></div>
+                <div class="health-item ok"><div class="hv" id="h24-downloads">–</div><div class="hl">Downloads</div></div>
+                <div class="health-item ok"><div class="hv" id="h24-visitors">–</div><div class="hl">Active Visitors</div></div>
+            </div>
+            <div style="height:14px;"></div>
+            <div class="chart-wrap" style="height:170px;"><canvas id="h24-chart"></canvas></div>
+            <div class="data-note">Based on the live event log (most recent ~300 events), so on very high-traffic hours this may undercount.</div>
+        </div>
+      </div><!-- /tab-today -->
+
+      <div id="tab-overview-2" class="tab-page tab-overview-part active">
+        <!-- TREND CHART (lifetime trend — pick a preset or a custom date-to-date range) -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-chart-line"></i>Traffic Trend</div>
+                <div class="range-btns" id="range-btns">
+                    <div class="range-btn" data-days="7">7D</div>
+                    <div class="range-btn active" data-days="14">14D</div>
+                    <div class="range-btn" data-days="30">30D</div>
+                    <div class="range-btn" data-days="90">90D</div>
+                </div>
+            </div>
+            <div class="range-controls" style="margin-bottom:12px;">
+                <span class="section-tag">Custom range:</span>
+                <input type="date" id="range-from" class="date-input">
+                <span class="section-tag">to</span>
+                <input type="date" id="range-to" class="date-input">
+                <div class="apply-btn" id="range-apply-btn">Apply</div>
+            </div>
+            <div class="chart-wrap"><canvas id="trend-chart"></canvas></div>
+        </div>
+
+        <!-- HEALTH -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-heart-pulse"></i>Site Health</div>
+                <div class="section-tag">All-time</div>
+            </div>
+            <div class="health-grid">
+                <div class="health-item warn"><div class="hv" id="health-broken">–</div><div class="hl">Broken Links</div></div>
+                <div class="health-item warn"><div class="hv" id="health-servererr">–</div><div class="hl">Server Errors</div></div>
+                <div class="health-item ok"><div class="hv" id="health-searches">–</div><div class="hl">Searches</div></div>
+                <div class="health-item ok"><div class="hv" id="health-modalopens">–</div><div class="hl">Detail Opens</div></div>
+            </div>
+        </div>
+
+        <!-- PEAK HOURS -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-clock"></i>Peak Hours</div>
+                <div class="section-tag">By hour of day, local time</div>
+            </div>
+            <div class="chart-wrap" style="height:170px;"><canvas id="hours-chart"></canvas></div>
+        </div>
+
+        <!-- EPISODE DROP-OFF -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-stairs"></i>Episode Drop-off</div>
+                <div class="section-tag">Watches by episode number, all anime</div>
+            </div>
+            <div class="chart-wrap" style="height:200px;"><canvas id="dropoff-chart"></canvas></div>
+        </div>
+
+        <div class="two-col-even">
+            <!-- EPISODE WATCH DURATION -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-stopwatch"></i>Episode Watch Duration</div>
+                    <div class="section-tag">Avg time watched per play</div>
+                </div>
+                <div id="duration-list"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div></div>
+            </div>
+
+            <!-- MOST DOWNLOADED -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-download"></i>Most Downloaded</div>
+                    <div class="section-tag">By episode downloads</div>
+                </div>
+                <div id="downloads-list"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div></div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <!-- TOP ANIME -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-fire"></i>Top Anime</div>
+                    <div class="section-tag">By views</div>
+                </div>
+                <div id="top-anime-list"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div></div>
+            </div>
+
+            <!-- DEVICES -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-mobile-screen"></i>Devices</div>
+                    <div class="section-tag">Split</div>
+                </div>
+                <div class="chart-wrap" style="height:180px;"><canvas id="device-chart"></canvas></div>
+                <div class="device-legend" id="device-legend"></div>
+            </div>
+        </div>
+
+        <div class="two-col-even">
+            <!-- GENRES -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-tags"></i>Genre Interest</div>
+                    <div class="section-tag">From detail opens</div>
+                </div>
+                <div id="genre-list"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div></div>
+            </div>
+
+            <!-- NEW VS RETURNING -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-users-rectangle"></i>New vs Returning</div>
+                    <div class="section-tag">Sessions</div>
+                </div>
+                <div class="chart-wrap" style="height:170px;"><canvas id="nr-chart"></canvas></div>
+                <div class="device-legend" id="nr-legend"></div>
+            </div>
+        </div>
+
+        <div class="two-col-even">
+            <!-- SEARCH TERMS -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-magnifying-glass"></i>Top Searches</div>
+                    <div class="section-tag">What people look for</div>
+                </div>
+                <div id="search-list"></div>
+            </div>
+
+            <!-- WATCHLIST -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-bookmark"></i>Most Watchlisted</div>
+                    <div class="section-tag">Future-interest signal</div>
+                </div>
+                <div id="watchlist-list"></div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <!-- PAGES + REFERRERS -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-file-lines"></i>Pages & Referrers</div>
+                    <div class="section-tag">Traffic sources</div>
+                </div>
+                <div id="pages-list"></div>
+                <div style="height:10px;"></div>
+                <div id="referrer-list"></div>
+            </div>
+
+            <!-- GEO -->
+            <div class="section">
+                <div class="section-head">
+                    <div class="section-title"><i class="fas fa-earth-asia"></i>Top Countries</div>
+                    <div class="section-tag">By IP lookup</div>
+                </div>
+                <div id="geo-list"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div></div>
+            </div>
+        </div>
+
+        <!-- RECENT ACTIVITY -->
+        <div class="section">
+            <div class="section-head">
+                <div class="section-title"><i class="fas fa-bolt"></i>Recent Activity</div>
+                <div class="section-tag">Live feed</div>
+            </div>
+            <div id="activity-list" style="max-height:360px; overflow-y:auto;">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i>Loading…</div>
+            </div>
+        </div>
+      </div><!-- /tab-overview (part 2) -->
+    </div>
+</div>
+
+<!-- EPISODE DOWNLOAD DETAIL MODAL -->
+<div class="modal-overlay" id="ep-detail-overlay" onclick="closeEpisodeDetail()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <div class="modal-title" id="ep-detail-title">Anime</div>
+            <div class="modal-close" onclick="closeEpisodeDetail()"><i class="fas fa-xmark"></i></div>
+        </div>
+        <div class="section-tag" style="margin-bottom:10px;">Downloads by episode</div>
+        <div id="ep-detail-list"></div>
+    </div>
+</div>
+
+<!-- CLEAR ALL DATA CONFIRM MODAL -->
+<div class="modal-overlay" id="clear-overlay" onclick="closeClearModal()">
+    <div class="modal-box" style="max-width:360px; text-align:center;" onclick="event.stopPropagation()">
+        <i class="fas fa-triangle-exclamation" style="font-size:28px;color:var(--bad);margin-bottom:10px;"></i>
+        <div style="font-size:15px;font-weight:800;margin-bottom:6px;">Clear all analytics data?</div>
+        <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:14px;">This permanently deletes every view, watch, download, and event ever recorded — for all time. This cannot be undone.</p>
+        <input type="text" id="clear-confirm-input" class="date-input" style="width:100%;box-sizing:border-box;margin-bottom:10px;" placeholder='Type DELETE to confirm' autocomplete="off">
+        <div style="display:flex;gap:8px;">
+            <div class="cancel-btn" style="flex:1;" onclick="closeClearModal()">Cancel</div>
+            <div class="danger-btn" style="flex:1;" id="clear-confirm-btn" disabled>Clear All Data</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ══════════════════════════════════════════════════════
+    // ⚠️ Change this before publishing the site live.
+    // ══════════════════════════════════════════════════════
+    const ADMIN_PASSWORD = '';
+
+    // ─── GATE LOGIC ───
+    // ─── TAB SWITCHER (Overview / Today) ───
+    function switchTab(name) {
+        document.querySelectorAll('.tab-overview-part').forEach(el => el.classList.toggle('active', name === 'overview'));
+        document.getElementById('tab-today').classList.toggle('active', name === 'today');
+        document.getElementById('tab-btn-overview').classList.toggle('active', name === 'overview');
+        document.getElementById('tab-btn-today').classList.toggle('active', name === 'today');
+        window.scrollTo({ top: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+    }
+
+    function tryUnlock() {
+        const val = document.getElementById('gate-input').value;
+        if (val === ADMIN_PASSWORD) {
+            try { sessionStorage.setItem('av_admin_auth', '1'); } catch(e) {}
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('dash').style.display = '';
+            initDashboard();
+        } else {
+            document.getElementById('gate-error').textContent = 'Wrong password. Try again.';
+        }
+    }
+    document.getElementById('gate-btn').onclick = tryUnlock;
+    document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+
+    (function checkExistingAuth() {
+        try {
+            if (sessionStorage.getItem('av_admin_auth') === '1') {
+                document.getElementById('gate').style.display = 'none';
+                document.getElementById('dash').style.display = '';
+                initDashboard();
+            }
+        } catch(e) {}
+    })();
+
+    // ─── FIREBASE ───
+    const firebaseConfig = {
+        apiKey: "AIzaSyAe5XKQlowY_AroKkQ80SeAYPqLnF02KoE",
+        databaseURL: "https://animeverse-9eada-default-rtdb.firebaseio.com/",
+        projectId: "animeverse-9eada",
+        appId: "1:296666771306:web:df732df90b1e5e9108ff13"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let trendChart = null, deviceChart = null, hoursChart = null, dropoffChart = null, nrChart = null, h24Chart = null;
+    let dashInited = false;
+    let dailyDataCache = {};
+    let latestAnimeSnapshot = {}; // for CSV export
+
+    function presetDays(n) {
+        const days = [];
+        for (let i = n - 1; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            days.push(dayKey(d));
+        }
+        return days;
+    }
+    function rangeDays(fromStr, toStr) {
+        if (!fromStr || !toStr) return presetDays(14);
+        let d = new Date(fromStr + 'T00:00:00');
+        const end = new Date(toStr + 'T00:00:00');
+        if (d > end) { const t = d; d = end; }
+        const days = [];
+        let guard = 0;
+        while (d <= end && guard < 366) {
+            days.push(dayKey(d));
+            d.setDate(d.getDate() + 1);
+            guard++;
+        }
+        return days.length ? days : presetDays(14);
+    }
+    let currentTrendDays = presetDays(14); // array of "YYYY-MM-DD" shown in the trend chart
+
+    function fmt(n) {
+        n = n || 0;
+        if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+        return String(n);
+    }
+    function pct(a, b) { return b > 0 ? Math.round((a / b) * 100) + '%' : '–'; }
+    function formatDuration(s) {
+        s = Math.round(s || 0);
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        if (h > 0) return `${h}h ${m}m`;
+        if (m > 0) return `${m}m ${sec}s`;
+        return `${sec}s`;
+    }
+    function timeAgo(ts) {
+        const s = Math.floor((Date.now() - ts) / 1000);
+        if (s < 60) return s + 's ago';
+        if (s < 3600) return Math.floor(s / 60) + 'm ago';
+        if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+        return Math.floor(s / 86400) + 'd ago';
+    }
+    function dayKey(d) {
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function dayLabel(key) {
+        const [y, m, d] = key.split('-').map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    }
+    function rankListHTML(rows, opts) {
+        opts = opts || {};
+        if (!rows.length) return `<div class="empty-state"><i class="fas ${opts.icon || 'fa-chart-simple'}"></i>${opts.emptyText || 'No data yet'}</div>`;
+        const max = rows[0].value || 1;
+        const fv = opts.formatValue || fmt;
+        return rows.map((r, i) => `
+            <div class="rank-row">
+                <div class="rank-num">${opts.numbered === false ? `<i class="fas ${opts.rowIcon || 'fa-circle'}" style="font-size:9px;"></i>` : (i + 1)}</div>
+                <div class="rank-info">
+                    <div class="rank-title">${r.label}</div>
+                    <div class="rank-bar-wrap"><div class="rank-bar ${opts.blue ? 'blue' : ''}" style="width:${(r.value / max * 100).toFixed(0)}%"></div></div>
+                </div>
+                <div class="rank-count">${fv(r.value)}</div>
+            </div>`).join('');
+    }
+
+    // ── MOST DOWNLOADED (clickable rows → episode-level breakdown) ──
+    function renderDownloadsList(a) {
+        const el = document.getElementById('downloads-list');
+        const dlRows = Object.entries(a)
+            .map(([slug, v]) => ({ slug, label: v.title || slug, value: v.downloads || 0 }))
+            .filter(r => r.value > 0)
+            .sort((x, y) => y.value - x.value)
+            .slice(0, 8);
+        if (!dlRows.length) {
+            el.innerHTML = `<div class="empty-state"><i class="fas fa-download"></i>No downloads yet</div>`;
+            return;
+        }
+        const max = dlRows[0].value || 1;
+        el.innerHTML = dlRows.map((r, i) => `
+            <div class="rank-row" style="cursor:pointer;" onclick="openEpisodeDetail('${r.slug}')" title="Tap for episode-wise breakdown">
+                <div class="rank-num">${i + 1}</div>
+                <div class="rank-info">
+                    <div class="rank-title">${r.label}</div>
+                    <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.value / max * 100).toFixed(0)}%"></div></div>
+                </div>
+                <div class="rank-count">${fmt(r.value)} <i class="fas fa-chevron-right" style="font-size:9px;color:var(--text-dim);margin-left:2px;"></i></div>
+            </div>`).join('');
+    }
+
+    function openEpisodeDetail(slug) {
+        const anime = latestAnimeSnapshot[slug];
+        if (!anime) return;
+        document.getElementById('ep-detail-title').textContent = anime.title || slug;
+
+        const epDownloads = anime.episodeDownloads || {};
+        const epWatches = anime.episodes || {};
+        const epDuration = anime.episodeDuration || {};
+        const allKeys = new Set([...Object.keys(epDownloads), ...Object.keys(epWatches)]);
+
+        const rows = Array.from(allKeys).map(k => ({
+            key: k,
+            downloads: epDownloads[k] || 0,
+            watches: epWatches[k] || 0,
+            avgDuration: epWatches[k] ? (epDuration[k] || 0) / epWatches[k] : 0
+        })).sort((x, y) => {
+            const nx = parseInt((x.key.match(/E(\d+)/) || [])[1] || '0', 10);
+            const ny = parseInt((y.key.match(/E(\d+)/) || [])[1] || '0', 10);
+            return nx - ny;
+        });
+
+        const maxDl = Math.max(1, ...rows.map(r => r.downloads));
+        const list = document.getElementById('ep-detail-list');
+        list.innerHTML = rows.length ? rows.map(r => `
+            <div class="rank-row">
+                <div class="rank-num"><i class="fas fa-play" style="font-size:9px;"></i></div>
+                <div class="rank-info">
+                    <div class="rank-title">${r.key}</div>
+                    <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${fmt(r.watches)} watches · ${formatDuration(r.avgDuration)} avg watch time</div>
+                    <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.downloads / maxDl * 100).toFixed(0)}%"></div></div>
+                </div>
+                <div class="rank-count">${fmt(r.downloads)}<div style="font-size:9px;color:var(--text-dim);font-weight:700;">downloads</div></div>
+            </div>`).join('') : `<div class="empty-state"><i class="fas fa-inbox"></i>No episode data yet</div>`;
+
+        document.getElementById('ep-detail-overlay').classList.add('open');
+    }
+    function closeEpisodeDetail() {
+        document.getElementById('ep-detail-overlay').classList.remove('open');
+    }
+
+    function initDashboard() {
+        if (dashInited) return;
+        dashInited = true;
+
+        // ── SUMMARY CARDS ──
+        db.ref('analytics/summary').on('value', snap => {
+            const s = snap.val() || {};
+            document.getElementById('stat-total-views').textContent = fmt(s.totalViews);
+            document.getElementById('stat-watches').textContent = fmt(s.totalWatches);
+            document.getElementById('stat-sessions').textContent = fmt(s.totalSessions) + ' sessions';
+
+            const watchRate = pct(s.totalWatches, s.totalModalOpens);
+            document.getElementById('stat-watch-rate').textContent = watchRate;
+
+            const newS = s.newVisitorSessions || 0, retS = s.returningVisitorSessions || 0;
+            document.getElementById('stat-returning').textContent = pct(retS, newS + retS);
+            document.getElementById('stat-new-sessions').textContent = `${fmt(newS)} new · ${fmt(retS)} returning`;
+
+            const notifTotal = (s.totalNotifGranted || 0) + (s.totalNotifDenied || 0);
+            document.getElementById('stat-notif-rate').textContent = pct(s.totalNotifGranted, notifTotal);
+            document.getElementById('stat-notif-sub').textContent = `${fmt(s.totalNotifGranted)} allowed · ${fmt(s.totalNotifDenied)} denied`;
+
+            document.getElementById('stat-watchlist').textContent = fmt(s.totalWatchlistAdds);
+            document.getElementById('stat-join-clicks').textContent = `${fmt(s.totalJoinClicks)} Telegram clicks`;
+
+            document.getElementById('health-broken').textContent = fmt(s.totalBrokenLinks);
+            document.getElementById('health-servererr').textContent = fmt(s.totalServerErrors);
+            document.getElementById('health-searches').textContent = fmt(s.totalSearches);
+            document.getElementById('health-modalopens').textContent = fmt(s.totalModalOpens);
+
+            // New vs returning donut
+            const ctx = document.getElementById('nr-chart').getContext('2d');
+            if (nrChart) nrChart.destroy();
+            const nrColors = ['#f47521', '#5a96ff'];
+            nrChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['New', 'Returning'], datasets: [{ data: [newS, retS], backgroundColor: nrColors, borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '68%' }
+            });
+            document.getElementById('nr-legend').innerHTML = ['New', 'Returning'].map((l, i) => `
+                <div class="device-legend-item"><span class="device-dot" style="background:${nrColors[i]}"></span>${l} (${fmt([newS, retS][i])})</div>
+            `).join('');
+        });
+
+        db.ref('analytics/visitors').on('value', snap => {
+            const v = snap.val() || {};
+            document.getElementById('stat-visitors').textContent = fmt(Object.keys(v).length);
+        });
+
+        // ── ANIME (top list, watch rate sub, drop-off, CSV cache) ──
+        db.ref('analytics/anime').on('value', snap => {
+            const a = snap.val() || {};
+            latestAnimeSnapshot = a;
+            document.getElementById('stat-anime-count').textContent = fmt(Object.keys(a).length);
+
+            const rows = Object.entries(a).map(([slug, v]) => ({
+                label: v.title || slug, value: v.views || 0, watchCount: v.watchCount || 0, modalOpens: v.modalOpens || 0
+            })).sort((x, y) => y.value - x.value).slice(0, 8);
+            document.getElementById('top-anime-list').innerHTML = rankListHTML(rows, { icon: 'fa-chart-simple', emptyText: 'No anime views yet' });
+
+            // Episode drop-off: aggregate watch counts by episode number across all anime
+            const epTotals = {};
+            Object.values(a).forEach(anime => {
+                const eps = anime.episodes || {};
+                Object.entries(eps).forEach(([key, count]) => {
+                    const m = key.match(/E(\d+)/);
+                    if (!m) return;
+                    const epNum = parseInt(m[1], 10);
+                    if (epNum > 24) return; // keep chart readable
+                    epTotals[epNum] = (epTotals[epNum] || 0) + count;
+                });
+            });
+            const epLabels = Object.keys(epTotals).map(Number).sort((x, y) => x - y);
+            const epValues = epLabels.map(n => epTotals[n]);
+
+            // Episode watch duration: avg seconds watched per play, per episode
+            const durRows = [];
+            Object.entries(a).forEach(([slug, v]) => {
+                const epDur = v.episodeDuration || {};
+                const epCount = v.episodes || {};
+                Object.entries(epDur).forEach(([epKey, secs]) => {
+                    const cnt = epCount[epKey] || 1;
+                    durRows.push({ label: `${v.title || slug} ${epKey}`, value: secs / cnt });
+                });
+            });
+            durRows.sort((x, y) => y.value - x.value);
+            document.getElementById('duration-list').innerHTML = rankListHTML(durRows.slice(0, 8), {
+                icon: 'fa-stopwatch', emptyText: 'No watch-time data yet', formatValue: formatDuration
+            });
+
+            // Most downloaded anime — clickable, opens per-episode breakdown
+            renderDownloadsList(a);
+
+            const dctx = document.getElementById('dropoff-chart').getContext('2d');
+            if (dropoffChart) dropoffChart.destroy();
+            dropoffChart = new Chart(dctx, {
+                type: 'bar',
+                data: {
+                    labels: epLabels.map(n => 'E' + n),
+                    datasets: [{ data: epValues, backgroundColor: '#f47521', borderRadius: 4, maxBarThickness: 28 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#555566', font: { size: 10 } }, grid: { display: false } },
+                        y: { ticks: { color: '#555566', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+                    }
+                }
+            });
+        });
+
+        // ── GENRES ──
+        db.ref('analytics/genres').on('value', snap => {
+            const g = snap.val() || {};
+            const rows = Object.entries(g).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value).slice(0, 10);
+            document.getElementById('genre-list').innerHTML = rankListHTML(rows, { icon: 'fa-tags', emptyText: 'No genre data yet' });
+        });
+
+        // ── SEARCH TERMS ──
+        db.ref('analytics/search_terms').on('value', snap => {
+            const st = snap.val() || {};
+            const rows = Object.entries(st).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+            document.getElementById('search-list').innerHTML = rankListHTML(rows, { icon: 'fa-magnifying-glass', emptyText: 'No searches logged yet', rowIcon: 'fa-magnifying-glass', numbered: false });
+        });
+
+        // ── WATCHLIST ──
+        db.ref('analytics/watchlist').on('value', snap => {
+            const w = snap.val() || {};
+            const rows = Object.entries(w).map(([k, v]) => ({ label: v.title || k, value: v.count || 0 })).sort((a, b) => b.value - a.value).slice(0, 8);
+            document.getElementById('watchlist-list').innerHTML = rankListHTML(rows, { icon: 'fa-bookmark', emptyText: 'No watchlist adds yet', rowIcon: 'fa-heart', numbered: false });
+        });
+
+        // ── PAGES ──
+        db.ref('analytics/pages').on('value', snap => {
+            const p = snap.val() || {};
+            const rows = Object.entries(p).map(([label, v]) => ({ label, value: v.views || 0 })).sort((a, b) => b.value - a.value);
+            document.getElementById('stat-top-page').textContent = rows[0] ? `Top: ${rows[0].label}` : '–';
+            document.getElementById('pages-list').innerHTML = rankListHTML(rows, { icon: 'fa-file', emptyText: 'No page data yet', rowIcon: 'fa-file', numbered: false });
+        });
+
+        // ── REFERRERS ──
+        db.ref('analytics/referrers').on('value', snap => {
+            const r = snap.val() || {};
+            const rows = Object.entries(r).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value).slice(0, 5);
+            document.getElementById('referrer-list').innerHTML = rankListHTML(rows, { icon: 'fa-link', emptyText: '', rowIcon: 'fa-link', numbered: false });
+        });
+
+        // ── GEO ──
+        db.ref('analytics/geo').on('value', snap => {
+            const g = snap.val() || {};
+            const rows = Object.entries(g).map(([label, value]) => ({ label, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+            document.getElementById('geo-list').innerHTML = rankListHTML(rows, { icon: 'fa-earth-asia', emptyText: 'No geo data yet', rowIcon: 'fa-location-dot', numbered: false });
+        });
+
+        // ── DEVICES ──
+        db.ref('analytics/devices').on('value', snap => {
+            const d = snap.val() || {};
+            const labels = ['mobile', 'desktop', 'tablet'];
+            const colors = ['#f47521', '#5a96ff', '#2ecc71'];
+            const values = labels.map(l => d[l] || 0);
+            const legend = document.getElementById('device-legend');
+            legend.innerHTML = labels.map((l, i) => `
+                <div class="device-legend-item"><span class="device-dot" style="background:${colors[i]}"></span>${l} (${fmt(values[i])})</div>
+            `).join('');
+
+            const ctx = document.getElementById('device-chart').getContext('2d');
+            if (deviceChart) deviceChart.destroy();
+            deviceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '68%' }
+            });
+        });
+
+        // ── PEAK HOURS ──
+        db.ref('analytics/hours').on('value', snap => {
+            const h = snap.val() || {};
+            const labels = Array.from({ length: 24 }, (_, i) => i);
+            const values = labels.map(i => h[i] || 0);
+            const ctx = document.getElementById('hours-chart').getContext('2d');
+            if (hoursChart) hoursChart.destroy();
+            hoursChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: labels.map(i => i + 'h'), datasets: [{ data: values, backgroundColor: '#5a96ff', borderRadius: 3, maxBarThickness: 14 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#555566', font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } },
+                        y: { ticks: { color: '#555566', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+                    }
+                }
+            });
+        });
+
+        // ── TREND (range-selectable) ──
+        db.ref('analytics/daily').on('value', snap => {
+            dailyDataCache = snap.val() || {};
+            renderTrend();
+        });
+
+        document.getElementById('range-btns').querySelectorAll('.range-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('range-from').value = '';
+                document.getElementById('range-to').value = '';
+                currentTrendDays = presetDays(parseInt(btn.dataset.days, 10));
+                renderTrend();
+            });
+        });
+
+        document.getElementById('range-apply-btn').addEventListener('click', () => {
+            const from = document.getElementById('range-from').value;
+            const to = document.getElementById('range-to').value;
+            if (!from || !to) return;
+            document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+            currentTrendDays = rangeDays(from, to);
+            renderTrend();
+        });
+
+        function renderTrend() {
+            const data = dailyDataCache;
+            const days = currentTrendDays;
+            const views = days.map(k => (data[k] && data[k].views) || 0);
+            const watches = days.map(k => (data[k] && data[k].watches) || 0);
+            const todayK = dayKey(new Date());
+            const yestK = dayKey(new Date(Date.now() - 86400000));
+
+            document.getElementById('stat-today-views').textContent =
+                `Today: ${fmt((data[todayK] && data[todayK].views) || 0)} · Yesterday: ${fmt((data[yestK] && data[yestK].views) || 0)}`;
+            document.getElementById('stat-today-watches').textContent =
+                `Today: ${fmt((data[todayK] && data[todayK].watches) || 0)}`;
+
+            const ctx = document.getElementById('trend-chart').getContext('2d');
+            if (trendChart) trendChart.destroy();
+            trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days.map(dayLabel),
+                    datasets: [
+                        { label: 'Views', data: views, borderColor: '#f47521', backgroundColor: 'rgba(244,117,33,0.12)', borderWidth: 2, tension: 0.35, fill: true, pointRadius: 0 },
+                        { label: 'Watches', data: watches, borderColor: '#5a96ff', backgroundColor: 'rgba(90,150,255,0.08)', borderWidth: 2, tension: 0.35, fill: true, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#8a8a9a', font: { family: 'Nunito', weight: 700, size: 11 }, boxWidth: 10 } } },
+                    scales: {
+                        x: { ticks: { color: '#555566', font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }, grid: { display: false } },
+                        y: { ticks: { color: '#555566', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // ── DAY EXPLORER helpers ──
+
+        // Most watched episode that day, with avg/max watch duration per episode
+        // (duration is tracked per session, so avg/max is computed across sessions)
+        function renderTopEpisodesToday(d) {
+            const ew = d.episodeWatches || {};
+            const ed = d.episodeDuration || {};
+            const titles = d.animeTitles || {};
+            const rows = [];
+            Object.entries(ew).forEach(([slug, eps]) => {
+                Object.entries(eps).forEach(([epKey, count]) => {
+                    const sessions = Object.values((ed[slug] && ed[slug][epKey]) || {});
+                    const avg = sessions.length ? sessions.reduce((a, b) => a + b, 0) / sessions.length : 0;
+                    const max = sessions.length ? Math.max(...sessions) : 0;
+                    rows.push({ label: `${titles[slug] || slug} · ${epKey}`, value: count, avg, max });
+                });
+            });
+            rows.sort((a, b) => b.value - a.value);
+            const top = rows.slice(0, 8);
+            const el = document.getElementById('de-topepisode-list');
+            if (!top.length) {
+                el.innerHTML = `<div class="empty-state"><i class="fas fa-play"></i>No episode watches recorded that day</div>`;
+                return;
+            }
+            const maxVal = top[0].value || 1;
+            el.innerHTML = top.map((r, i) => `
+                <div class="rank-row">
+                    <div class="rank-num">${i + 1}</div>
+                    <div class="rank-info">
+                        <div class="rank-title">${r.label}</div>
+                        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">avg ${formatDuration(r.avg)} · max ${formatDuration(r.max)} watch time</div>
+                        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.value / maxVal * 100).toFixed(0)}%"></div></div>
+                    </div>
+                    <div class="rank-count">${fmt(r.value)}</div>
+                </div>`).join('');
+        }
+
+        // Downloads that day, broken down by episode and quality
+        function renderTodayDownloads(d) {
+            const dl = d.episodeDownloads || {};
+            const titles = d.animeTitles || {};
+            const rows = [];
+            Object.entries(dl).forEach(([slug, eps]) => {
+                Object.entries(eps).forEach(([epKey, qualities]) => {
+                    const total = Object.values(qualities).reduce((a, b) => a + b, 0);
+                    const qualityStr = Object.entries(qualities)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([q, c]) => `${q} ×${c}`).join(' · ');
+                    rows.push({ label: `${titles[slug] || slug} · ${epKey}`, value: total, qualityStr });
+                });
+            });
+            rows.sort((a, b) => b.value - a.value);
+            const top = rows.slice(0, 8);
+            const el = document.getElementById('de-downloads-list');
+            if (!top.length) {
+                el.innerHTML = `<div class="empty-state"><i class="fas fa-download"></i>No downloads recorded that day</div>`;
+                return;
+            }
+            const maxVal = top[0].value || 1;
+            el.innerHTML = top.map((r, i) => `
+                <div class="rank-row">
+                    <div class="rank-num">${i + 1}</div>
+                    <div class="rank-info">
+                        <div class="rank-title">${r.label}</div>
+                        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${r.qualityStr}</div>
+                        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(r.value / maxVal * 100).toFixed(0)}%"></div></div>
+                    </div>
+                    <div class="rank-count">${fmt(r.value)}</div>
+                </div>`).join('');
+        }
+
+        // ── DAY EXPLORER (defaults to today; date picker loads any day) ──
+        function loadDayExplorer(dateKey) {
+            const isToday = dateKey === dayKey(new Date());
+            document.getElementById('de-heading').textContent = isToday ? "Today's Analytics" : `Analytics for ${dayLabel(dateKey)}`;
+            db.ref('analytics/daily/' + dateKey).once('value', snap => {
+                const d = snap.val() || {};
+                document.getElementById('de-views').textContent = fmt(d.views || 0);
+                document.getElementById('de-watches').textContent = fmt(d.watches || 0);
+                document.getElementById('de-downloads').textContent = fmt(d.downloads || 0);
+                document.getElementById('de-visitors').textContent = fmt(d.visitors ? Object.keys(d.visitors).length : 0);
+                document.getElementById('de-watchtime').textContent = formatDuration(d.watchSeconds || 0);
+
+                const animeWatches = d.animeWatches || {};
+                const animeTitles = d.animeTitles || {};
+                const rows = Object.entries(animeWatches)
+                    .map(([slug, value]) => ({ label: animeTitles[slug] || slug, value }))
+                    .sort((a, b) => b.value - a.value)
+                    .slice(0, 8);
+                document.getElementById('de-topanime-list').innerHTML = rankListHTML(rows, { icon: 'fa-fire', emptyText: 'No watches recorded that day' });
+
+                renderTopEpisodesToday(d);
+                renderTodayDownloads(d);
+            });
+        }
+        const deDateInput = document.getElementById('de-date');
+        const todayStr = dayKey(new Date());
+        deDateInput.value = todayStr;
+        deDateInput.max = todayStr;
+        deDateInput.addEventListener('change', () => { if (deDateInput.value) loadDayExplorer(deDateInput.value); });
+        document.getElementById('de-today-btn').addEventListener('click', () => {
+            deDateInput.value = todayStr;
+            loadDayExplorer(todayStr);
+        });
+        loadDayExplorer(todayStr);
+
+        // ── LAST 24 HOURS (rolling window, from the event log) ──
+        function renderLast24h() {
+            const now = Date.now();
+            const cutoff = now - 24 * 3600 * 1000;
+            db.ref('analytics/events').orderByChild('ts').startAt(cutoff).once('value', snap => {
+                let views = 0, watches = 0, downloads = 0;
+                const visitors = new Set();
+                const hourBuckets = new Array(24).fill(0);
+                snap.forEach(child => {
+                    const r = child.val();
+                    if (!r || !r.ts) return;
+                    if (r.type === 'pageview') views++;
+                    else if (r.type === 'episode_watch') watches++;
+                    else if (r.type === 'download') downloads++;
+                    if (r.visitorId) visitors.add(r.visitorId);
+                    const idx = 23 - Math.floor((now - r.ts) / 3600000);
+                    if (idx >= 0 && idx <= 23) hourBuckets[idx]++;
+                });
+                document.getElementById('h24-views').textContent = fmt(views);
+                document.getElementById('h24-watches').textContent = fmt(watches);
+                document.getElementById('h24-downloads').textContent = fmt(downloads);
+                document.getElementById('h24-visitors').textContent = fmt(visitors.size);
+
+                const labels = [];
+                for (let i = 23; i >= 0; i--) labels.push(new Date(now - i * 3600000).getHours() + 'h');
+
+                const ctx = document.getElementById('h24-chart').getContext('2d');
+                if (h24Chart) h24Chart.destroy();
+                h24Chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ data: hourBuckets, backgroundColor: '#a56bff', borderRadius: 3, maxBarThickness: 14 }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { ticks: { color: '#555566', font: { size: 9 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { display: false } },
+                            y: { ticks: { color: '#555566', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+                        }
+                    }
+                });
+            });
+        }
+        renderLast24h();
+        setInterval(renderLast24h, 60000);
+
+        // ── RECENT ACTIVITY (live) ──
+        db.ref('analytics/events').orderByChild('ts').limitToLast(30).on('value', snap => {
+            const rows = [];
+            snap.forEach(child => rows.push(child.val()));
+            rows.reverse();
+
+            const iconMap = {
+                pageview: 'fa-eye', anime_view: 'fa-tv', episode_watch: 'fa-play',
+                modal_open: 'fa-circle-info', search: 'fa-magnifying-glass', watchlist_add: 'fa-bookmark',
+                broken_link: 'fa-link-slash', server_error: 'fa-triangle-exclamation',
+                join_click: 'fa-paper-plane', notif_permission: 'fa-bell', download: 'fa-download'
+            };
+            const textMap = (r) => {
+                switch (r.type) {
+                    case 'pageview': return `Visited <b>${r.page || 'a page'}</b>`;
+                    case 'anime_view': return `Opened player for <b>${r.title || r.slug || ''}</b>`;
+                    case 'episode_watch': return `Watched <b>${r.title || r.slug || ''}</b> S${r.season || 1}E${r.episode || 1}`;
+                    case 'modal_open': return `Viewed details of <b>${r.title || r.slug || ''}</b>`;
+                    case 'search': return `Searched <b>"${r.term || ''}"</b>`;
+                    case 'watchlist_add': return `Added <b>${r.title || ''}</b> to list`;
+                    case 'broken_link': return `Broken link: <b>${r.title || r.slug || ''}</b> S${r.season || 1}E${r.episode || 1}`;
+                    case 'server_error': return `Server error: <b>${r.context || ''}</b>`;
+                    case 'join_click': return `Clicked Telegram join (${r.source || ''})`;
+                    case 'notif_permission': return `Notification ${r.result || ''}`;
+                    case 'download': return `Downloaded <b>${r.title || r.slug || ''}</b> S${r.season || 1}E${r.episode || 1} (${r.quality || ''})`;
+                    default: return r.type || 'Event';
+                }
+            };
+
+            const el = document.getElementById('activity-list');
+            el.innerHTML = rows.length ? rows.map(r => `
+                <div class="activity-row">
+                    <div class="activity-icon ${r.type}"><i class="fas ${iconMap[r.type] || 'fa-circle'}"></i></div>
+                    <div class="activity-text">${textMap(r)}</div>
+                    <div class="activity-time">${timeAgo(r.ts || Date.now())}</div>
+                </div>`).join('') : `<div class="empty-state"><i class="fas fa-bolt"></i>No activity yet</div>`;
+        });
+    }
+
+    document.getElementById('refresh-btn').onclick = () => location.reload();
+
+    // ── CLEAR ALL DATA ──
+    document.getElementById('clear-btn').onclick = () => {
+        document.getElementById('clear-confirm-input').value = '';
+        document.getElementById('clear-confirm-btn').disabled = true;
+        document.getElementById('clear-confirm-btn').textContent = 'Clear All Data';
+        document.getElementById('clear-overlay').classList.add('open');
+    };
+    function closeClearModal() {
+        document.getElementById('clear-overlay').classList.remove('open');
+    }
+    document.getElementById('clear-confirm-input').addEventListener('input', (e) => {
+        document.getElementById('clear-confirm-btn').disabled = e.target.value.trim() !== 'DELETE';
+    });
+    document.getElementById('clear-confirm-btn').addEventListener('click', () => {
+        const btn = document.getElementById('clear-confirm-btn');
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = 'Clearing…';
+        db.ref('analytics').remove()
+            .then(() => { location.reload(); })
+            .catch(() => { btn.textContent = 'Failed — tap to retry'; btn.disabled = false; });
+    });
+
+    // ── EXPORT CSV (daily trend for the selected range + top anime) ──
+    document.getElementById('export-btn').onclick = () => {
+        const days = currentTrendDays;
+        let csv = 'Date,Views,Watches,Downloads,Unique Visitors\n';
+        days.forEach(k => {
+            const row = dailyDataCache[k] || {};
+            const visitors = row.visitors ? Object.keys(row.visitors).length : 0;
+            csv += `${k},${row.views || 0},${row.watches || 0},${row.downloads || 0},${visitors}\n`;
+        });
+
+        csv += '\nAnime,Views,Modal Opens,Watch Count\n';
+        Object.values(latestAnimeSnapshot)
+            .sort((a, b) => (b.views || 0) - (a.views || 0))
+            .forEach(a => {
+                const title = (a.title || '').replace(/,/g, ' ');
+                csv += `${title},${a.views || 0},${a.modalOpens || 0},${a.watchCount || 0}\n`;
+            });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `animeverse-analytics-${dayKey(new Date())}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+</script>
+</body>
+</html>
