@@ -685,6 +685,58 @@
             border-color: var(--border2);
             color: var(--text-muted);
         }
+
+        /* ─── QUALITY GROUP (header + shortener/direct options) ─── */
+        .dl-quality-group {
+            padding: 10px 18px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .dl-quality-group:last-of-type { border-bottom: none; }
+        .dl-quality-group.unavailable { opacity: 0.35; pointer-events: none; }
+        .dl-quality-header {
+            display: flex; align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+        .dl-option-row {
+            display: flex; gap: 8px;
+        }
+        .dl-option-btn {
+            flex: 1;
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px;
+            padding: 10px 8px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.2px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .dl-option-shortener {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-border);
+            color: var(--accent);
+        }
+        .dl-option-shortener:active { background: rgba(47,230,201,0.22); }
+        .dl-option-direct {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            color: var(--text-muted);
+        }
+        .dl-option-direct:active { background: var(--surface3); }
+        .dl-shortener-note {
+            margin-top: 8px;
+            font-size: 10px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-left: 2px solid var(--accent);
+            border-radius: 0 6px 6px 0;
+            padding: 7px 10px;
+        }
+        .dl-shortener-note b { color: var(--accent); font-weight: 700; }
         .dl-cancel-btn {
             display: flex; align-items: center; justify-content: center;
             width: calc(100% - 32px);
@@ -984,6 +1036,21 @@
             color: rgba(255,255,255,0.6);
             letter-spacing: 0.3px;
         }
+        /* Fullscreen button floating over the embedded iframe player */
+        #btn-iframe-fs {
+            position: absolute;
+            right: 10px; bottom: 10px;
+            width: 32px; height: 32px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.55);
+            border: 1px solid rgba(255,255,255,0.18);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 13px;
+            cursor: pointer;
+            z-index: 20;
+            transition: background 0.15s;
+        }
+        #btn-iframe-fs:active { background: rgba(0,0,0,0.8); }
     </style>
 </head>
 <body>
@@ -1046,6 +1113,9 @@
                 <div class="placeholder-sub">Try another server or episode</div>
             </div>
             <iframe id="main-iframe" src="" allowfullscreen allow="fullscreen; autoplay; encrypted-media" style="display:none;"></iframe>
+            <button id="btn-iframe-fs" style="display:none;" title="Fullscreen">
+                <i class="fas fa-expand" id="iframe-fs-icon"></i>
+            </button>
 
             <!-- ─── CUSTOM PLAYER (Server 2) ─── -->
             <div id="custom-player-wrap">
@@ -1262,7 +1332,27 @@
         // srv2Data['S1']['E1'] = { '1080p': {link, dl_link, server, time}, ... }
         let srv1Data = {};
         let srv2Data = {};
+        // audio_tracks/{slug}/S{n}/E{n}/{quality} -> { tracks: [...] } se load hota hai
+        // (encoder bot ka alag Firebase path, anime_links se bilkul door — koi overwrite
+        // risk nahi). audioTracksStore[sKey][eKey][quality] = normalized tracks array.
+        let audioTracksStore = {};
         let hlsInstance = null;   // active Hls.js instance (for multi-audio HLS streams)
+
+        // Firebase Realtime Database arrays ko sequential-numeric-key OBJECT ki tarah
+        // store karta hai ({"0":{...},"1":{...}}), JS SDK usually auto-array bana deta
+        // hai agar keys 0..N contiguous hon, lekin safety ke liye khud bhi normalize
+        // kar lete hain — array ho ya object, dono handle ho jaayenge.
+        function normalizeTracks(raw) {
+            if (!raw) return [];
+            if (Array.isArray(raw)) return raw.filter(Boolean);
+            if (typeof raw === 'object') {
+                return Object.keys(raw)
+                    .sort((a, b) => Number(a) - Number(b))
+                    .map(k => raw[k])
+                    .filter(Boolean);
+            }
+            return [];
+        }
 
         // ─── WATCH DURATION TRACKING ───
         // wdCtx = which episode the accumulated seconds belong to (set only once
@@ -1380,7 +1470,7 @@
         // Automatically replaces any occurrence of the old base URL with the new one,
         // no matter where it appears in the Firebase data (link, dl_link, url, etc).
         const OLD_BASE_URL = 'https://versebot-syvy.onrender.com';
-        const NEW_BASE_URL = 'https://royal-snowflake-61cf.ayushkum099766.workers.dev';
+        const NEW_BASE_URL = 'https://ep-7crf.onrender.com';
         function fixLinksDeep(obj) {
             if (!obj) return obj;
             try {
@@ -1395,7 +1485,8 @@
         function loadFirebaseServers() {
             return new Promise((resolve) => {
                 let done = 0;
-                function check() { if (++done === 2) resolve(); }
+                const total = 3;
+                function check() { if (++done === total) resolve(); }
 
                 // SERVER 1 — anime_links/{slug}
                 // Structure: S1 > E1 > { '1080p': {link, dl_link, server, time}, '720p': {...}, '480p': {...} }
@@ -1414,6 +1505,28 @@
                     }
                     check();
                 }, () => { if (window.AVAnalytics) window.AVAnalytics.trackServerError('anime_links_load'); check(); });
+
+                // AUDIO TRACKS — audio_tracks/{slug} (encoder bot ka alag path, anime_links
+                // se bilkul door — isliye video-link data se koi overwrite/clash nahi).
+                // Structure: S1 > E1 > {quality} > { tracks: [{name, lang, default, audio_link}, ...] }
+                db.ref('audio_tracks/' + animeSlug).once('value', snap => {
+                    const data = snap.val();
+                    if (data && typeof data === 'object') {
+                        Object.entries(data).forEach(([sKey, eps]) => {
+                            if (!sKey.startsWith('S') || typeof eps !== 'object') return;
+                            audioTracksStore[sKey] = audioTracksStore[sKey] || {};
+                            Object.entries(eps).forEach(([eKey, qualities]) => {
+                                if (!eKey.startsWith('E') || !qualities || typeof qualities !== 'object') return;
+                                audioTracksStore[sKey][eKey] = audioTracksStore[sKey][eKey] || {};
+                                Object.entries(qualities).forEach(([q, qData]) => {
+                                    const arr = normalizeTracks(qData && qData.tracks);
+                                    if (arr.length) audioTracksStore[sKey][eKey][q] = arr;
+                                });
+                            });
+                        });
+                    }
+                    check();
+                }, () => { check(); }); // is fetch ka fail hona optional feature hai — video playback ko block nahi karna
 
                 // (Server 2 removed — only one server now)
                 check();
@@ -1715,6 +1828,7 @@
             const eKey = 'E' + currentEpisode;
 
             const iframe      = document.getElementById('main-iframe');
+            const iframeFsBtn = document.getElementById('btn-iframe-fs');
             const loading     = document.getElementById('player-loading');
             const placeholder = document.getElementById('player-placeholder');
             const customWrap  = document.getElementById('custom-player-wrap');
@@ -1726,6 +1840,7 @@
             let videoUrl = null;
             let dlUrl    = null;
             let metaText = '';
+            let audioTracksData = null;
 
             const epData = srv1Data[sKey]?.[eKey];
             if (epData) {
@@ -1735,6 +1850,42 @@
                         videoUrl = epData[q].link;
                         dlUrl    = epData[q].dl_link || null;
                         metaText = q + (epData[q].server ? ' · ' + epData[q].server : ' · Server 1');
+
+                        // Agar is quality ke liye alag-alag audio-language files defined
+                        // hain (audio_track_splitter.py se), to default/pehla track hi
+                        // shuru me load karo — switcher se baad me change kar sakte hain.
+                        if (Array.isArray(epData[q].audio_tracks) && epData[q].audio_tracks.length > 1) {
+                            audioTracksData = epData[q].audio_tracks;
+                            const defaultTrack = audioTracksData.find(t => t.default) || audioTracksData[0];
+                            videoUrl = defaultTrack.link;
+                        } else {
+                            audioTracksData = null;
+                        }
+
+                        // NAYA STORE — encoder bot ke 'audio_tracks/' path se (isi quality
+                        // ke liye). Ise legacy epData[q].audio_tracks se prefer karte hain
+                        // jab ye available ho. "default" track ke liye koi alag audio_link
+                        // nahi hota (wo already is video file me muxed hai), isliye uska
+                        // link seedha isi quality ke main videoUrl se le lete hain. Jis
+                        // track ka link hi missing ho (jaise storage-channel copy fail hui
+                        // thi), use switcher me mat dikhao — chunne layak nahi hai.
+                        const rawAudio = audioTracksStore[sKey]?.[eKey]?.[q];
+                        if (Array.isArray(rawAudio) && rawAudio.length) {
+                            const mapped = rawAudio
+                                .map(t => ({
+                                    name: t.name || t.lang || 'Track',
+                                    lang: t.lang || '',
+                                    default: !!t.default,
+                                    link: t.default ? videoUrl : (t.audio_link || null),
+                                    audioOnly: !t.default, // .m4a hai, khud ka video stream nahi hai
+                                }))
+                                .filter(t => !!t.link);
+                            if (mapped.length > 1) {
+                                audioTracksData = mapped;
+                                const defaultTrack = audioTracksData.find(t => t.default) || audioTracksData[0];
+                                videoUrl = defaultTrack.link;
+                            }
+                        }
                         break;
                     }
                 }
@@ -1745,6 +1896,7 @@
                 resetAudioBtn();
                 iframe.style.display      = 'none';
                 iframe.src                = '';
+                iframeFsBtn.style.display = 'none';
                 loading.style.display     = 'none';
                 customWrap.classList.remove('active');
                 placeholder.style.display = 'flex';
@@ -1777,23 +1929,27 @@
                 customWrap.classList.remove('active');
                 loading.style.display     = 'flex';
                 iframe.style.display      = 'none';
+                iframeFsBtn.style.display = 'none';
                 iframe.src = videoUrl;
                 iframe.onload = () => {
-                    loading.style.display = 'none';
-                    iframe.style.display  = 'block';
+                    loading.style.display     = 'none';
+                    iframe.style.display      = 'block';
+                    iframeFsBtn.style.display = 'flex';
                 };
                 setTimeout(() => {
                     if (loading.style.display !== 'none') {
-                        loading.style.display = 'none';
-                        iframe.style.display  = 'block';
+                        loading.style.display     = 'none';
+                        iframe.style.display      = 'block';
+                        iframeFsBtn.style.display = 'flex';
                     }
                 }, 7000);
             } else {
-                iframe.style.display  = 'none';
-                iframe.src            = '';
+                iframe.style.display      = 'none';
+                iframe.src                = '';
+                iframeFsBtn.style.display = 'none';
                 loading.style.display = 'none';
                 customWrap.classList.add('active');
-                initCustomPlayer(videoUrl);
+                initCustomPlayer(videoUrl, audioTracksData);
             }
 
             // Download link bar
@@ -1802,18 +1958,91 @@
                 bar.id = 'dl-bar-inline';
                 bar.style.cssText = 'padding:0 16px 14px;';
                 const dlQualityLabel = metaText.split('·')[0].trim();
-                bar.innerHTML = `<a href="${dlUrl}" target="_blank" rel="noopener" onclick="if(window.AVAnalytics) window.AVAnalytics.trackDownload(animeSlug, animeTitle || animeSlug, currentSeason, currentEpisode, '${dlQualityLabel}')" style="
-                    display:flex;align-items:center;justify-content:center;gap:8px;
-                    width:100%;background:var(--surface2);
-                    border:1.5px solid rgba(244,117,33,0.35);border-radius:8px;
-                    padding:10px 0;font-size:12px;font-weight:800;
-                    color:var(--accent);text-decoration:none;font-family:inherit;">
-                    <i class="fas fa-download"></i> Download Episode (${dlQualityLabel})
-                </a>`;
+                bar.innerHTML = `
+                    <div style="display:flex;gap:8px;">
+                        <button type="button" onclick='triggerDownload(${JSON.stringify(dlUrl)}, ${JSON.stringify(dlQualityLabel)}, true)' style="
+                            flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+                            background:var(--surface2);
+                            border:1.5px solid rgba(244,117,33,0.35);border-radius:8px;
+                            padding:10px 0;font-size:11.5px;font-weight:800;
+                            color:var(--accent);font-family:inherit;cursor:pointer;">
+                            <i class="fas fa-bolt"></i> Shortener
+                        </button>
+                        <button type="button" onclick='triggerDownload(${JSON.stringify(dlUrl)}, ${JSON.stringify(dlQualityLabel)}, false)' style="
+                            flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+                            background:var(--surface2);
+                            border:1.5px solid var(--border2);border-radius:8px;
+                            padding:10px 0;font-size:11.5px;font-weight:800;
+                            color:var(--text-muted);font-family:inherit;cursor:pointer;">
+                            <i class="fas fa-download"></i> Direct
+                        </button>
+                    </div>
+                    <div style="margin-top:8px;font-size:10px;line-height:1.5;color:var(--text-muted);
+                        background:var(--surface2);border:1px solid var(--border);
+                        border-left:2px solid var(--accent);border-radius:0 6px 6px 0;padding:7px 10px;">
+                        <b style="color:var(--accent);">Please use Shortener</b> to download — it helps support the site. <br>
+                        <b style="color:var(--accent);">Shortener use karke</b> download karo, isse site ko support milta hai. Thank you! 🙏
+                    </div>`;
                 const pw = document.getElementById('player-wrap');
                 pw.parentNode.insertBefore(bar, pw.nextSibling);
             }
         }
+
+        // ─── FULLSCREEN + AUTO-LANDSCAPE (shared by iframe player & custom player) ───
+        // Screen ko landscape (horizontal) me lock karne ki koshish karta hai. Kai
+        // browsers is API ko sirf fullscreen ke andar hi allow karte hain, isliye ye
+        // fullscreen ho jaane ke baad call hota hai. Agar device/browser support
+        // nahi karta to silently ignore ho jayega (video fullscreen to rahega hi).
+        function lockLandscape() {
+            try {
+                if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+                    window.screen.orientation.lock('landscape').catch(() => {});
+                }
+            } catch (e) {}
+        }
+        function unlockOrientation() {
+            try {
+                if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+                    window.screen.orientation.unlock();
+                }
+            } catch (e) {}
+        }
+        function requestFsAndRotate(el) {
+            if (!el) return;
+            const req = (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen)?.call(el);
+            if (req && req.then) {
+                req.then(lockLandscape).catch(() => {});
+            } else {
+                // Older/prefixed browsers don't return a promise — try right away.
+                lockLandscape();
+            }
+        }
+        function exitFsAndUnlock() {
+            (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen)?.call(document)?.catch?.(() => {});
+            unlockOrientation();
+        }
+
+        // Fullscreen button that floats over the embedded iframe player (Server 1).
+        // Iframe players usually have their own controls, but not all embeds expose a
+        // reliable fullscreen+rotate option on mobile, so we add our own.
+        (function setupIframeFullscreen() {
+            const btn = document.getElementById('btn-iframe-fs');
+            const iframe = document.getElementById('main-iframe');
+            if (!btn || !iframe) return;
+            btn.onclick = () => {
+                if (!document.fullscreenElement) {
+                    requestFsAndRotate(iframe);
+                } else {
+                    exitFsAndUnlock();
+                }
+            };
+            document.addEventListener('fullscreenchange', () => {
+                const isFs = !!document.fullscreenElement;
+                const icon = document.getElementById('iframe-fs-icon');
+                if (icon) icon.className = isFs ? 'fas fa-compress' : 'fas fa-expand';
+                if (!isFs) unlockOrientation();
+            });
+        })();
 
         // ─── CUSTOM PLAYER LOGIC ───
         let cvControlsTimer = null;
@@ -1830,7 +2059,7 @@
             }
         }
 
-        function initCustomPlayer(src) {
+        function initCustomPlayer(src, audioTracks) {
             const video    = document.getElementById('cv-video');
             const wrap     = document.getElementById('custom-player-wrap');
             const spinner  = document.getElementById('cv-spinner');
@@ -1843,6 +2072,7 @@
             resetAudioBtn();
 
             const isHls = src.includes('.m3u8');
+            const hasSeparateAudioFiles = Array.isArray(audioTracks) && audioTracks.length > 1;
 
             if (isHls && window.Hls && Hls.isSupported()) {
                 // ─ HLS.js: exposes multiple audio tracks when present in the manifest ─
@@ -1869,11 +2099,16 @@
                     }
                 });
             } else {
-                // Native playback (mp4 / direct links, or Safari's built-in HLS support)
+                // Native playback (mp4 / direct links, or Safari's built-in HLS support).
                 video.src = src;
                 video.load();
-                if (isHls) {
-                    // Safari exposes multiple audio renditions via video.audioTracks
+                if (hasSeparateAudioFiles) {
+                    // Reliable, sab-browser-compatible tareeka — alag file per language
+                    const activeIdx = audioTracks.findIndex(t => t.link === src);
+                    setupSourceSwapAudioTracks(video, audioTracks, activeIdx >= 0 ? activeIdx : 0);
+                } else {
+                    // Fallback: native video.audioTracks (sirf Safari me kaam karta hai,
+                    // baaki browsers me chupchaap kuch nahi karta — harmless)
                     video.addEventListener('loadedmetadata', () => setupNativeAudioTracks(video), { once: true });
                 }
             }
@@ -2036,38 +2271,11 @@
             const fsBtn  = document.getElementById('cv-btn-fs');
             const fsIcon = document.getElementById('cv-fs-icon');
 
-            // Screen ko landscape (horizontal) me lock karne ki koshish karta hai.
-            // Kai browsers is API ko sirf fullscreen ke andar hi allow karte hain,
-            // isliye ye fullscreen ho jaane ke baad call hota hai. Agar device/browser
-            // support nahi karta to silently ignore ho jayega (video fullscreen to rahega hi).
-            function lockLandscape() {
-                try {
-                    if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
-                        window.screen.orientation.lock('landscape').catch(() => {});
-                    }
-                } catch (e) {}
-            }
-            function unlockOrientation() {
-                try {
-                    if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
-                        window.screen.orientation.unlock();
-                    }
-                } catch (e) {}
-            }
-
             fsBtn.onclick = () => {
-                const el = wrap;
                 if (!document.fullscreenElement) {
-                    const req = (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen).call(el);
-                    if (req && req.then) {
-                        req.then(lockLandscape).catch(() => {});
-                    } else {
-                        // Older browsers (webkit/moz prefixed) don't return a promise — try right away.
-                        lockLandscape();
-                    }
+                    requestFsAndRotate(wrap);
                 } else {
-                    (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen).call(document).catch(()=>{});
-                    unlockOrientation();
+                    exitFsAndUnlock();
                 }
                 showCvControls();
             };
@@ -2135,6 +2343,9 @@
             const list = document.getElementById('cv-audio-list');
             if (wrap) wrap.classList.remove('has-tracks');
             if (list) list.innerHTML = '';
+            destroyExtraAudio();
+            const video = document.getElementById('cv-video');
+            if (video) video.muted = false;
         }
 
         function renderAudioList(tracks, activeIdx, onSelect) {
@@ -2158,17 +2369,38 @@
             });
         }
 
+        // Audio track switch karte waqt ek chhota (~1.3s) loading dikhata hai, taaki
+        // naya audio aur video properly buffer/sync ho jaaye aur switch ekdum jhatke
+        // (glitch) jaisa mehsoos na ho. Video ko turant pause karke, switchFn() chalate
+        // hain, aur kam se kam minMs guzarne ke baad hi spinner hata ke resume karte hain.
+        function runAudioSwitchLoading(video, switchFn, minMs = 1300) {
+            const spinner = document.getElementById('cv-spinner');
+            const wasPlaying = !video.paused;
+            if (wasPlaying) video.pause();
+            if (spinner) spinner.style.display = 'flex';
+            switchFn();
+            setTimeout(() => {
+                if (spinner) spinner.style.display = 'none';
+                if (wasPlaying) video.play().catch(() => {});
+            }, minMs);
+        }
+
         // HLS.js path — used when the .m3u8 manifest contains multiple audio renditions
         function setupAudioTracks(hls) {
             const tracks = hls.audioTracks || [];
             const wrap = document.getElementById('cv-audio-wrap');
+            const video = document.getElementById('cv-video');
             if (tracks.length <= 1) { resetAudioBtn(); return; }
 
             wrap.classList.add('has-tracks');
-            renderAudioList(tracks, hls.audioTrack, (idx) => { hls.audioTrack = idx; });
+            renderAudioList(tracks, hls.audioTrack, (idx) => {
+                runAudioSwitchLoading(video, () => { hls.audioTrack = idx; });
+            });
 
             hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (evt, data) => {
-                renderAudioList(hls.audioTracks, data.id, (idx) => { hls.audioTrack = idx; });
+                renderAudioList(hls.audioTracks, data.id, (idx) => {
+                    runAudioSwitchLoading(video, () => { hls.audioTrack = idx; });
+                });
             });
         }
 
@@ -2182,8 +2414,168 @@
             const arr = Array.from(tracks);
             const activeIdx = arr.findIndex(t => t.enabled);
             renderAudioList(arr, activeIdx, (idx) => {
-                arr.forEach((t, i) => { t.enabled = (i === idx); });
+                runAudioSwitchLoading(video, () => {
+                    arr.forEach((t, i) => { t.enabled = (i === idx); });
+                });
             });
+        }
+
+        // Secondary <audio> element jo audio-only tracks (encoder bot ke .m4a files)
+        // ko muted <video> ke saath sync me chalata hai — kyunki in files me video
+        // stream hota hi nahi, isliye video.src ko seedha inpe switch nahi kar sakte.
+        let cvExtraAudio = null;
+        let cvAudioSyncBound = false;
+
+        function destroyExtraAudio() {
+            if (cvExtraAudio) {
+                cvExtraAudio.pause();
+                cvExtraAudio.src = '';
+                cvExtraAudio._pendingHandlers = null;
+                cvExtraAudio.remove();
+                cvExtraAudio = null;
+            }
+        }
+
+        // Video ke play/pause/seek/speed events ko ek baar hi (per <video> element)
+        // secondary audio ke saath bind karte hain, taaki har track-switch pe listeners
+        // stack na hon. Chhota periodic drift-correction bhi 'timeupdate' se free milta hai.
+        function bindAudioSync(video) {
+            if (cvAudioSyncBound) return;
+            cvAudioSyncBound = true;
+            video.addEventListener('play',  () => { if (cvExtraAudio) cvExtraAudio.play().catch(() => {}); });
+            video.addEventListener('pause', () => { if (cvExtraAudio) cvExtraAudio.pause(); });
+            video.addEventListener('seeked', () => { if (cvExtraAudio) cvExtraAudio.currentTime = video.currentTime; });
+            video.addEventListener('ratechange', () => { if (cvExtraAudio) cvExtraAudio.playbackRate = video.playbackRate; });
+            video.addEventListener('timeupdate', () => {
+                if (cvExtraAudio && Math.abs(cvExtraAudio.currentTime - video.currentTime) > 0.3) {
+                    cvExtraAudio.currentTime = video.currentTime;
+                }
+            });
+        }
+
+        function applyAudioTrack(video, track) {
+            const spinner = document.getElementById('cv-spinner');
+            const switchStart = Date.now();
+            // Audio/video ko properly sync hone ka ehsaas dilane ke liye kam se kam
+            // itni der spinner dikhana hai, chahe real sync usse pehle hi ready ho jaaye.
+            const MIN_SWITCH_MS = 1300;
+            if (spinner) spinner.style.display = 'flex';
+
+            function finishSwitch(playAction) {
+                const elapsed = Date.now() - switchStart;
+                const wait = Math.max(0, MIN_SWITCH_MS - elapsed);
+                setTimeout(() => {
+                    if (spinner) spinner.style.display = 'none';
+                    playAction();
+                }, wait);
+            }
+
+            if (!track.audioOnly) {
+                // Poori video hi is language ki hai (legacy alt-video-per-language
+                // system) — seedha video.src swap karo, currentTime/play-state preserve.
+                destroyExtraAudio();
+                video.muted = false;
+                const wasPlaying = !video.paused;
+                const resumeAt   = video.currentTime;
+                if (wasPlaying) video.pause();
+                video.src = track.link;
+                video.load();
+                video.addEventListener('loadedmetadata', () => {
+                    video.currentTime = resumeAt;
+                    finishSwitch(() => { if (wasPlaying) video.play().catch(() => {}); });
+                }, { once: true });
+                return;
+            }
+
+            // Audio-only track: main video ka apna audio mute karke, ek alag
+            // <audio> element ko usi ke saath chalate hain. Taaki switch karte
+            // hi audio 0 se shuru na ho jaaye (metadata load hone se pehle seek
+            // set karna browsers me ignore ho jaata hai) ya video se peeche/aage
+            // na ho jaaye, hum: (1) video ko turant pause kar dete hain, (2) naya
+            // audio poora load + seek-confirm hone ka wait karte hain, (3) tabhi
+            // dono ko EK SAATH resume karte hain — koi silent 0-se-start ya
+            // half-second ka desync nahi hota.
+            bindAudioSync(video);
+
+            const targetTime = video.currentTime;
+            const wasPlaying = !video.paused;
+            if (wasPlaying) video.pause();   // naya audio ready hone tak video ko aage mat badhne do
+
+            if (!cvExtraAudio) {
+                cvExtraAudio = document.createElement('audio');
+                cvExtraAudio.style.display = 'none';
+                cvExtraAudio.preload = 'auto';
+                document.body.appendChild(cvExtraAudio);
+            }
+
+            // Jaldi-jaldi track badalne par purana pending handler cancel karo —
+            // warna wo baad me fire hoke galat position pe seek/play kar sakta hai.
+            if (cvExtraAudio._pendingHandlers) {
+                cvExtraAudio.removeEventListener('loadedmetadata', cvExtraAudio._pendingHandlers.ready);
+                cvExtraAudio.removeEventListener('error', cvExtraAudio._pendingHandlers.fail);
+                cvExtraAudio._pendingHandlers = null;
+            }
+
+            const onReady = () => {
+                cvExtraAudio.playbackRate = video.playbackRate;
+                const resumeBoth = () => {
+                    video.muted = true;
+                    finishSwitch(() => {
+                        if (wasPlaying) {
+                            cvExtraAudio.play().catch(() => {});
+                            video.play().catch(() => {});
+                        }
+                    });
+                    cvExtraAudio.removeEventListener('seeked', resumeBoth);
+                };
+                // Agar naya audio pehle se hi target position ke bahut kareeb load
+                // hua (rare, jaise cached 0:00 wali file jab targetTime bhi ~0 ho),
+                // to browser 'seeked' fire hi nahi karta — isliye chhota timeout
+                // fallback bhi rakha hai taaki resumeBoth hamesha chal jaaye.
+                let settled = false;
+                const settleOnce = () => { if (!settled) { settled = true; resumeBoth(); } };
+                cvExtraAudio.addEventListener('seeked', settleOnce, { once: true });
+                cvExtraAudio.currentTime = targetTime; // ab metadata load ho chuka hai, seek reliably chalega
+                setTimeout(settleOnce, 600);
+                cvExtraAudio._pendingHandlers = null;
+            };
+            const onFail = () => {
+                console.warn('Audio track load fail:', track.link);
+                showToast('⚠️ Ye audio track load nahi ho paya, default audio pe wapas ja rahe hain');
+                destroyExtraAudio();
+                video.muted = false;
+                finishSwitch(() => { if (wasPlaying) video.play().catch(() => {}); });
+            };
+
+            cvExtraAudio._pendingHandlers = { ready: onReady, fail: onFail };
+            cvExtraAudio.addEventListener('loadedmetadata', onReady, { once: true });
+            cvExtraAudio.addEventListener('error', onFail, { once: true });
+            cvExtraAudio.src = track.link;
+            cvExtraAudio.load();
+        }
+
+        // Multi-audio switcher — chahe track "default" (video ke andar hi muxed
+        // audio) ho ya "audio-only" (encoder bot ki alag .m4a file), dono ko
+        // seamlessly handle karta hai. MX Player jaisa currentTime/play-state
+        // preserve karke switch karta hai.
+        function setupSourceSwapAudioTracks(video, tracks, activeIdx) {
+            const wrap = document.getElementById('cv-audio-wrap');
+            if (!Array.isArray(tracks) || tracks.length <= 1) { resetAudioBtn(); return; }
+
+            wrap.classList.add('has-tracks');
+            renderAudioList(tracks, activeIdx, (idx) => {
+                if (idx === activeIdx) return;
+                applyAudioTrack(video, tracks[idx]);
+                setupSourceSwapAudioTracks(video, tracks, idx);
+            });
+
+            // Pehli baar setup hote waqt (ya episode/quality change ke baad), agar
+            // shuru me hi active track audio-only hai (default track pehle se load
+            // ho chuka video.src use kar raha, isliye usme dubara chhedne ki zaroorat
+            // nahi), to turant mute + synced secondary audio chalu karo.
+            if (tracks[activeIdx]?.audioOnly) {
+                applyAudioTrack(video, tracks[activeIdx]);
+            }
         }
 
 
@@ -2219,7 +2611,125 @@
             }
         }
 
-        // ─── DOWNLOAD ───
+        // ─── EXE.IO DOWNLOAD SHORTENER ───
+        // Firebase se milne wale download URL ko Exe.io se automatically shorten karta hai.
+        // NOTE: Client-side API token source code me visible rahega. Production me backend/proxy
+        // use karna safer hai, lekin current player ko direct Exe.io API integration ke saath
+        // isi file me rakha gaya hai.
+        const EXEIO_API_TOKEN = '43969b53fc7338369f7f24cc706b8e9dd97bb72c';
+        const EXEIO_API_ENDPOINT = 'https://exe.io/api';
+
+        async function shortenWithGPlinks(destinationUrl) {
+            if (!destinationUrl || destinationUrl === 'null' || destinationUrl === 'undefined') {
+                throw new Error('Invalid download URL');
+            }
+
+            const longUrl = String(destinationUrl).trim();
+            const apiUrl = `${EXEIO_API_ENDPOINT}?api=${encodeURIComponent(EXEIO_API_TOKEN)}&url=${encodeURIComponent(longUrl)}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Exe.io HTTP ${response.status}`);
+            }
+
+            const raw = (await response.text()).trim();
+            if (!raw) throw new Error('Empty Exe.io response');
+
+            // Exe.io returns JSON: {"status":"success","shortenedUrl":"https://exe.io/xxxxx"}
+            let shortenedUrl = raw;
+            try {
+                const parsed = JSON.parse(raw);
+                if (parsed?.status !== 'success') {
+                    throw new Error(parsed?.message || 'Exe.io returned an error');
+                }
+                shortenedUrl = parsed?.shortenedUrl || parsed?.shortened_url || parsed?.url || raw;
+            } catch (e) {
+                // Fallback in case of a plain-text response.
+                if (e instanceof SyntaxError) {
+                    shortenedUrl = raw;
+                } else {
+                    throw e;
+                }
+            }
+
+            // Remove accidental quotes around a plain-text URL.
+            shortenedUrl = String(shortenedUrl).trim().replace(/^['\"]|['\"]$/g, '');
+            if (!/^https?:\/\//i.test(shortenedUrl)) {
+                throw new Error('Invalid shortened URL returned by Exe.io');
+            }
+
+            return shortenedUrl;
+        }
+
+        // Opens the download link. useShortener=true routes through Exe.io (supports the site);
+        // useShortener=false opens the original Firebase link directly, no ads/redirect.
+        // If Exe.io fails, the original Firebase link is used as a fallback either way.
+        async function triggerDownload(url, quality, useShortener = true) {
+            if (!url || url === 'null' || url === 'undefined') {
+                showToast('No download available');
+                return;
+            }
+
+            const originalUrl = String(url).trim();
+            const overlay = document.getElementById('dl-popup-overlay');
+            if (overlay) overlay.classList.remove('open');
+
+            const logDownload = () => {
+                if (window.AVAnalytics) {
+                    window.AVAnalytics.trackDownload(
+                        animeSlug,
+                        animeTitle || animeSlug,
+                        currentSeason,
+                        currentEpisode,
+                        quality || ''
+                    );
+                }
+            };
+
+            // Direct download — skip the shortener entirely.
+            if (!useShortener) {
+                showToast('Opening direct download...');
+                window.open(originalUrl, '_blank');
+                logDownload();
+                return;
+            }
+
+            showToast('Creating download link...');
+
+            // Open a blank tab immediately to avoid popup blockers caused by the async API call.
+            let popup = null;
+            try { popup = window.open('about:blank', '_blank'); } catch (e) {}
+
+            try {
+                const shortenedUrl = await shortenWithGPlinks(originalUrl);
+
+                if (popup && !popup.closed) {
+                    popup.location.href = shortenedUrl;
+                } else {
+                    window.location.href = shortenedUrl;
+                }
+
+                showToast('Opening download...');
+                logDownload();
+            } catch (error) {
+                console.error('Exe.io error:', error);
+
+                // If Exe.io/API/CORS is unavailable, keep the original Firebase URL working.
+                if (popup && !popup.closed) {
+                    popup.location.href = originalUrl;
+                } else {
+                    window.location.href = originalUrl;
+                }
+
+                showToast('Exe.io unavailable · Opening original link');
+                logDownload();
+            }
+        }
+
         // ─── DOWNLOAD POPUP ───
         function openDlPopup() {
             const sKey = 'S' + currentSeason;
@@ -2243,14 +2753,27 @@
                 const meta   = qualityMeta[q];
                 const unavail = !url ? 'unavailable' : '';
                 return `
-                <button class="dl-quality-btn ${unavail}" onclick="triggerDownload('${url}', '${q}')">
-                    <div class="dl-quality-icon"><i class="fas ${meta.icon}"></i></div>
-                    <div class="dl-quality-info">
-                        <div class="dl-quality-label">${meta.label}</div>
-                        <div class="dl-quality-desc">${url ? meta.desc : 'Not available'}</div>
+                <div class="dl-quality-group ${unavail}">
+                    <div class="dl-quality-header">
+                        <div class="dl-quality-icon"><i class="fas ${meta.icon}"></i></div>
+                        <div class="dl-quality-info">
+                            <div class="dl-quality-label">${meta.label}</div>
+                            <div class="dl-quality-desc">${url ? meta.desc : 'Not available'}</div>
+                        </div>
                     </div>
-                    <i class="fas fa-download" style="font-size:13px;color:var(--accent);opacity:${url?1:0};"></i>
-                </button>`;
+                    <div class="dl-option-row">
+                        <button class="dl-option-btn dl-option-shortener" onclick='triggerDownload(${JSON.stringify(url)}, ${JSON.stringify(q)}, true)'>
+                            <i class="fas fa-bolt"></i> Shortener
+                        </button>
+                        <button class="dl-option-btn dl-option-direct" onclick='triggerDownload(${JSON.stringify(url)}, ${JSON.stringify(q)}, false)'>
+                            <i class="fas fa-download"></i> Direct
+                        </button>
+                    </div>
+                    <div class="dl-shortener-note">
+                        <b>Please use Shortener</b> to download — it helps support the site. <br>
+                        <b>Shortener use karke</b> download karo, isse site ko support milta hai. Thank you! 🙏
+                    </div>
+                </div>`;
             }).join('');
 
             document.getElementById('dl-popup-overlay').classList.add('open');
@@ -2259,16 +2782,6 @@
         function closeDlPopup(e) {
             if (e && e.target !== document.getElementById('dl-popup-overlay')) return;
             document.getElementById('dl-popup-overlay').classList.remove('open');
-        }
-
-        function triggerDownload(url, quality) {
-            if (!url || url === 'null') return;
-            window.open(url, '_blank');
-            showToast('Opening download...');
-            document.getElementById('dl-popup-overlay').classList.remove('open');
-            if (window.AVAnalytics) {
-                window.AVAnalytics.trackDownload(animeSlug, animeTitle || animeSlug, currentSeason, currentEpisode, quality || '');
-            }
         }
 
         function downloadEp() {

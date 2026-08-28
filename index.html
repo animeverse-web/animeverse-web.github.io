@@ -74,25 +74,52 @@
             --bg: #0a0a0f;
             --surface: #13131a;
             --surface2: #1c1c26;
+            --surface3: #23232f;
             --accent: #f47521;
             --accent2: #ff6b35;
+            --accent-hot: #ff3d68;
+            --accent-violet: #8b5cf6;
+            --gradient-brand: linear-gradient(120deg, #f47521 0%, #ff5a3d 50%, #ff3d68 100%);
             --text: #ffffff;
             --text-muted: #8a8a9a;
             --text-dim: #555566;
             --border: rgba(255,255,255,0.07);
-            --card-radius: 8px;
+            --border-hover: rgba(244,117,33,0.4);
+            --card-radius: 10px;
             --nav-h: 60px;
+            --glow-accent: 0 6px 24px rgba(244,58,73,0.28);
+            --shadow-card: 0 14px 34px rgba(0,0,0,0.5);
+            --ease: cubic-bezier(.22,1,.36,1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html { scroll-behavior: smooth; }
+
         body {
-            background: var(--bg);
+            background:
+                radial-gradient(1100px 600px at 12% -8%, rgba(244,117,33,0.10), transparent 60%),
+                radial-gradient(900px 560px at 108% 8%, rgba(255,61,104,0.08), transparent 55%),
+                var(--bg);
             color: var(--text);
             font-family: 'Nunito', sans-serif;
+            -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
             padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 8px);
+        }
+
+        ::selection { background: var(--accent-hot); color: #fff; }
+
+        @media (hover: hover) and (pointer: fine) {
+            .h-scroll::-webkit-scrollbar, .no-scrollbar.h-scroll::-webkit-scrollbar { height: 6px; }
+            .h-scroll::-webkit-scrollbar-track { background: transparent; }
+            .h-scroll::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 10px; }
+            .h-scroll::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
         }
 
         /* ─── FOOTER ─── */
@@ -101,6 +128,15 @@
             padding: 22px 16px 24px;
             border-top: 1px solid var(--border);
             background: var(--surface);
+            position: relative;
+        }
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 0; right: 0;
+            height: 1px;
+            background: var(--gradient-brand);
+            opacity: 0.5;
         }
         .site-footer .footer-brand {
             font-size: 18px;
@@ -109,7 +145,12 @@
             color: var(--text);
             margin-bottom: 8px;
         }
-        .site-footer .footer-brand span { color: var(--accent); }
+        .site-footer .footer-brand span {
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
         .site-footer .footer-desc {
             font-size: 11.5px;
             line-height: 1.6;
@@ -150,7 +191,7 @@
             font-weight: 800;
             color: var(--text-muted);
             text-decoration: none;
-            transition: color 0.2s;
+            transition: color 0.2s var(--ease);
         }
         .site-footer .footer-links a:hover,
         .site-footer .footer-links a:active { color: var(--accent); }
@@ -182,6 +223,7 @@
             padding: 0 16px;
             z-index: 2000;
             border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 0 rgba(244,117,33,0.12), 0 12px 24px -12px rgba(0,0,0,0.6);
         }
         .cr-logo {
             font-size: 22px;
@@ -189,7 +231,12 @@
             letter-spacing: -0.5px;
             color: var(--text);
         }
-        .cr-logo span { color: var(--accent); }
+        .cr-logo span {
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
         .cr-header-actions { display: flex; gap: 8px; align-items: center; }
         .icon-btn {
             width: 38px; height: 38px;
@@ -198,11 +245,14 @@
             border: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
             color: #ccc;
             font-size: 14px;
         }
         .icon-btn:active { background: var(--surface); transform: scale(0.93); }
+        @media (hover: hover) and (pointer: fine) {
+            .icon-btn:hover { border-color: var(--border-hover); color: var(--text); transform: translateY(-1px); }
+        }
 
         /* ─── CATEGORY TABS ─── */
         .category-tabs {
@@ -228,11 +278,15 @@
             border-bottom: 2px solid transparent;
             white-space: nowrap;
             letter-spacing: 0.3px;
-            transition: color 0.2s;
+            transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
         }
         .tab-item.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
+            color: var(--text);
+            border-bottom: 2px solid;
+            border-image: var(--gradient-brand) 1;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .tab-item:not(.active):hover { color: #ccc; }
         }
 
         /* ─── GENRE CHIPS ─── */
@@ -247,12 +301,16 @@
             border-radius: 20px;
             cursor: pointer;
             white-space: nowrap;
-            transition: all 0.2s;
+            transition: all 0.2s var(--ease);
         }
         .genre-chip.active {
             color: white;
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--gradient-brand);
+            border-color: transparent;
+            box-shadow: var(--glow-accent);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .genre-chip:not(.active):hover { color: #ddd; border-color: var(--border-hover); }
         }
 
         /* ─── MAIN CONTENT ─── */
@@ -273,6 +331,12 @@
             width: 100%; height: 100%;
             object-fit: cover;
             display: block;
+            animation: heroKenBurns 16s ease-in-out infinite alternate, imgReveal .5s var(--ease);
+            will-change: transform;
+        }
+        @keyframes heroKenBurns {
+            from { transform: scale(1); }
+            to   { transform: scale(1.08); }
         }
         .hero-overlay {
             position: absolute;
@@ -280,8 +344,8 @@
             background: linear-gradient(
                 to bottom,
                 rgba(10,10,15,0.1) 0%,
-                rgba(10,10,15,0.2) 40%,
-                rgba(10,10,15,0.85) 80%,
+                rgba(10,10,15,0.25) 40%,
+                rgba(10,10,15,0.9) 82%,
                 #0a0a0f 100%
             );
             display: flex;
@@ -293,29 +357,31 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            background: var(--accent);
+            background: var(--gradient-brand);
             color: white;
             font-size: 9px;
             font-weight: 900;
             letter-spacing: 1px;
             text-transform: uppercase;
-            padding: 3px 8px;
-            border-radius: 3px;
-            margin-bottom: 6px;
+            padding: 4px 9px;
+            border-radius: 4px;
+            margin-bottom: 8px;
             width: fit-content;
+            box-shadow: var(--glow-accent);
         }
         .hero-title {
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 900;
             line-height: 1.15;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
             letter-spacing: -0.3px;
+            text-shadow: 0 2px 16px rgba(0,0,0,0.6);
         }
         .hero-meta {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         .hero-meta span {
             font-size: 10px;
@@ -324,35 +390,46 @@
         }
         .hero-meta .rating {
             display: flex; align-items: center; gap: 3px;
-            color: var(--accent);
+            color: #ffd700;
             font-weight: 800;
         }
         .hero-actions { display: flex; gap: 8px; }
         .btn-play {
             flex: 1;
-            background: var(--accent);
+            background: var(--gradient-brand);
+            background-size: 160% 100%;
             color: white;
             border: none;
-            border-radius: 5px;
-            padding: 9px 0;
+            border-radius: 6px;
+            padding: 10px 0;
             font-size: 12px;
             font-weight: 900;
             display: flex; align-items: center; justify-content: center; gap: 6px;
             cursor: pointer;
             letter-spacing: 0.5px;
+            box-shadow: var(--glow-accent);
+            transition: transform 0.2s var(--ease), background-position 0.4s var(--ease), box-shadow 0.2s var(--ease);
         }
-        .btn-play:active { filter: brightness(0.85); transform: scale(0.97); }
+        .btn-play:active { filter: brightness(0.9); transform: scale(0.97); }
+        @media (hover: hover) and (pointer: fine) {
+            .btn-play:hover { background-position: 100% 0; box-shadow: 0 8px 30px rgba(244,58,73,0.4); }
+        }
         .btn-info {
-            width: 38px;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 5px;
+            width: 40px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 6px;
             color: white;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             font-size: 14px;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s var(--ease);
         }
         .btn-info:active { background: rgba(255,255,255,0.2); }
+        @media (hover: hover) and (pointer: fine) {
+            .btn-info:hover { background: rgba(255,255,255,0.18); }
+        }
 
         /* ─── HERO DOTS ─── */
         .hero-dots {
@@ -368,7 +445,8 @@
         .hero-dot.active {
             width: 18px;
             border-radius: 3px;
-            background: var(--accent);
+            background: var(--gradient-brand);
+            box-shadow: 0 0 8px rgba(244,58,73,0.5);
         }
 
         /* ─── SECTION ─── */
@@ -392,8 +470,9 @@
             content: '';
             display: block;
             width: 3px; height: 15px;
-            background: var(--accent);
+            background: var(--gradient-brand);
             border-radius: 2px;
+            box-shadow: 0 0 6px rgba(244,58,73,0.4);
         }
         .see-all {
             font-size: 11px;
@@ -401,6 +480,14 @@
             color: var(--accent);
             cursor: pointer;
             letter-spacing: 0.3px;
+            transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .see-all::after { content: '\f105'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 9px; }
+        @media (hover: hover) and (pointer: fine) {
+            .see-all:hover { color: var(--accent-hot); transform: translateX(2px); }
         }
 
         /* ─── HORIZONTAL SCROLL ROW ─── */
@@ -425,12 +512,19 @@
             border-radius: var(--card-radius);
             overflow: hidden;
             background: var(--surface2);
-            transition: transform 0.15s;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
         }
         .p-card img {
             width: 100%; height: 100%;
             object-fit: cover;
             display: block;
+            transition: transform 0.4s var(--ease);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .p-card:hover .p-card-img-wrap { transform: translateY(-5px); box-shadow: var(--shadow-card), var(--glow-accent); will-change: transform; }
+            .p-card:hover img { transform: scale(1.08); }
+            .p-card:hover .p-card-title { color: var(--accent); }
         }
         .p-card-badge {
             position: absolute;
@@ -483,10 +577,13 @@
             width: 26px; height: 26px;
             border-radius: 4px;
             background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
             display: flex; align-items: center; justify-content: center;
             font-size: 10px;
             border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.15s var(--ease), background 0.15s var(--ease);
         }
+        .p-card-fav:active { transform: scale(0.85); background: rgba(0,0,0,0.8); }
         .p-card-title {
             font-size: 10px;
             font-weight: 700;
@@ -498,6 +595,7 @@
             overflow: hidden;
             color: #ccc;
             padding: 0 1px;
+            transition: color 0.2s var(--ease);
         }
 
         /* ─── LANDSCAPE CARD ─── */
@@ -514,15 +612,21 @@
             border-radius: var(--card-radius);
             overflow: hidden;
             background: var(--surface2);
-            transition: transform 0.15s;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
         }
         .l-card img {
             width: 100%; height: 100%;
             object-fit: cover;
+            transition: transform 0.4s var(--ease);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .l-card:hover .l-card-img-wrap { transform: translateY(-4px); box-shadow: var(--shadow-card), var(--glow-accent); }
+            .l-card:hover img { transform: scale(1.08); }
         }
         .l-card-overlay {
             position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+            background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
             display: flex; align-items: flex-end;
             padding: 8px;
         }
@@ -539,12 +643,25 @@
         .l-ep-badge {
             position: absolute;
             top: 5px; right: 5px;
-            background: var(--accent);
+            background: var(--gradient-brand);
             color: white;
             font-size: 8px;
             font-weight: 900;
             padding: 2px 5px;
             border-radius: 3px;
+            box-shadow: var(--glow-accent);
+        }
+        .cw-play-btn {
+            position: absolute; top: 6px; right: 6px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 50%;
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .l-card:hover .cw-play-btn { background: var(--gradient-brand); transform: scale(1.1); }
         }
 
         /* ─── WATCHLIST STORIES ROW ─── */
@@ -561,7 +678,12 @@
             width: 52px; height: 52px;
             border-radius: 50%;
             padding: 2px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            background: var(--gradient-brand);
+            transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+        }
+        .story-item:active .story-ring { transform: scale(0.92); }
+        @media (hover: hover) and (pointer: fine) {
+            .story-item:hover .story-ring { box-shadow: var(--glow-accent); }
         }
         .story-ring-inner {
             width: 100%; height: 100%;
@@ -583,6 +705,10 @@
             display: flex; align-items: center; justify-content: center;
             color: var(--text-muted);
             font-size: 16px;
+            transition: border-color 0.2s var(--ease), color 0.2s var(--ease);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .story-add-btn:hover { border-color: var(--accent); color: var(--accent); }
         }
         .story-label {
             font-size: 8.5px;
@@ -614,9 +740,9 @@
             border: 1.5px solid var(--border);
             border-radius: 8px;
             overflow: hidden;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
         }
-        .search-input-wrap:focus-within { border-color: var(--accent); }
+        .search-input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(244,117,33,0.12); }
         #searchInput {
             flex: 1;
             background: transparent;
@@ -633,7 +759,9 @@
             color: var(--text-muted);
             font-size: 16px;
             cursor: pointer;
+            transition: color 0.2s var(--ease);
         }
+        .search-close-btn:active { color: var(--accent); }
         #search-suggestions {
             margin-top: 8px;
             background: var(--surface2);
@@ -642,6 +770,7 @@
             max-height: 60vh;
             overflow-y: auto;
             display: none;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
         }
         #search-suggestions.open { display: block; }
         .sugg-item {
@@ -651,22 +780,36 @@
             padding: 10px 14px;
             border-bottom: 1px solid var(--border);
             cursor: pointer;
+            transition: background 0.15s var(--ease);
         }
         .sugg-item:last-child { border-bottom: none; }
         .sugg-item:active { background: var(--surface); }
         .sugg-item img { width: 36px; height: 50px; border-radius: 4px; object-fit: cover; }
         .sugg-title { font-size: 12px; font-weight: 700; color: #ddd; }
+        @media (hover: hover) and (pointer: fine) {
+            .sugg-item:hover { background: var(--surface); }
+            .sugg-item:hover .sugg-title { color: var(--accent); }
+        }
 
         /* ─── SKELETON ─── */
         .skeleton {
-            background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+            background: linear-gradient(90deg, var(--surface) 25%, var(--surface3) 50%, var(--surface) 75%);
             background-size: 200% 100%;
-            animation: shimmer 1.5s infinite linear;
+            animation: shimmer 1.6s infinite linear;
             border-radius: 6px;
         }
         @keyframes shimmer {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
+        }
+
+        /* ─── IMAGE REVEAL — smooth fade instead of an abrupt pop-in ─── */
+        @keyframes imgReveal {
+            from { opacity: 0; transform: scale(1.02); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .p-card img, .l-card img, .at-card-img img, .story-ring-inner img {
+            animation: imgReveal .4s var(--ease);
         }
 
         /* ─── BOTTOM NAV ─── */
@@ -678,6 +821,7 @@
             background: rgba(13,13,20,0.98);
             backdrop-filter: blur(20px);
             border-top: 1px solid var(--border);
+            box-shadow: 0 -1px 0 rgba(244,117,33,0.1), 0 -12px 24px -12px rgba(0,0,0,0.6);
             display: flex;
             align-items: flex-start;
             justify-content: space-around;
@@ -690,13 +834,14 @@
             align-items: center;
             gap: 3px;
             cursor: pointer;
-            padding: 0 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
             color: var(--text-dim);
             text-decoration: none;
-            transition: color 0.2s;
+            transition: color 0.2s var(--ease), background 0.2s var(--ease), transform 0.15s var(--ease);
             min-width: 50px;
         }
-        .nav-item.active { color: var(--accent); }
+        .nav-item.active { color: var(--accent); background: rgba(244,117,33,0.1); }
         .nav-item i { font-size: 20px; }
         .nav-item span {
             font-size: 9px;
@@ -725,12 +870,15 @@
             position: relative;
             width: 100%;
             background: var(--surface);
+            border: 1px solid var(--border);
+            border-bottom: none;
             border-radius: 18px 18px 0 0;
             overflow: hidden;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.5);
         }
         #modal-content.open { transform: translateY(0); }
         .modal-handle {
@@ -743,8 +891,10 @@
             position: relative;
             width: 100%;
             aspect-ratio: 16/9;
+            overflow: hidden;
+            background: var(--surface2);
         }
-        #modal-banner { width: 100%; height: 100%; object-fit: cover; }
+        #modal-banner { width: 100%; height: 100%; object-fit: cover; display: block; }
         .modal-banner-gradient {
             position: absolute; inset: 0;
             background: linear-gradient(to top, var(--surface) 0%, transparent 60%);
@@ -755,10 +905,16 @@
             width: 32px; height: 32px;
             border-radius: 50%;
             background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
             border: 1px solid rgba(255,255,255,0.15);
             display: flex; align-items: center; justify-content: center;
             color: white; font-size: 13px;
             cursor: pointer;
+            transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+        }
+        .modal-close:active { transform: scale(0.9); }
+        @media (hover: hover) and (pointer: fine) {
+            .modal-close:hover { background: rgba(0,0,0,0.8); }
         }
         .modal-body { padding: 0 16px 24px; margin-top: -20px; position: relative; }
         .modal-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -770,7 +926,7 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
-        .tag-accent { background: var(--accent); color: white; }
+        .tag-accent { background: var(--gradient-brand); color: white; box-shadow: var(--glow-accent); }
         .tag-dim { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
         #modal-title {
             font-size: 22px;
@@ -803,12 +959,15 @@
             position: relative;
             width: 100%;
             background: var(--surface);
+            border: 1px solid var(--border);
+            border-bottom: none;
             border-radius: 18px 18px 0 0;
             overflow: hidden;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.5);
         }
         #upcoming-modal-content.open { transform: translateY(0); }
         #upcoming-modal-banner-wrap { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); }
@@ -844,7 +1003,7 @@
             display: flex; align-items: center; gap: 8px;
             background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: var(--card-radius);
             padding: 10px 12px;
             font-size: 11.5px;
             color: var(--text-muted);
@@ -854,7 +1013,7 @@
         .modal-actions { display: flex; gap: 10px; }
         .modal-btn-play {
             flex: 1;
-            background: var(--accent);
+            background: var(--gradient-brand);
             color: white;
             border: none;
             border-radius: 6px;
@@ -865,8 +1024,10 @@
             cursor: pointer;
             letter-spacing: 0.5px;
             font-family: 'Nunito', sans-serif;
+            box-shadow: var(--glow-accent);
+            transition: transform 0.2s var(--ease), filter 0.2s var(--ease);
         }
-        .modal-btn-play:active { filter: brightness(0.85); }
+        .modal-btn-play:active { filter: brightness(0.85); transform: scale(0.98); }
         .modal-btn-fav {
             width: 46px;
             background: var(--surface2);
@@ -876,8 +1037,9 @@
             font-size: 16px;
             cursor: pointer;
             color: white;
+            transition: background 0.2s var(--ease), transform 0.2s var(--ease);
         }
-        .modal-btn-fav:active { background: var(--surface); }
+        .modal-btn-fav:active { background: var(--surface); transform: scale(0.92); }
 
         /* ─── TOAST ─── */
         #toast {
@@ -885,16 +1047,18 @@
             bottom: 75px;
             left: 50%;
             transform: translateX(-50%) translateY(10px);
-            background: var(--surface2);
-            border: 1px solid var(--border);
+            background: rgba(28,28,38,0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-hover);
             color: white;
-            padding: 8px 18px;
+            padding: 9px 20px;
             border-radius: 100px;
             font-size: 11px;
             font-weight: 800;
             z-index: 9999;
             opacity: 0;
-            transition: all 0.25s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.25s var(--ease);
             pointer-events: none;
             white-space: nowrap;
         }
@@ -947,12 +1111,16 @@
             touch-action: manipulation;
         }
         .page-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--gradient-brand);
+            border-color: transparent;
             color: white;
+            box-shadow: var(--glow-accent);
         }
         .page-btn:active { transform: scale(0.92); }
         .page-btn.disabled { opacity: 0.3; pointer-events: none; }
+        @media (hover: hover) and (pointer: fine) {
+            .page-btn:not(.active):not(.disabled):hover { border-color: var(--border-hover); color: #ddd; }
+        }
 
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; transform: scale(1); }
@@ -973,11 +1141,17 @@
             border-radius: var(--card-radius);
             overflow: hidden;
             background: var(--surface2);
-            transition: transform 0.15s;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
         }
         .at-card-img img {
             width: 100%; height: 100%;
             object-fit: cover;
+            transition: transform 0.4s var(--ease);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .at-card:hover .at-card-img { transform: translateY(-4px); box-shadow: var(--shadow-card), var(--glow-accent); }
+            .at-card:hover .at-card-img img { transform: scale(1.08); }
         }
         .at-ep-label {
             position: absolute;
@@ -992,13 +1166,14 @@
             justify-content: space-between;
         }
         .at-new-pill {
-            background: var(--accent);
+            background: var(--gradient-brand);
             color: white;
             font-size: 7px;
             font-weight: 900;
             padding: 1px 5px;
             border-radius: 20px;
             letter-spacing: 0.5px;
+            box-shadow: var(--glow-accent);
         }
         .at-card-title {
             font-size: 10px;
@@ -1031,9 +1206,10 @@
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
         }
-        .p-card-img-wrap, .l-card-img-wrap, .at-card-img {
-            will-change: transform;
-        }
+        /* Note: hover/active transform karte waqt hi will-change lagayenge (neeche @media
+           hover:hover blocks mein) — hamesha ke liye har card ko apni GPU layer promote
+           karna memory + compositing overhead badhata hai jab screen par dus-bees cards
+           ek saath ho, jo lambe session mein khud ek lag ka karan ban sakta hai. */
 
         /* ─── NOTIFICATION BELL ─── */
         .notif-dot {
@@ -1064,7 +1240,7 @@
             opacity: 0;
             pointer-events: none;
             transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(244,117,33,0.06);
         }
         #notif-panel.open {
             transform: translateY(0);
@@ -1092,7 +1268,7 @@
             transition: background 0.15s;
         }
         .notif-item:active { background: var(--surface2); }
-        .notif-item.unread { background: rgba(244,117,33,0.06); }
+        .notif-item.unread { background: rgba(244,117,33,0.06); border-left: 2px solid var(--accent); }
         .notif-thumb {
             width: 46px; height: 46px;
             border-radius: 6px;
@@ -1121,8 +1297,11 @@
             transition: color 0.15s, transform 0.15s;
             -webkit-tap-highlight-color: transparent;
         }
-        .star-btn.lit { color: #ffd700; }
+        .star-btn.lit { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
         .star-btn:active { transform: scale(1.3); }
+        @media (hover: hover) and (pointer: fine) {
+            .star-btn:hover { transform: scale(1.15); }
+        }
         .user-review-wrap { margin-top: 10px; display: none; }
         .user-review-wrap.show { display: block; }
         .review-input {
@@ -1171,7 +1350,7 @@
         #skeleton-loader .sk-hero { width: 100%; aspect-ratio: 16/9; max-height: 220px; }
         #skeleton-loader .sk-row { display: flex; gap: 10px; padding: 0 16px; }
         #skeleton-loader .sk-card { width: 105px; flex-shrink: 0; }
-        #skeleton-loader .sk-card-img { aspect-ratio: 2/3; border-radius: 8px; }
+        #skeleton-loader .sk-card-img { aspect-ratio: 2/3; border-radius: var(--card-radius); }
         #skeleton-loader .sk-card-text { height: 10px; margin-top: 7px; border-radius: 4px; }
         #skeleton-loader .sk-story { width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0; }
 
@@ -1206,10 +1385,12 @@
                 background: var(--surface2);
                 cursor: pointer;
                 min-height: 280px;
+                box-shadow: var(--shadow-card);
             }
             .pc-feat-main img {
                 width: 100%; height: 100%;
                 object-fit: cover; display: block;
+                animation: heroKenBurns 16s ease-in-out infinite alternate;
             }
             .pc-feat-main-overlay {
                 position: absolute; inset: 0;
@@ -1219,14 +1400,16 @@
             }
             .pc-feat-badge {
                 display: inline-flex; align-items: center; gap: 5px;
-                background: var(--accent); color: white;
+                background: var(--gradient-brand); color: white;
                 font-size: 10px; font-weight: 900; letter-spacing: 1px;
                 text-transform: uppercase; padding: 3px 8px;
                 border-radius: 3px; margin-bottom: 7px; width: fit-content;
+                box-shadow: var(--glow-accent);
             }
             .pc-feat-title {
                 font-size: 16px; font-weight: 900; line-height: 1.2;
                 margin-bottom: 5px;
+                text-shadow: 0 2px 12px rgba(0,0,0,0.6);
             }
             .pc-feat-meta {
                 font-size: 11px; color: rgba(255,255,255,0.6);
@@ -1236,13 +1419,17 @@
             .pc-feat-meta .star { color: #ffd700; }
             .pc-feat-play {
                 display: flex; align-items: center; justify-content: center; gap: 7px;
-                background: var(--accent); color: white;
+                background: var(--gradient-brand);
+                background-size: 160% 100%;
+                color: white;
                 border: none; border-radius: 6px;
                 padding: 9px 14px; font-size: 13px; font-weight: 900;
                 cursor: pointer; font-family: 'Nunito', sans-serif;
                 letter-spacing: 0.3px; width: 100%;
+                box-shadow: var(--glow-accent);
+                transition: background-position 0.4s var(--ease), transform 0.2s var(--ease);
             }
-            .pc-feat-play:hover { filter: brightness(1.1); }
+            .pc-feat-play:hover { background-position: 100% 0; transform: translateY(-1px); }
 
             /* Right side */
             .pc-feat-right {
@@ -1255,7 +1442,9 @@
                 flex: 1; background: var(--surface2);
                 border: 1px solid var(--border); border-radius: 10px;
                 padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+                transition: transform 0.2s var(--ease), border-color 0.2s var(--ease);
             }
+            .pc-stat-card:hover { transform: translateY(-2px); border-color: var(--border-hover); }
             .pc-stat-icon {
                 width: 40px; height: 40px; border-radius: 10px;
                 display: flex; align-items: center; justify-content: center;
@@ -1281,20 +1470,27 @@
             }
             .pc-trending-header::before {
                 content: ''; display: block; width: 3px; height: 12px;
-                background: var(--accent); border-radius: 2px;
+                background: var(--gradient-brand); border-radius: 2px;
+                box-shadow: 0 0 6px rgba(244,58,73,0.4);
             }
             .pc-trending-item {
                 display: flex; align-items: center; gap: 12px;
                 padding: 9px 14px; border-bottom: 1px solid var(--border);
-                cursor: pointer; transition: background 0.15s; flex: 1;
+                cursor: pointer; transition: background 0.15s var(--ease); flex: 1;
             }
             .pc-trending-item:last-child { border-bottom: none; }
-            .pc-trending-item:hover { background: rgba(255,255,255,0.04); }
+            .pc-trending-item:hover { background: rgba(244,117,33,0.06); }
+            .pc-trending-item:hover .pc-trending-name { color: var(--accent); }
             .pc-trending-num {
                 font-size: 17px; font-weight: 900; color: var(--text-dim);
                 width: 26px; flex-shrink: 0; text-align: center;
             }
-            .pc-trending-num.top { color: var(--accent); }
+            .pc-trending-num.top {
+                background: var(--gradient-brand);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
             .pc-trending-thumb {
                 width: 38px; height: 52px; border-radius: 5px;
                 object-fit: cover; background: var(--surface); flex-shrink: 0;
@@ -1304,6 +1500,7 @@
                 font-size: 13px; font-weight: 800;
                 white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
                 margin-bottom: 3px;
+                transition: color 0.2s var(--ease);
             }
             .pc-trending-sub { font-size: 11px; color: var(--text-muted); font-weight: 700; }
             .pc-trending-rating {
@@ -1954,11 +2151,62 @@
         let autoScrollInterval = null;
         let resumeTimeout = null;
 
+        // Cache version — jab bhi fetchMeta ka matching logic badle, ye number badha do.
+        // Isse purana (galat poster wala) cache automatically invalidate ho jata hai,
+        // users ko manually "refresh" karne ki zaroorat nahi padti.
+        const CACHE_VERSION = 3;
+
         const getCache = () => {
-            try { return JSON.parse(localStorage.getItem('av_cache') || '[]'); } 
+            try {
+                const meta = JSON.parse(localStorage.getItem('av_cache_v') || 'null');
+                if (!meta || meta.v !== CACHE_VERSION) return []; // purana version — reject, fresh fetch hoga
+                return JSON.parse(localStorage.getItem('av_cache') || '[]');
+            } 
             catch(e) { localStorage.removeItem('av_cache'); return []; }
         };
-        const setCache = (data) => { try { localStorage.setItem('av_cache', JSON.stringify(data)); } catch(e) {} };
+        const setCache = (data) => { 
+            try { 
+                localStorage.setItem('av_cache', JSON.stringify(data)); 
+                localStorage.setItem('av_cache_v', JSON.stringify({ v: CACHE_VERSION }));
+            } catch(e) {} 
+        };
+
+        // ════════════════════════════════
+        // ☁️ FIREBASE-BACKED META CACHE (poster / banner / rating)
+        // localStorage cache sirf usi browser ke liye kaam karta hai — naye
+        // user (khaali localStorage) ke liye har anime dobara Jikan/AniList/
+        // Kitsu/TMDB se fetch karna padta tha, jo slow tha. Ab: jis anime ka
+        // meta ek baar bhi kisi bhi user ne fetch kar liya, wo Firebase mein
+        // save ho jata hai — aage koi bhi (naya) user seedha Firebase se
+        // instantly le lega, external API sirf pehli baar hi lagegi.
+        // ════════════════════════════════
+        let firebaseMetaCache = null; // ek session mein sirf ek baar load hota hai
+
+        function metaCacheKey(title) {
+            return (title || '')
+                .toLowerCase()
+                .replace(/[.#$\[\]\/]/g, '_')
+                .replace(/\s+/g, '-')
+                .substring(0, 200);
+        }
+
+        async function loadFirebaseMetaCache() {
+            try {
+                const snap = await db.ref('meta_cache').once('value');
+                return snap.val() || {};
+            } catch (e) {
+                console.warn('Firebase meta_cache load failed:', e);
+                return {};
+            }
+        }
+
+        function saveMetaToFirebase(title, meta) {
+            try {
+                db.ref('meta_cache/' + metaCacheKey(title)).set({
+                    p: meta.p, b: meta.b, r: meta.r, ts: Date.now()
+                });
+            } catch (e) { /* best-effort — fail ho to bhi UI par asar nahi */ }
+        }
 
         // ════════════════════════════════
         // 🏷 AUTO GENRE DETECTION (Jikan / MyAnimeList API)
@@ -2004,10 +2252,15 @@
         // ── Source 1: Jikan (MyAnimeList) ──
         async function fetchMetaJikan(title) {
             try {
-                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=1`);
+                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`);
                 const data = await res.json();
-                const entry = data?.data?.[0];
-                if (!entry) return null;
+                const entries = data?.data || [];
+                let entry = null, bestScore = 0;
+                entries.forEach(e => {
+                    const score = bestTitleMatch(title, [e.title, e.title_english, e.title_japanese]);
+                    if (score > bestScore) { bestScore = score; entry = e; }
+                });
+                if (!entry || bestScore < MATCH_THRESHOLD) return null;
                 const rawGenres = [
                     ...(entry.genres || []),
                     ...(entry.themes || []),
@@ -2032,13 +2285,16 @@
             try {
                 const query = `
                     query ($search: String) {
-                        Media(search: $search, type: ANIME) {
-                            genres
-                            tags { name }
-                            format
-                            averageScore
-                            popularity
-                            status
+                        Page(perPage: 5) {
+                            media(search: $search, type: ANIME) {
+                                title { romaji english native }
+                                genres
+                                tags { name }
+                                format
+                                averageScore
+                                popularity
+                                status
+                            }
                         }
                     }`;
                 const res = await fetch('https://graphql.anilist.co', {
@@ -2047,8 +2303,13 @@
                     body: JSON.stringify({ query, variables: { search: title } })
                 });
                 const data = await res.json();
-                const media = data?.data?.Media;
-                if (!media) return null;
+                const list = data?.data?.Page?.media || [];
+                let media = null, bestScore = 0;
+                list.forEach(m => {
+                    const score = bestTitleMatch(title, [m.title?.romaji, m.title?.english, m.title?.native]);
+                    if (score > bestScore) { bestScore = score; media = m; }
+                });
+                if (!media || bestScore < MATCH_THRESHOLD) return null;
                 const rawGenres = [
                     ...(media.genres || []),
                     ...(media.tags || []).map(t => t.name)
@@ -2070,10 +2331,16 @@
         // ── Source 3: Kitsu ──
         async function fetchMetaKitsu(title) {
             try {
-                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1&include=genres`);
+                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=5&include=genres`);
                 const data = await res.json();
-                const entry = data?.data?.[0];
-                if (!entry) return null;
+                const entries = data?.data || [];
+                let entry = null, bestScore = 0;
+                entries.forEach(e => {
+                    const a = e.attributes || {};
+                    const score = bestTitleMatch(title, [a.canonicalTitle, a.titles?.en, a.titles?.en_jp, a.titles?.ja_jp]);
+                    if (score > bestScore) { bestScore = score; entry = e; }
+                });
+                if (!entry || bestScore < MATCH_THRESHOLD) return null;
                 const included = data?.included || [];
                 const rawGenres = included.filter(i => i.type === 'genres').map(i => i.attributes?.name).filter(Boolean);
                 const attr = entry.attributes || {};
@@ -2119,7 +2386,21 @@
         }
 
         // Sare anime ka meta (genre, type, score, popularity) background mein scan/fetch karo
+        let metaLoadInProgress = false;
         async function ensureMetaLoaded() {
+            // renderUIAndShow() ab progressive loading ke dauraan baar baar call hoti hai —
+            // agar ye loop pehle se chal raha ho to dobara shuru mat karo, varna
+            // overlapping calls same titles ko baar baar fetch karke rate-limit hit kar dengi
+            if (metaLoadInProgress) return getMetaCache();
+            metaLoadInProgress = true;
+            try {
+                return await ensureMetaLoadedInner();
+            } finally {
+                metaLoadInProgress = false;
+            }
+        }
+
+        async function ensureMetaLoadedInner() {
             const cache = getMetaCache();
             let updated = false;
             const BATCH = 5; // Har 5 anime ke baad tab refresh
@@ -2200,6 +2481,7 @@
 
         function clearCache() {
             localStorage.removeItem('av_cache');
+            localStorage.removeItem('av_cache_v');
             localStorage.removeItem('my_watchlist');
             showToast('🔄 Refreshing...');
             setTimeout(() => location.reload(), 800);
@@ -2234,12 +2516,11 @@
 
                 const section = document.getElementById('added-today-section');
                 const grid = document.getElementById('added-today-grid');
-                grid.innerHTML = '';
 
                 // timestamp ke hisaab se sort — newest first
                 const sorted = Object.entries(data).sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
 
-                sorted.forEach(([slug, info]) => {
+                grid.innerHTML = sorted.map(([slug, info]) => {
                     const animeEntry = allAnimeData.find(a => a.slug === slug);
                     const title = animeEntry?.title || slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                     const poster = animeEntry?.poster || '';
@@ -2260,7 +2541,7 @@
                     else if (diffHr < 24) timeAgo = `${diffHr}h ago`;
                     else timeAgo = `${Math.floor(diffHr/24)}d ago`;
 
-                    grid.innerHTML += `
+                    return `
                     <div class="at-card" onclick="openInfoModal('${safeTitle}','${slug}','${banner}','${rating}')">
                         <div class="at-card-img">
                             <img src="${thumb}" loading="lazy" 
@@ -2275,7 +2556,7 @@
                             <i class="fas fa-clock" style="font-size:8px; color:var(--accent);"></i> ${timeAgo}
                         </div>
                     </div>`;
-                });
+                }).join('');
 
                 section.style.display = '';
             } catch(e) {
@@ -2283,38 +2564,204 @@
             }
         }
 
+        // ════════════════════════════════
+        // 🎯 TITLE MATCH VALIDATION — galat anime match hone se rokne ke liye
+        // Kisi bhi API se result lene se pehle check karte hain ki title sach me match karta hai ya nahi
+        // ════════════════════════════════
+        function normalizeTitle(str) {
+            return (str || '')
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        // Do strings ke beech edit distance (kitne characters badalne se ek dusre jaisa ban jaye)
+        function levenshtein(a, b) {
+            const m = a.length, n = b.length;
+            if (m === 0) return n;
+            if (n === 0) return m;
+            let prev = Array.from({ length: n + 1 }, (_, j) => j);
+            for (let i = 1; i <= m; i++) {
+                const curr = [i];
+                for (let j = 1; j <= n; j++) {
+                    curr[j] = a[i - 1] === b[j - 1]
+                        ? prev[j - 1]
+                        : 1 + Math.min(prev[j - 1], prev[j], curr[j - 1]);
+                }
+                prev = curr;
+            }
+            return prev[n];
+        }
+
+        function levenshteinRatio(a, b) {
+            const maxLen = Math.max(a.length, b.length);
+            if (maxLen === 0) return 1;
+            return 1 - levenshtein(a, b) / maxLen;
+        }
+
+        // Chhote typos (jaise "Heghehog" vs "Hedgehog") ya plural ("Hunter" vs "Hunters") ko bhi
+        // same word maan lo, taaki admin ki typing mistakes se match fail na ho
+        function wordsMatch(w1, w2) {
+            if (w1 === w2) return true;
+            if (w1.length < 3 || w2.length < 3) return false; // bahut chhote words exact hi match hone chahiye
+            const dist = levenshtein(w1, w2);
+            return dist <= 1 || (dist <= 2 && Math.max(w1.length, w2.length) >= 6);
+        }
+
+        function titleSimilarity(a, b) {
+            const na = normalizeTitle(a), nb = normalizeTitle(b);
+            if (!na || !nb) return 0;
+            if (na === nb) return 1;
+            if (na.includes(nb) || nb.includes(na)) return 0.85;
+
+            // Word-by-word overlap (typo/plural tolerant)
+            const wa = na.split(' '), wb = nb.split(' ');
+            const usedB = new Array(wb.length).fill(false);
+            let common = 0;
+            wa.forEach(w1 => {
+                for (let i = 0; i < wb.length; i++) {
+                    if (!usedB[i] && wordsMatch(w1, wb[i])) { usedB[i] = true; common++; break; }
+                }
+            });
+            const wordScore = common / Math.max(wa.length, wb.length);
+
+            // Poore title ka fuzzy match bhi nikal lo (chhote typos ke liye) —
+            // sirf tab jab dono titles ki length kaafi kareeb ho, warna galat match ho sakta hai
+            let fuzzyScore = 0;
+            const lenDiff = Math.abs(na.length - nb.length);
+            if (lenDiff <= Math.max(4, Math.round(Math.max(na.length, nb.length) * 0.3))) {
+                fuzzyScore = levenshteinRatio(na, nb);
+            }
+
+            return Math.max(wordScore, fuzzyScore);
+        }
+
+        // query title ko candidate titles ke against best match score do
+        function bestTitleMatch(query, candidates) {
+            let best = 0;
+            (candidates || []).filter(Boolean).forEach(c => {
+                const s = titleSimilarity(query, c);
+                if (s > best) best = s;
+            });
+            return best;
+        }
+
+        const MATCH_THRESHOLD = 0.45; // isse kam similarity ho to result reject kar do
+
         async function fetchMeta(title) {
-            const query = encodeURIComponent(title);
-            try {
-                const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${query}`);
-                const tmdb = await tmdbRes.json();
-                if (tmdb.results?.[0]?.poster_path) {
-                    return { 
-                        p: 'https://image.tmdb.org/t/p/w500' + tmdb.results[0].poster_path, 
-                        b: 'https://image.tmdb.org/t/p/original' + (tmdb.results[0].backdrop_path || tmdb.results[0].poster_path), 
-                        r: tmdb.results[0].vote_average?.toFixed(1) || '8.0' 
-                    };
-                }
-            } catch (e) { console.warn("TMDB failed for:", title); }
+            let poster = null, banner = null, rating = null;
 
+            // ── Source 1: AniList — EK hi request me poster + ASLI widescreen banner + rating ──
+            // Isse ye sabse pehle try karte hain — zyadatar popular anime ke liye
+            // yehi ek call kaafi hoti hai, baaki APIs ki extra round-trip nahi lagti (speed ke liye important)
             try {
-                const kitsuRes = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${query}&page[limit]=1`);
-                const kitsu = await kitsuRes.json();
-                if (kitsu.data?.[0]) {
-                    const attr = kitsu.data[0].attributes;
-                    return { 
-                        p: attr.posterImage?.large || attr.posterImage?.original, 
-                        b: attr.coverImage?.large || attr.posterImage?.large, 
-                        r: attr.averageRating ? (attr.averageRating / 10).toFixed(1) : '7.5' 
-                    };
+                const query = `
+                    query ($search: String) {
+                        Page(perPage: 5) {
+                            media(search: $search, type: ANIME) {
+                                title { romaji english native }
+                                coverImage { extraLarge large }
+                                bannerImage
+                                averageScore
+                            }
+                        }
+                    }`;
+                const res = await fetch('https://graphql.anilist.co', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, variables: { search: title } })
+                });
+                const data = await res.json();
+                const list = data?.data?.Page?.media || [];
+                let best = null, bestScore = 0;
+                list.forEach(m => {
+                    const score = bestTitleMatch(title, [m.title?.romaji, m.title?.english, m.title?.native]);
+                    if (score > bestScore) { bestScore = score; best = m; }
+                });
+                if (best && bestScore >= MATCH_THRESHOLD) {
+                    poster = best.coverImage?.extraLarge || best.coverImage?.large;
+                    if (best.bannerImage) banner = best.bannerImage; // sirf tabhi jab asli banner ho
+                    if (best.averageScore) rating = (best.averageScore / 10).toFixed(1);
                 }
-                } catch (e) { console.warn("Kitsu failed for:", title); }
+            } catch (e) { console.warn("AniList fetch failed for:", title); }
 
+            // ── Source 2: Jikan (MyAnimeList) — poster/rating fallback + kabhi kabhi trailer thumbnail banner ──
+            if (!poster || !banner || !rating) {
+                try {
+                    const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`);
+                    const data = await res.json();
+                    const entries = data?.data || [];
+                    let best = null, bestScore = 0;
+                    entries.forEach(entry => {
+                        const score = bestTitleMatch(title, [entry.title, entry.title_english, entry.title_japanese]);
+                        if (score > bestScore) { bestScore = score; best = entry; }
+                    });
+                    if (best && bestScore >= MATCH_THRESHOLD) {
+                        if (!poster) {
+                            const img = best.images?.jpg || best.images?.webp || {};
+                            poster = img.large_image_url || img.image_url;
+                        }
+                        if (!rating && best.score) rating = best.score.toFixed(1);
+                        // Trailer ka thumbnail hota hai to genuine widescreen (YouTube 16:9) hota hai
+                        if (!banner) {
+                            const trailerImg = best.trailer?.images?.maximum_image_url || best.trailer?.images?.large_image_url;
+                            if (trailerImg) banner = trailerImg;
+                        }
+                    }
+                } catch (e) { console.warn("Jikan fetch failed for:", title); }
+            }
+
+            // ── Source 3: Kitsu — "coverImage" bhi ek dedicated widescreen field hai (posterImage nahi) ──
+            if (!poster || !banner || !rating) {
+                try {
+                    const kitsuRes = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=5`);
+                    const kitsu = await kitsuRes.json();
+                    const list = kitsu?.data || [];
+                    let best = null, bestScore = 0;
+                    list.forEach(entry => {
+                        const attr = entry.attributes || {};
+                        const score = bestTitleMatch(title, [attr.canonicalTitle, attr.titles?.en, attr.titles?.en_jp, attr.titles?.ja_jp]);
+                        if (score > bestScore) { bestScore = score; best = attr; }
+                    });
+                    if (best && bestScore >= MATCH_THRESHOLD) {
+                        if (!poster) poster = best.posterImage?.large || best.posterImage?.original;
+                        // coverImage Kitsu ka widescreen-type field hai — posterImage se alag
+                        if (!banner && best.coverImage) banner = best.coverImage.original || best.coverImage.large;
+                        if (!rating && best.averageRating) rating = (best.averageRating / 10).toFixed(1);
+                    }
+                } catch (e) { console.warn("Kitsu fetch failed for:", title); }
+            }
+
+            // ── Source 4: TMDB — "backdrop_path" bhi ek asli widescreen image hai, sabse LAST resort ──
+            // (movies/TV/celebrities sab isme mix hote hain, isliye sirf tv/movie type
+            // aur strict title-match ke baad hi accept karte hain)
+            if (!poster || !banner || !rating) {
+                try {
+                    const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}`);
+                    const tmdb = await tmdbRes.json();
+                    const results = (tmdb.results || []).filter(r => r.media_type === 'tv' || r.media_type === 'movie');
+                    let best = null, bestScore = 0;
+                    results.forEach(r => {
+                        let score = bestTitleMatch(title, [r.title, r.name, r.original_title, r.original_name]);
+                        if ((r.genre_ids || []).includes(16)) score += 0.1; // Animation genre ko thoda boost
+                        if (score > bestScore) { bestScore = score; best = r; }
+                    });
+                    if (best && bestScore >= MATCH_THRESHOLD) {
+                        if (!poster && best.poster_path) poster = 'https://image.tmdb.org/t/p/w500' + best.poster_path;
+                        if (!banner && best.backdrop_path) banner = 'https://image.tmdb.org/t/p/original' + best.backdrop_path;
+                        if (!rating && best.vote_average) rating = best.vote_average.toFixed(1);
+                    }
+                } catch (e) { console.warn("TMDB fetch failed for:", title); }
+            }
+
+            // ── Final: poster na mile to placeholder; banner na mile to bhi CLEAN placeholder — ──
+            // ── portrait poster ko kabhi crop/blur karke fake banner nahi banayenge ──
             const encoded = encodeURIComponent(title.substring(0, 20));
-            return { 
-                p: `https://placehold.co/500x750/13131a/f47521?text=${encoded}`, 
-                b: `https://placehold.co/1000x500/13131a/f47521?text=${encoded}`, 
-                r: '7.0' 
+            return {
+                p: poster || `https://placehold.co/500x750/13131a/f47521?text=${encoded}`,
+                b: banner || `https://placehold.co/1000x500/13131a/f47521?text=${encoded}`,
+                r: rating || '7.0'
             };
         }
 
@@ -2323,12 +2770,31 @@
             document.getElementById('real-content').classList.remove('hidden');
         }
 
+        // Concurrency-limited map — ek saath sirf N titles fetch karta hai (default 6).
+        // Free anime APIs (Jikan/AniList) rate-limit karte hain agar ek saath sau-do-sau
+        // requests fire ho jayein — isse ulta poori site slow/fail ho jaati hai.
+        async function mapWithConcurrency(items, limit, fn) {
+            let cursor = 0;
+            async function worker() {
+                while (cursor < items.length) {
+                    const i = cursor++;
+                    await fn(items[i], i);
+                }
+            }
+            const workers = Array.from({ length: Math.min(limit, items.length) }, () => worker());
+            await Promise.all(workers);
+        }
+
         async function initApp() {
             // 5 second timeout — Firebase slow ya local file ho toh bhi content dikhega
             const skeletonTimeout = setTimeout(() => {
                 showContent();
                 if (allAnimeData.length === 0) showToast('⚠️ Data load failed. Try refreshing.');
             }, 5000);
+
+            // Firebase ka shared meta_cache turant load karna shuru kar do (parallel mein) —
+            // isse har naye anime ke liye external API call karne ki zaroorat kam se kam padegi
+            const metaCachePromise = loadFirebaseMetaCache();
 
             const cache = getCache();
             if (cache.length > 0) {
@@ -2348,31 +2814,77 @@
                     }
 
                     const titles = Object.keys(data);
-                    
-                    const freshData = await Promise.all(titles.map(async (title, index) => {
+
+                    // Ek session mein sirf ek baar Firebase se shared meta_cache load karo
+                    if (firebaseMetaCache === null) firebaseMetaCache = await metaCachePromise;
+
+                    // ── Step 1: Turant ek pass banao aur render kar do ──
+                    // Priority: (1) localStorage cache — is browser mein pehle se fetch ho chuka
+                    //           (2) Firebase shared meta_cache — kisi bhi aur user ne fetch kiya ho
+                    //           (3) placeholder — sirf tab jab kahin bhi na mile, background mein fetch hoga
+                    const nextData = titles.map((title, index) => {
                         const existing = allAnimeData.find(a => a.title === title);
                         if (existing && existing.poster && !existing.poster.includes('placeholder') && !existing.poster.includes('placehold')) {
-                            return { 
-                                ...existing, 
-                                item: data[title],
-                                // Firebase index preserve karo — naye anime end mein hote hain
-                                firebaseIndex: index
+                            return { ...existing, item: data[title], firebaseIndex: index };
+                        }
+
+                        const slug = title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, '');
+                        const shared = firebaseMetaCache[metaCacheKey(title)];
+                        if (shared && shared.p) {
+                            return {
+                                title, item: data[title], slug,
+                                poster: shared.p, banner: shared.b, rating: shared.r || '7.0',
+                                addedAt: data[title]?.addedAt || data[title]?.timestamp || Date.now(),
+                                firebaseIndex: index,
+                                _metaPending: false // Firebase se mil gaya — external fetch ki zaroorat nahi
                             };
                         }
-                        const meta = await fetchMeta(title);
-                        return { 
-                            title, item: data[title], 
-                            slug: title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, ''), 
-                            poster: meta.p, banner: meta.b, rating: meta.r,
-                            // Timestamp — pehli baar fetch hone ka time
-                            addedAt: data[title]?.addedAt || data[title]?.timestamp || Date.now(),
-                            firebaseIndex: index
-                        };
-                    }));
 
-                    allAnimeData = freshData;
+                        const encoded = encodeURIComponent(title.substring(0, 20));
+                        return {
+                            title, item: data[title], slug,
+                            poster: `https://placehold.co/500x750/13131a/f47521?text=${encoded}`,
+                            banner: `https://placehold.co/1000x500/13131a/f47521?text=${encoded}`,
+                            rating: '—',
+                            addedAt: data[title]?.addedAt || data[title]?.timestamp || Date.now(),
+                            firebaseIndex: index,
+                            _metaPending: true // kahin bhi nahi mila — asli poster/banner abhi fetch hona baaki hai
+                        };
+                    });
+
+                    allAnimeData = nextData;
+                    renderUIAndShow(); // turant dikhao — cache/shared/placeholder jo bhi mila usके saath
+
+                    // ── Step 2: Sirf genuinely-naye titles ke liye external API call karo ──
+                    const pendingIndexes = nextData
+                        .map((a, i) => a._metaPending ? i : -1)
+                        .filter(i => i !== -1);
+
+                    if (pendingIndexes.length === 0) { setCache(allAnimeData); return; }
+
+                    // Har resolve pe turant re-render nahi karte (isse flicker/jank hota hai) —
+                    // ~400ms mein batch karke ek saath re-render karte hain, poster dheere-dheere pop-in hota hai
+                    let rerenderScheduled = false;
+                    const scheduleRerender = () => {
+                        if (rerenderScheduled) return;
+                        rerenderScheduled = true;
+                        setTimeout(() => { rerenderScheduled = false; renderUIAndShow(); }, 400);
+                    };
+
+                    await mapWithConcurrency(pendingIndexes, 6, async (i) => {
+                        try {
+                            const meta = await fetchMeta(nextData[i].title);
+                            Object.assign(allAnimeData[i], { poster: meta.p, banner: meta.b, rating: meta.r, _metaPending: false });
+                            // Firebase mein save kar do — aage koi bhi user (naya bhi) isko turant paayega
+                            saveMetaToFirebase(nextData[i].title, meta);
+                        } catch (e) {
+                            allAnimeData[i]._metaPending = false;
+                        }
+                        scheduleRerender();
+                    });
+
                     setCache(allAnimeData);
-                    renderUIAndShow();
+                    renderUIAndShow(); // final render — sab kuch resolve ho chuka
                 }, (error) => {
                     clearTimeout(skeletonTimeout);
                     console.error("Firebase error:", error);
@@ -2664,7 +3176,7 @@
                 if (rating) rating.textContent = r ? r.toFixed(1) : '—';
                 if (playBtn) playBtn.onclick = () => { window.location.href = feat.slug ? feat.slug + '.html' : '#'; };
                 const main = document.getElementById('pc-feat-main');
-                if (main) main.onclick = (e) => { if (e.target !== playBtn) openInfoModal(feat.title, feat.slug, feat.banner || feat.poster, feat.rating, feat); };
+                if (main) main.onclick = (e) => { if (e.target !== playBtn) openInfoModal(feat.title, feat.slug, feat.banner, feat.rating, feat); };
             }
 
             // Stats
@@ -2689,7 +3201,7 @@
                 trendList.innerHTML = top5.map((a, i) => {
                     const score = parseFloat(getMetaFor(a).score) || parseFloat(a.rating) || 0;
                     const safeTitle = (a.title||'').replace(/'/g,"\'");
-                    return `<div class="pc-trending-item" onclick="openInfoModal('${safeTitle}','${a.slug}','${a.banner||a.poster}','${a.rating}',${JSON.stringify(a).replace(/</g,'\u003c')})">
+                    return `<div class="pc-trending-item" onclick="openInfoModal('${safeTitle}','${a.slug}','${a.banner}','${a.rating}',${JSON.stringify(a).replace(/</g,'\u003c')})">
                         <div class="pc-trending-num ${i < 3 ? 'top' : ''}">${i + 1}</div>
                         <img class="pc-trending-thumb" src="${a.poster||''}" onerror="this.src='https://placehold.co/38x52/1c1c26/555566?text=?'">
                         <div class="pc-trending-info">
@@ -2716,34 +3228,38 @@
             let watchlist = [];
             try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) { watchlist = []; }
 
-            // Watchlist stories
-            watchlist.forEach(t => {
+            // Watchlist stories — array build karke ek hi baar innerHTML set karo
+            // (baar baar += se DOM har iteration pe reparse hota tha, badi list pe ye hi lag ka sabse bada karan tha)
+            const storyCardsHtml = watchlist.map(t => {
                 const a = allAnimeData.find(i => i.title === t);
-                if (a) {
-                    const safeTitle = t.replace(/'/g, "\\'");
-                    watchlistArea.innerHTML += `
-                        <div class="story-item" onclick="openInfoModal('${safeTitle}','${a.slug}','${a.banner}','${a.rating}')">
-                            <div class="story-ring">
-                                <div class="story-ring-inner">
-                                    <img src="${a.poster}" onerror="this.src='https://placehold.co/64x64/13131a/f47521?text=?'">
-                                </div>
-                                    </div>
-                            <div class="story-label">${t}</div>
-                        </div>`;
-                }
-            });
+                if (!a) return '';
+                const safeTitle = t.replace(/'/g, "\\'");
+                return `
+                    <div class="story-item" onclick="openInfoModal('${safeTitle}','${a.slug}','${a.banner}','${a.rating}')">
+                        <div class="story-ring">
+                            <div class="story-ring-inner">
+                                <img src="${a.poster}" loading="lazy" onerror="this.src='https://placehold.co/64x64/13131a/f47521?text=?'">
+                            </div>
+                        </div>
+                        <div class="story-label">${t}</div>
+                    </div>`;
+            }).join('');
 
             // Empty slots
             const slotsToFill = Math.max(0, 4 - watchlist.length);
-            for (let i = 0; i < slotsToFill; i++) {
-                watchlistArea.innerHTML += `
-                    <div class="story-item" style="opacity:0.3;">
-                        <div class="story-add-btn" style="background:transparent;"><i class="fas fa-plus" style="font-size:12px; color:var(--text-dim);"></i></div>
-                        <div class="story-label">Empty</div>
-                    </div>`;
-            }
+            const emptySlotsHtml = Array.from({ length: slotsToFill }, () => `
+                <div class="story-item" style="opacity:0.3;">
+                    <div class="story-add-btn" style="background:transparent;"><i class="fas fa-plus" style="font-size:12px; color:var(--text-dim);"></i></div>
+                    <div class="story-label">Empty</div>
+                </div>`).join('');
+
+            watchlistArea.innerHTML = storyCardsHtml + emptySlotsHtml;
 
             const shuffledForYou = shuffleArray([...allAnimeData]);
+            // Carousel/preview rows ko ek fixed limit tak rakho — poore catalog ko baar baar
+            // render/clone karna (khaas kar auto-scroll marquee mein) hi asli "laggy" wajah thi.
+            // Poora catalog "See All" pe hamesha available hai.
+            const ROW_LIMIT = 18;
 
             // ── CONTINUE WATCHING ──
             let cwList = [];
@@ -2754,12 +3270,11 @@
             }
             if (cwList.length > 0) {
                 document.getElementById('continue-watching-section').style.display = '';
-                cwList.forEach(t => {
+                cwGrid.innerHTML = cwList.map(t => {
                     const a = allAnimeData.find(i => i.title === t);
-                    if (!a) return;
-                    const safeTitle = a.title.replace(/'/g, "\\'");
+                    if (!a) return '';
                     const progress = (() => { try { return parseInt(localStorage.getItem('progress_' + a.slug) || '40'); } catch(e) { return 40; } })();
-                    cwGrid.innerHTML += `
+                    return `
                     <div class="l-card" onclick="location.href='player.html?id=${a.slug}'">
                         <div class="l-card-img-wrap">
                             <img src="${a.banner || a.poster}" loading="lazy" onerror="this.src='https://placehold.co/400x225/13131a/f47521?text=${encodeURIComponent(a.title.substring(0,10))}'">
@@ -2767,12 +3282,12 @@
                                 <div class="l-card-title">${a.title}</div>
                             </div>
                             <div class="cw-progress-wrap"><div class="cw-progress-bar" style="width:${progress}%"></div></div>
-                            <div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">
+                            <div class="cw-play-btn">
                                 <i class="fas fa-play" style="font-size:9px;color:white;margin-left:2px;"></i>
                             </div>
                         </div>
                     </div>`;
-                });
+                }).join('');
             }
 
             // ── LATEST UPLOAD ──
@@ -2784,14 +3299,14 @@
             const toShowLatest = latestList.length > 0 ? latestList : allAnimeData.slice(-8).reverse();
             if (toShowLatest.length > 0) {
                 document.getElementById('latest-upload-section').style.display = '';
-                toShowLatest.forEach(({title, slug, poster, banner, rating}) => {
+                latestGrid.innerHTML = toShowLatest.map(({title, slug, poster, banner, rating}) => {
                     const isLiked = watchlist.includes(title);
-                    latestGrid.innerHTML += makePortraitCard({title, slug, poster, banner, rating, isLiked});
-                });
+                    return makePortraitCard({title, slug, poster, banner, rating, isLiked});
+                }).join('');
             }
 
-            // ── FOR YOU carousel — saare shuffled anime ──
-            carousel.innerHTML = shuffledForYou.map(({title, slug, poster, banner, rating}) =>
+            // ── FOR YOU carousel — bounded subset, warna bade catalog pe clone ke saath DOM bahut bada ho jaata ──
+            carousel.innerHTML = shuffledForYou.slice(0, ROW_LIMIT).map(({title, slug, poster, banner, rating}) =>
                 `<div class="trending-item" style="flex-shrink:0;">` + makeLandscapeCard({title, slug, poster, banner, rating}) + `</div>`
             ).join('');
             initInfiniteAutoScroll(carousel);
@@ -2803,7 +3318,7 @@
             }).join('');
 
             // ── LATEST MOVIES ──
-            moviesGrid.innerHTML = shuffledForYou.map(({title, slug, poster, banner, rating}) =>
+            moviesGrid.innerHTML = shuffledForYou.slice(0, ROW_LIMIT).map(({title, slug, poster, banner, rating}) =>
                 makeLandscapeCard({title, slug, poster, banner, rating})
             ).join('');
 
@@ -2811,7 +3326,7 @@
             const topRatedGrid = document.getElementById('top-rated-grid');
             if (topRatedGrid) {
                 const sorted = [...allAnimeData].sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
-                topRatedGrid.innerHTML = sorted.map(({title, slug, poster, banner, rating, item}) => {
+                topRatedGrid.innerHTML = sorted.slice(0, ROW_LIMIT).map(({title, slug, poster, banner, rating, item}) => {
                     const isLiked = watchlist.includes(title);
                     return makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
                 }).join('');
@@ -2836,6 +3351,19 @@
         }
 
         function initInfiniteAutoScroll(container) {
+            // ── CRITICAL FIX ──
+            // renderGrids() (aur isliye ye function) baar baar call hoti hai — progressive
+            // meta loading ke dauraan, watchlist toggle pe, continue-watching clear pe, waghera.
+            // Pehle har call pe ek NAYA requestAnimationFrame loop + naye document-level
+            // listeners add ho jaate the, purane kabhi cancel/remove nahi hote the. Isse
+            // dheere dheere (page jitni der khula rehta) utne hi scroll loops ek saath chal
+            // rahe hote — carousel jhatkon ke saath tez hota jaata aur poori site laggy feel
+            // hoti. Fix: har naye init se pehle purana loop/listeners poori tarah cleanup karo.
+            if (container._avAutoScrollCleanup) {
+                container._avAutoScrollCleanup();
+                container._avAutoScrollCleanup = null;
+            }
+
             const trendingItems = container.querySelectorAll('.trending-item');
             if (trendingItems.length <= 1) return;
 
@@ -2851,6 +3379,7 @@
             let isUserScrolling = false;
             let userScrollTimeout = null;
             let rafId = null;
+            let stopped = false;
             const speed = 1.2; // px per frame — faster
 
             function getHalfWidth() {
@@ -2858,6 +3387,7 @@
             }
 
             function autoStep() {
+                if (stopped) return;
                 if (!isUserScrolling) {
                     scrollPos += speed;
                     if (scrollPos >= getHalfWidth()) scrollPos = 0;
@@ -2873,27 +3403,23 @@
                 rafId = requestAnimationFrame(autoStep);
             }
 
-            // Touch — user scroll detect karo
-            container.addEventListener('touchstart', () => {
+            function onTouchStart() {
                 isUserScrolling = true;
                 clearTimeout(userScrollTimeout);
-            }, { passive: true });
-
-            container.addEventListener('touchend', () => {
+            }
+            function onTouchEnd() {
                 // 1.5s baad auto resume — jhatka nahi, current position se shuru
                 clearTimeout(userScrollTimeout);
                 userScrollTimeout = setTimeout(() => {
                     scrollPos = container.scrollLeft;
                     isUserScrolling = false;
                 }, 1500);
-            }, { passive: true });
-
-            // Mouse drag support
-            container.addEventListener('mousedown', () => {
+            }
+            function onMouseDown() {
                 isUserScrolling = true;
                 clearTimeout(userScrollTimeout);
-            });
-            document.addEventListener('mouseup', () => {
+            }
+            function onMouseUp() {
                 if (isUserScrolling) {
                     clearTimeout(userScrollTimeout);
                     userScrollTimeout = setTimeout(() => {
@@ -2901,18 +3427,38 @@
                         isUserScrolling = false;
                     }, 1500);
                 }
-            });
-
-            // Battery save
-            document.addEventListener('visibilitychange', () => {
+            }
+            function onVisibilityChange() {
                 if (document.hidden) {
                     cancelAnimationFrame(rafId);
-                } else {
+                } else if (!stopped) {
                     scrollPos = container.scrollLeft;
                     rafId = requestAnimationFrame(autoStep);
                 }
-            });
-        rafId = requestAnimationFrame(autoStep);
+            }
+
+            // Touch — user scroll detect karo
+            container.addEventListener('touchstart', onTouchStart, { passive: true });
+            container.addEventListener('touchend', onTouchEnd, { passive: true });
+            // Mouse drag support
+            container.addEventListener('mousedown', onMouseDown);
+            document.addEventListener('mouseup', onMouseUp);
+            // Battery save
+            document.addEventListener('visibilitychange', onVisibilityChange);
+
+            rafId = requestAnimationFrame(autoStep);
+
+            // Agli baar re-init hone par (ya container hatne par) sab kuch saaf karne ke liye
+            container._avAutoScrollCleanup = function() {
+                stopped = true;
+                cancelAnimationFrame(rafId);
+                clearTimeout(userScrollTimeout);
+                container.removeEventListener('touchstart', onTouchStart);
+                container.removeEventListener('touchend', onTouchEnd);
+                container.removeEventListener('mousedown', onMouseDown);
+                document.removeEventListener('mouseup', onMouseUp);
+                document.removeEventListener('visibilitychange', onVisibilityChange);
+            };
         }
 
         async function openInfoModal(title, slug, banner, rating) {
@@ -2932,8 +3478,9 @@
             document.getElementById('modal-desc').innerText = "Loading details...";
             
             const bannerImg = document.getElementById('modal-banner');
-            bannerImg.src = banner || '';
-            bannerImg.onerror = () => { bannerImg.src = `https://placehold.co/800x450/13131a/f47521?text=${encodeURIComponent(title.substring(0,15))}`; };
+            const bannerFallback = `https://placehold.co/800x450/13131a/f47521?text=${encodeURIComponent(title.substring(0,15))}`;
+            bannerImg.src = banner || bannerFallback;
+            bannerImg.onerror = () => { bannerImg.src = bannerFallback; };
 
             document.getElementById('modal-play-btn').onclick = () => { 
                 addToContinueWatching(title);
@@ -3127,23 +3674,20 @@
                 filtered = [...withScore].sort((a, b) => b._score - a._score);
             }
 
-            const grid = document.getElementById('filter-grid');
-            grid.innerHTML = '';
-            let watchlist = [];
-            try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
-
             if (filtered.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px 0; color:var(--text-dim); font-size:12px; font-weight:800;">No anime found in this category</div>`;
+                document.getElementById('filter-grid').innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px 0; color:var(--text-dim); font-size:12px; font-weight:800;">No anime found in this category</div>`;
                 document.getElementById('filter-count').innerText = '';
+                document.getElementById('pagination-wrap').innerHTML = '';
                 return;
             }
 
             document.getElementById('filter-count').innerText = `${filtered.length} anime`;
 
-            filtered.forEach(({title, slug, poster, banner, rating, item}) => {
-                const isLiked = watchlist.includes(title);
-                grid.innerHTML += makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
-            });
+            // Paginated renderer reuse karo (same jo "See All" use karta hai) — badi list ko
+            // ek saath poora DOM mein daalne se site laggy ho jaati thi, ab sirf ek page dikhta hai
+            seeAllAllData = filtered;
+            seeAllCurrentPage = 1;
+            renderSeeAllPage(1);
         }
 
         // ════════════════════════════════
@@ -3190,25 +3734,18 @@
                 return g.includes(genreName);
             });
 
-            const grid = document.getElementById('filter-grid');
-            grid.innerHTML = '';
-            document.getElementById('pagination-wrap').innerHTML = '';
-
-            let watchlist = [];
-            try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
-
             if (filtered.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px 0; color:var(--text-dim); font-size:12px; font-weight:800;">No anime found in "${genreName}"</div>`;
+                document.getElementById('filter-grid').innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px 0; color:var(--text-dim); font-size:12px; font-weight:800;">No anime found in "${genreName}"</div>`;
                 document.getElementById('filter-count').innerText = '';
+                document.getElementById('pagination-wrap').innerHTML = '';
                 return;
             }
 
             document.getElementById('filter-count').innerText = `${filtered.length} anime`;
 
-            filtered.forEach(({title, slug, poster, banner, rating, item}) => {
-                const isLiked = watchlist.includes(title);
-                grid.innerHTML += makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
-            });
+            seeAllAllData = filtered;
+            seeAllCurrentPage = 1;
+            renderSeeAllPage(1);
         }
 
         // ════════════════════════════════
@@ -3318,7 +3855,22 @@
         }
 
         // Firebase se naye episodes check karo (polling)
+        let episodeWatcherStarted = false;
         function startEpisodeWatcher() {
+            // renderUIAndShow() ab progressive loading ke dauraan baar baar call hoti hai —
+            // isliye guard laga diya taaki setInterval sirf ek hi baar register ho (varna
+            // har re-render pe ek naya interval stack ho jaata, duplicate notifications aatin)
+            if (episodeWatcherStarted) {
+                // Snapshot phir bhi refresh kar do latest data ke saath
+                allAnimeData.forEach(a => {
+                    if (a.item?.lastEpisode) {
+                        lastKnownEpisodes[a.slug] = { s: a.item.lastSeason || 1, e: a.item.lastEpisode };
+                    }
+                });
+                return;
+            }
+            episodeWatcherStarted = true;
+
             // Pehle existing episodes snapshot lo
             allAnimeData.forEach(a => {
                 if (a.item?.lastEpisode) {
@@ -3504,11 +4056,10 @@
             try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
 
             const grid = document.getElementById('filter-grid');
-            grid.innerHTML = '';
-            pageData.forEach(({title, slug, poster, banner, rating, item}) => {
+            grid.innerHTML = pageData.map(({title, slug, poster, banner, rating, item}) => {
                 const isLiked = watchlist.includes(title);
-                grid.innerHTML += makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
-            });
+                return makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
+            }).join('');
 
             // Pagination render
             const wrap = document.getElementById('pagination-wrap');
