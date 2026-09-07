@@ -1320,7 +1320,7 @@
         let currentSeason  = 1;
         let currentEpisode = 1;
         let currentServer  = 1;   // 1 = animeverse_links, 2 = anime_links
-        let currentQuality = '1080p';
+        let currentQuality = '480p'; // bandwidth saving ke liye default low quality; user manually badal sakta hai
         let totalSeasons   = 1;
         let totalEpisodes  = {};
         let watchedEps     = {};
@@ -1528,8 +1528,24 @@
                     check();
                 }, () => { check(); }); // is fetch ka fail hona optional feature hai — video playback ko block nahi karna
 
-                // (Server 2 removed — only one server now)
-                check();
+                // SERVER 2 — server2_links/{slug}
+                // Alag folder hai (anime_links se mix nahi hota). Same structure:
+                // S1 > E1 > { '1080p': {...}, '720p': {...}, '480p': {...} }
+                db.ref('server2_links/' + animeSlug).once('value', snap => {
+                    const data = fixLinksDeep(snap.val());
+                    if (data && typeof data === 'object') {
+                        Object.entries(data).forEach(([sKey, eps]) => {
+                            if (!sKey.startsWith('S') || typeof eps !== 'object') return;
+                            srv2Data[sKey] = {};
+                            Object.entries(eps).forEach(([eKey, qualities]) => {
+                                if (eKey.startsWith('E') && qualities && typeof qualities === 'object') {
+                                    srv2Data[sKey][eKey] = qualities;
+                                }
+                            });
+                        });
+                    }
+                    check();
+                }, () => { if (window.AVAnalytics) window.AVAnalytics.trackServerError('server2_links_load'); check(); });
             });
         }
 
@@ -1566,11 +1582,24 @@
                     </select>
                     <i class="fas fa-chevron-down" style="font-size:8px;color:var(--accent);pointer-events:none;position:absolute;right:10px;"></i>
                 </div>`;
-            wrap.innerHTML = `
-                <div class="server-tab active">
+
+            const sKey = 'S' + currentSeason;
+            const eKey = 'E' + currentEpisode;
+            const hasServer2 = !!(srv2Data[sKey] && srv2Data[sKey][eKey]);
+
+            let tabsHtml = `
+                <div class="server-tab ${currentServer===1?'active':''}" onclick="selectServer(1)">
                     <i class="fas fa-play"></i> Server 1
-                </div>
-                ${qualityHtml}`;
+                </div>`;
+
+            if (hasServer2) {
+                tabsHtml += `
+                <div class="server-tab ${currentServer===2?'active':''}" onclick="selectServer(2)">
+                    <i class="fas fa-play"></i> Server 2
+                </div>`;
+            }
+
+            wrap.innerHTML = tabsHtml + qualityHtml;
         }
 
 
@@ -1842,9 +1871,11 @@
             let metaText = '';
             let audioTracksData = null;
 
-            const epData = srv1Data[sKey]?.[eKey];
+            const primaryData = currentServer === 1 ? srv1Data : srv2Data;
+            const epData = primaryData[sKey]?.[eKey];
             if (epData) {
-                const tryOrder = [currentQuality, '1080p', '720p', '480p'];
+                // currentQuality na mile to bandwidth-saving fallback: low → high (480p pehle, 1080p sabse aakhri me)
+                const tryOrder = [currentQuality, '480p', '720p', '1080p'];
                 for (const q of tryOrder) {
                     if (epData[q]?.link) {
                         videoUrl = epData[q].link;
@@ -2113,6 +2144,17 @@
                 }
             }
 
+            // ─ TIMING DEBUG: prints how long each loading stage takes in the
+            // browser console (F12 → Console). Remove once slow-load issue is fixed.
+            const cvLoadT0 = performance.now();
+            console.log('[AV-TIMING] src set at 0ms:', src);
+            video.addEventListener('loadstart', () => console.log('[AV-TIMING] loadstart @', (performance.now()-cvLoadT0).toFixed(0), 'ms'));
+            video.addEventListener('loadedmetadata', () => console.log('[AV-TIMING] loadedmetadata @', (performance.now()-cvLoadT0).toFixed(0), 'ms'));
+            video.addEventListener('loadeddata', () => console.log('[AV-TIMING] loadeddata (first frame ready) @', (performance.now()-cvLoadT0).toFixed(0), 'ms'));
+            video.addEventListener('canplay', () => console.log('[AV-TIMING] canplay @', (performance.now()-cvLoadT0).toFixed(0), 'ms'));
+            video.addEventListener('stalled', () => console.log('[AV-TIMING] STALLED (browser waiting on network) @', (performance.now()-cvLoadT0).toFixed(0), 'ms'));
+            video.addEventListener('error', () => console.log('[AV-TIMING] ERROR @', (performance.now()-cvLoadT0).toFixed(0), 'ms', video.error));
+
             // Autoplay as soon as enough data is ready
             video.oncanplay = () => {
                 spinner.style.display = 'none';
@@ -2121,7 +2163,7 @@
 
             // Show spinner while buffering
             spinner.style.display = 'flex';
-            video.onwaiting = () => { spinner.style.display = 'flex'; };
+            video.onwaiting = () => { spinner.style.display = 'flex'; console.log('[AV-TIMING] waiting (buffering) @', (performance.now()-cvLoadT0).toFixed(0), 'ms'); };
             video.onplaying = () => { spinner.style.display = 'none'; };
 
             // Auto-show controls on start
