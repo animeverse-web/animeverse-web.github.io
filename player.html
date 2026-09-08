@@ -1604,6 +1604,16 @@
 
 
 
+        // Server 2 ko priority do (agar us episode ka data available ho), warna Server 1.
+        // User manually server switch kare to yahan interfere nahi karte (selectServer mein call nahi hota).
+        function pickBestServer(season, episode) {
+            const sKey = 'S' + season;
+            const eKey = 'E' + episode;
+            if (srv2Data[sKey] && srv2Data[sKey][eKey]) return 2;
+            if (srv1Data[sKey] && srv1Data[sKey][eKey]) return 1;
+            return currentServer;
+        }
+
         function selectServer(n) {
             currentServer = n;
             renderServers();
@@ -1629,6 +1639,7 @@
         function selectSeason(s) {
             currentSeason = parseInt(s);
             currentEpisode = 1;
+            currentServer = pickBestServer(currentSeason, currentEpisode);
             renderSeasons();
             renderEpisodes();
             loadVideo();
@@ -1829,6 +1840,7 @@
 
         function selectEpisode(e) {
             currentEpisode = e;
+            currentServer = pickBestServer(currentSeason, currentEpisode);
             saveContinueWatching();
 
             renderServers();
@@ -2919,6 +2931,8 @@
             if (!totalEpisodes[currentSeason]) currentSeason = parseInt(Object.keys(totalEpisodes).sort((a,b)=>a-b)[0]);
             // Clamp currentEpisode
             if (currentEpisode > (totalEpisodes[currentSeason] || 1)) currentEpisode = 1;
+            // Pehli baar load hote waqt bhi Server 2 ko priority do (agar available ho)
+            currentServer = pickBestServer(currentSeason, currentEpisode);
 
             // Render UI
             renderServers();
