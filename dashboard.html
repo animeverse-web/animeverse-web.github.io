@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="robots" content="noindex, nofollow">
 <title>AnimeVerse — Analytics</title>
 
@@ -19,149 +19,180 @@
     --accent:#f47521; --accent2:#ff6b35; --accent-hot:#ff3d68; --accent-violet:#8b5cf6;
     --gradient-brand: linear-gradient(120deg,#f47521 0%,#ff5a3d 50%,#ff3d68 100%);
     --text:#ffffff; --text-muted:#8a8a9a; --text-dim:#555566;
-    --border: rgba(255,255,255,0.07); --border-hover: rgba(244,117,33,0.4);
-    --radius:12px;
-    --shadow-card: 0 14px 34px rgba(0,0,0,0.5);
+    --border: rgba(255,255,255,0.08); --border-hover: rgba(244,117,33,0.4);
+    --radius:12px; --nav-h:58px; --topbar-h:56px; --tabbar-h:44px;
     --ease: cubic-bezier(.22,1,.36,1);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
+html,body{height:100%;overscroll-behavior-y:none;}
 body{
     background:
         radial-gradient(1100px 600px at 12% -8%, rgba(244,117,33,0.09), transparent 60%),
         radial-gradient(900px 560px at 108% 8%, rgba(255,61,104,0.07), transparent 55%),
         var(--bg);
-    color:var(--text); font-family:'Nunito',sans-serif; min-height:100vh;
-    -webkit-font-smoothing:antialiased; padding-bottom:60px;
+    color:var(--text); font-family:'Nunito',sans-serif;
+    -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent;
+    display:flex; flex-direction:column; min-height:100vh;
 }
 .mono{font-family:'JetBrains Mono',monospace;}
 ::selection{background:var(--accent-hot);color:#fff;}
-::-webkit-scrollbar{height:8px;width:8px;}
+::-webkit-scrollbar{height:6px;width:6px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:10px;}
 
-/* ── TOPBAR ── */
+/* ── TOPBAR (fixed) ── */
 .topbar{
-    position:sticky; top:0; z-index:50;
-    display:flex; align-items:center; justify-content:space-between; gap:16px;
-    padding:14px 24px; background:rgba(10,10,15,0.86); backdrop-filter:blur(14px);
+    position:fixed; top:0; left:0; right:0; z-index:60; height:var(--topbar-h);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:0 14px; background:rgba(10,10,15,0.9); backdrop-filter:blur(14px);
     border-bottom:1px solid var(--border);
-    flex-wrap:wrap;
 }
-.brand{display:flex; align-items:center; gap:10px;}
+.brand{display:flex; align-items:center; gap:9px; min-width:0;}
 .brand .mark{
-    width:34px;height:34px;border-radius:9px;background:var(--gradient-brand);
-    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;
-    box-shadow:0 6px 20px rgba(244,58,73,0.3);
+    width:30px;height:30px;border-radius:8px;background:var(--gradient-brand);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12.5px;
+    box-shadow:0 6px 16px rgba(244,58,73,0.3);
 }
-.brand h1{font-size:16px;font-weight:900;letter-spacing:-.2px;}
-.brand h1 span{color:var(--text-muted);font-weight:700;font-size:12px;display:block;margin-top:1px;}
-.top-right{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.brand h1{font-size:14px;font-weight:900;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.brand h1 span{color:var(--text-muted);font-weight:700;font-size:10.5px;display:block;margin-top:0;}
+.top-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .live-pill{
-    display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--text-muted);
-    padding:6px 11px;border:1px solid var(--border);border-radius:99px;background:var(--surface);
+    display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;color:var(--text-muted);
+    padding:5px 9px;border:1px solid var(--border);border-radius:99px;background:var(--surface);
 }
-.live-dot{width:7px;height:7px;border-radius:50%;background:#2ecc71;box-shadow:0 0 0 0 rgba(46,204,113,.6);animation:pulse 1.8s infinite;}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,204,113,.55);}70%{box-shadow:0 0 0 7px rgba(46,204,113,0);}100%{box-shadow:0 0 0 0 rgba(46,204,113,0);}}
-.range-group{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;gap:2px;}
-.range-btn{
-    border:none;background:transparent;color:var(--text-muted);font-family:inherit;font-weight:700;
-    font-size:12px;padding:7px 12px;border-radius:7px;cursor:pointer;transition:.2s var(--ease);
-}
-.range-btn.active{background:var(--gradient-brand);color:#fff;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#2ecc71;animation:pulse 1.8s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,204,113,.55);}70%{box-shadow:0 0 0 6px rgba(46,204,113,0);}100%{box-shadow:0 0 0 0 rgba(46,204,113,0);}}
 .refresh-btn{
-    width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);
-    color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
-    transition:.2s var(--ease);
+    width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface);
+    color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
-.refresh-btn:hover{color:var(--accent);border-color:var(--border-hover);}
 .refresh-btn.spinning i{animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-.wrap{max-width:1360px;margin:0 auto;padding:24px;}
+/* ── TABBAR (desktop, under topbar) ── */
+.tabbar{
+    position:fixed; top:var(--topbar-h); left:0; right:0; z-index:55; height:var(--tabbar-h);
+    display:flex; align-items:center; gap:4px; padding:0 12px;
+    background:rgba(10,10,15,0.9); backdrop-filter:blur(14px); border-bottom:1px solid var(--border);
+    overflow-x:auto; scrollbar-width:none;
+}
+.tabbar::-webkit-scrollbar{display:none;}
+.tab-btn{
+    border:none;background:transparent;color:var(--text-muted);font-family:inherit;font-weight:800;
+    font-size:12.5px;padding:8px 13px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:.2s var(--ease);
+    display:flex;align-items:center;gap:6px;
+}
+.tab-btn i{font-size:11px;}
+.tab-btn.active{background:var(--surface2);color:var(--text);}
 
-/* ── KPI GRID ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:22px;}
+/* ── MAIN CONTENT ── */
+.main{
+    flex:1; margin-top:calc(var(--topbar-h) + var(--tabbar-h));
+    padding:14px 14px calc(var(--nav-h) + 24px);
+    max-width:1200px; width:100%; margin-left:auto; margin-right:auto;
+}
+.view{display:none;}
+.view.active{display:block; animation:fadeIn .25s var(--ease);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+.view-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.view-header h2{font-size:14px;font-weight:900;}
+.range-group{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;gap:2px;}
+.range-btn{
+    border:none;background:transparent;color:var(--text-muted);font-family:inherit;font-weight:700;
+    font-size:11px;padding:6px 10px;border-radius:7px;cursor:pointer;transition:.2s var(--ease);
+}
+.range-btn.active{background:var(--gradient-brand);color:#fff;}
+
+/* ── KPI horizontal scroller (YT-studio style) ── */
+.kpi-scroll{
+    display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; margin-bottom:16px;
+    scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+}
+.kpi-scroll::-webkit-scrollbar{display:none;}
 .kpi{
+    flex:0 0 auto; scroll-snap-align:start; width:132px;
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    padding:16px 17px; position:relative; overflow:hidden; transition:.25s var(--ease);
+    padding:13px 14px;
 }
-.kpi:hover{border-color:var(--border-hover); transform:translateY(-2px);}
 .kpi .icn{
-    width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-    font-size:13px;margin-bottom:12px;
+    width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+    font-size:11px;margin-bottom:9px;
 }
-.kpi .val{font-size:24px;font-weight:900;letter-spacing:-.5px;line-height:1;}
-.kpi .lbl{font-size:11.5px;color:var(--text-muted);font-weight:700;margin-top:6px;text-transform:uppercase;letter-spacing:.4px;}
-.kpi .sub{font-size:11px;color:var(--text-dim);font-weight:600;margin-top:4px;}
+.kpi .val{font-size:19px;font-weight:900;letter-spacing:-.4px;line-height:1;}
+.kpi .lbl{font-size:10px;color:var(--text-muted);font-weight:700;margin-top:5px;line-height:1.3;}
+.kpi .sub{font-size:9.5px;color:var(--text-dim);font-weight:600;margin-top:3px;}
 
-/* section headers */
-.section-title{display:flex;align-items:center;justify-content:space-between;margin:26px 0 12px;}
-.section-title h2{font-size:15px;font-weight:800;letter-spacing:-.2px;}
-.section-title .hint{font-size:11.5px;color:var(--text-dim);font-weight:600;}
-
-/* ── PANELS / CHARTS ── */
-.grid-2{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-@media(max-width:920px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+/* ── PANELS ── */
+.grid-2{display:grid;grid-template-columns:1fr;gap:12px;}
+@media(min-width:760px){.grid-2{grid-template-columns:1.5fr 1fr;}}
+.grid-3{display:grid;grid-template-columns:1fr;gap:12px;}
+@media(min-width:760px){.grid-3{grid-template-columns:repeat(3,1fr);}}
 .panel{
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-    padding:18px 18px 14px;
+    padding:15px 15px 12px; margin-bottom:12px;
 }
-.panel h3{font-size:13px;font-weight:800;margin-bottom:2px;}
-.panel .panel-sub{font-size:11px;color:var(--text-dim);font-weight:600;margin-bottom:14px;}
-.chart-box{position:relative;height:260px;}
-.chart-box.short{height:210px;}
+.panel h3{font-size:12.5px;font-weight:800;margin-bottom:1px;}
+.panel .panel-sub{font-size:10.5px;color:var(--text-dim);font-weight:600;margin-bottom:12px;}
+.chart-box{position:relative;height:190px;}
+.chart-box.short{height:170px;}
+@media(min-width:760px){.chart-box{height:230px;} .chart-box.short{height:200px;}}
 
 .empty-note{
-    display:flex;align-items:center;justify-content:center;height:100%;min-height:120px;
-    color:var(--text-dim);font-size:12px;font-weight:700;text-align:center;flex-direction:column;gap:8px;
+    display:flex;align-items:center;justify-content:center;height:100%;min-height:110px;
+    color:var(--text-dim);font-size:11.5px;font-weight:700;text-align:center;flex-direction:column;gap:7px;
 }
-.empty-note i{font-size:20px;opacity:.5;}
+.empty-note i{font-size:18px;opacity:.5;}
 
 /* ── TABLES ── */
-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+table{width:100%;border-collapse:collapse;font-size:11.5px;}
 th{
-    text-align:left;color:var(--text-dim);font-weight:800;font-size:10.5px;text-transform:uppercase;
-    letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--border);
+    text-align:left;color:var(--text-dim);font-weight:800;font-size:9.5px;text-transform:uppercase;
+    letter-spacing:.4px;padding:7px 8px;border-bottom:1px solid var(--border);
 }
-td{padding:10px;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);}
+td{padding:9px 8px;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);}
 tr:last-child td{border-bottom:none;}
-td.muted{color:var(--text-muted);}
+td.muted{color:var(--text-muted);white-space:nowrap;}
+.table-scroll{max-height:260px;overflow-y:auto;}
 .rank{
-    display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;
-    background:var(--surface3);color:var(--text-muted);font-size:10.5px;font-weight:800;margin-right:8px;
+    display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;
+    background:var(--surface3);color:var(--text-muted);font-size:9.5px;font-weight:800;margin-right:8px;flex-shrink:0;
 }
 .rank.top1{background:var(--gradient-brand);color:#fff;}
-.bar-cell{display:flex;align-items:center;gap:8px;}
-.mini-bar{flex:1;height:6px;border-radius:4px;background:var(--surface3);overflow:hidden;}
+.mini-bar{flex:1;height:5px;border-radius:4px;background:var(--surface3);overflow:hidden;}
 .mini-bar i{display:block;height:100%;background:var(--gradient-brand);border-radius:4px;}
-.tag{
-    display:inline-block;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:6px;
-    background:var(--surface3);color:var(--text-muted);
-}
+.tag{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:6px;background:var(--surface3);color:var(--text-muted);}
 .tag.red{background:rgba(255,61,104,0.12);color:var(--accent-hot);}
-.tag.violet{background:rgba(139,92,246,0.12);color:var(--accent-violet);}
 
 /* ── LIVE FEED ── */
-.feed{max-height:400px;overflow-y:auto;}
-.feed-item{
-    display:flex;align-items:flex-start;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);
-    animation:slideIn .3s var(--ease);
-}
+.feed{max-height:calc(100vh - var(--topbar-h) - var(--tabbar-h) - var(--nav-h) - 90px);overflow-y:auto;}
+.feed-item{display:flex;align-items:flex-start;gap:9px;padding:9px 2px;border-bottom:1px solid var(--border);animation:slideIn .3s var(--ease);}
 .feed-item:last-child{border-bottom:none;}
 @keyframes slideIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-.feed-icn{
-    width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
-    font-size:11px;flex-shrink:0;margin-top:1px;
-}
-.feed-text{font-size:12.5px;font-weight:600;color:var(--text);line-height:1.4;}
+.feed-icn{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px;}
+.feed-text{font-size:11.5px;font-weight:600;color:var(--text);line-height:1.4;}
 .feed-text b{font-weight:800;}
-.feed-time{font-size:10.5px;color:var(--text-dim);font-weight:700;margin-top:2px;}
+.feed-time{font-size:9.5px;color:var(--text-dim);font-weight:700;margin-top:2px;}
 
-.footer-note{
-    margin-top:30px;padding-top:16px;border-top:1px solid var(--border);
-    color:var(--text-dim);font-size:11px;font-weight:600;text-align:center;
+/* ── BOTTOM NAV (mobile) ── */
+.bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:60; height:var(--nav-h);
+    display:flex; background:rgba(10,10,15,0.94); backdrop-filter:blur(16px);
+    border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom);
+}
+.bn-item{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    color:var(--text-dim); font-size:9.5px; font-weight:800; background:none; border:none; font-family:inherit;
+}
+.bn-item i{font-size:16px;}
+.bn-item.active{color:var(--accent);}
+
+@media(min-width:760px){
+    .bottom-nav{display:none;}
+    .main{padding-bottom:24px;}
+}
+@media(max-width:759px){
+    .tabbar{display:none;}
 }
 </style>
 </head>
@@ -170,46 +201,55 @@ td.muted{color:var(--text-muted);}
 <div class="topbar">
     <div class="brand">
         <div class="mark">AV</div>
-        <h1>AnimeVerse<span>Analytics Dashboard</span></h1>
+        <div style="min-width:0;">
+            <h1>Analytics</h1>
+            <span>AnimeVerse</span>
+        </div>
     </div>
     <div class="top-right">
         <div class="live-pill"><span class="live-dot"></span> Live</div>
-        <div class="range-group" id="rangeGroup">
-            <button class="range-btn" data-range="1">Today</button>
-            <button class="range-btn active" data-range="7">7 Days</button>
-            <button class="range-btn" data-range="30">30 Days</button>
-            <button class="range-btn" data-range="90">90 Days</button>
-        </div>
         <button class="refresh-btn" id="refreshBtn" title="Refresh"><i class="fas fa-rotate"></i></button>
     </div>
 </div>
 
-<div class="wrap">
+<div class="tabbar" id="tabbar">
+    <button class="tab-btn active" data-view="overview"><i class="fas fa-chart-line"></i> Overview</button>
+    <button class="tab-btn" data-view="content"><i class="fas fa-photo-film"></i> Content</button>
+    <button class="tab-btn" data-view="health"><i class="fas fa-heart-pulse"></i> Health</button>
+    <button class="tab-btn" data-view="activity"><i class="fas fa-bolt"></i> Activity</button>
+</div>
 
-    <div class="kpi-grid" id="kpiGrid"></div>
+<div class="main">
 
-    <div class="section-title">
-        <h2>Traffic</h2>
-        <span class="hint" id="rangeLabel">Last 7 days</span>
-    </div>
-    <div class="grid-2">
+    <!-- ═══ OVERVIEW ═══ -->
+    <div class="view active" id="view-overview">
+        <div class="kpi-scroll" id="kpiGrid"></div>
+
+        <div class="view-header">
+            <h2>Traffic</h2>
+            <div class="range-group" id="rangeGroup">
+                <button class="range-btn" data-range="1">1D</button>
+                <button class="range-btn active" data-range="7">7D</button>
+                <button class="range-btn" data-range="30">30D</button>
+                <button class="range-btn" data-range="90">90D</button>
+            </div>
+        </div>
         <div class="panel">
-            <h3>Pageviews over time</h3>
+            <h3>Pageviews</h3>
             <div class="panel-sub">Home vs Player, by day</div>
             <div class="chart-box"><canvas id="pageviewsChart"></canvas></div>
         </div>
         <div class="panel">
             <h3>Unique visitors</h3>
             <div class="panel-sub">Distinct devices per day</div>
-            <div class="chart-box"><canvas id="visitorsChart"></canvas></div>
+            <div class="chart-box short"><canvas id="visitorsChart"></canvas></div>
         </div>
     </div>
 
-    <div class="section-title">
-        <h2>Content performance</h2>
-        <span class="hint">All-time totals</span>
-    </div>
-    <div class="grid-2">
+    <!-- ═══ CONTENT ═══ -->
+    <div class="view" id="view-content">
+        <div class="view-header"><h2>Content performance</h2><span style="font-size:10.5px;color:var(--text-dim);font-weight:700;">All-time</span></div>
+
         <div class="panel">
             <h3>Most watched anime</h3>
             <div class="panel-sub">By episode-watch events</div>
@@ -220,56 +260,59 @@ td.muted{color:var(--text-muted);}
             <div class="panel-sub">What people are looking for</div>
             <div class="chart-box"><canvas id="topSearchChart"></canvas></div>
         </div>
+        <div class="grid-3">
+            <div class="panel">
+                <h3>Notification opt-in</h3>
+                <div class="panel-sub">Permission responses</div>
+                <div class="chart-box short"><canvas id="notifChart"></canvas></div>
+            </div>
+            <div class="panel">
+                <h3>Telegram joins</h3>
+                <div class="panel-sub">Nav vs pop-up modal</div>
+                <div class="chart-box short"><canvas id="joinChart"></canvas></div>
+            </div>
+            <div class="panel">
+                <h3>Top by watch time</h3>
+                <div class="panel-sub">Minutes, all-time</div>
+                <div id="watchTimeList" style="padding-top:2px;"></div>
+            </div>
+        </div>
     </div>
 
-    <div class="grid-3" style="margin-top:14px;">
-        <div class="panel">
-            <h3>Notification opt-in</h3>
-            <div class="panel-sub">Browser permission responses</div>
-            <div class="chart-box short"><canvas id="notifChart"></canvas></div>
-        </div>
-        <div class="panel">
-            <h3>Telegram join clicks</h3>
-            <div class="panel-sub">Nav bar vs pop-up modal</div>
-            <div class="chart-box short"><canvas id="joinChart"></canvas></div>
-        </div>
-        <div class="panel">
-            <h3>Top by watch time</h3>
-            <div class="panel-sub">Minutes watched, all-time</div>
-            <div id="watchTimeList" style="padding-top:4px;"></div>
-        </div>
-    </div>
-
-    <div class="section-title">
-        <h2>Health &amp; issues</h2>
-        <span class="hint">Needs attention</span>
-    </div>
-    <div class="grid-2">
+    <!-- ═══ HEALTH ═══ -->
+    <div class="view" id="view-health">
+        <div class="view-header"><h2>Health &amp; issues</h2></div>
         <div class="panel">
             <h3>Broken link reports</h3>
             <div class="panel-sub">Reported from the player</div>
-            <div style="max-height:280px;overflow-y:auto;">
-                <table id="brokenLinksTable"><thead><tr><th>Anime</th><th>Ep</th><th>Reports</th><th>Last</th></tr></thead><tbody></tbody></table>
+            <div class="table-scroll">
+                <table id="brokenLinksTable"><thead><tr><th>Anime</th><th>Ep</th><th>#</th><th>Last</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
         <div class="panel">
             <h3>Server / load errors</h3>
             <div class="panel-sub">Failed data fetches by context</div>
-            <div style="max-height:280px;overflow-y:auto;">
-                <table id="serverErrorsTable"><thead><tr><th>Context</th><th>Count</th><th>Last</th></tr></thead><tbody></tbody></table>
+            <div class="table-scroll">
+                <table id="serverErrorsTable"><thead><tr><th>Context</th><th>#</th><th>Last</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
     </div>
 
-    <div class="section-title">
-        <h2>Live activity</h2>
-        <span class="hint" id="feedCount">last 40 events</span>
-    </div>
-    <div class="panel">
-        <div class="feed" id="feed"></div>
+    <!-- ═══ ACTIVITY ═══ -->
+    <div class="view" id="view-activity">
+        <div class="view-header"><h2>Live activity</h2><span style="font-size:10.5px;color:var(--text-dim);font-weight:700;">last 40 events</span></div>
+        <div class="panel" style="padding-bottom:2px;">
+            <div class="feed" id="feed"></div>
+        </div>
     </div>
 
-    <div class="footer-note">AnimeVerse internal dashboard · data from Firebase Realtime Database · not for public access</div>
+</div>
+
+<div class="bottom-nav" id="bottomNav">
+    <button class="bn-item active" data-view="overview"><i class="fas fa-chart-line"></i>Overview</button>
+    <button class="bn-item" data-view="content"><i class="fas fa-photo-film"></i>Content</button>
+    <button class="bn-item" data-view="health"><i class="fas fa-heart-pulse"></i>Health</button>
+    <button class="bn-item" data-view="activity"><i class="fas fa-bolt"></i>Activity</button>
 </div>
 
 <script>
@@ -282,6 +325,10 @@ const ROOT = 'analytics';
 
 let currentRangeDays = 7;
 let charts = {};
+let latestData = {};
+let feedStarted = false;
+const initedViews = new Set();
+
 const EVENT_META = {
     pageview:        { icon:'fa-eye', color:'#8a8a9a', bg:'rgba(138,138,154,0.12)' },
     search:          { icon:'fa-magnifying-glass', color:'#f47521', bg:'rgba(244,117,33,0.12)' },
@@ -311,32 +358,22 @@ function fmtTime(ts){
     if (diff < 86400000) return Math.floor(diff/3600000)+'h ago';
     return new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
 }
-function dayKey(d){
-    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
+function dayKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function lastNDays(n){
     const out = [];
-    for (let i=n-1;i>=0;i--){
-        const d = new Date();
-        d.setDate(d.getDate()-i);
-        out.push(dayKey(d));
-    }
+    for (let i=n-1;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); out.push(dayKey(d)); }
     return out;
 }
-function chartTheme(){
-    Chart.defaults.font.family = "'Nunito', sans-serif";
-    Chart.defaults.color = '#8a8a9a';
-    Chart.defaults.font.weight = 600;
-}
-chartTheme();
+Chart.defaults.font.family = "'Nunito', sans-serif";
+Chart.defaults.color = '#8a8a9a';
+Chart.defaults.font.weight = 600;
 
 function emptyState(canvasId, msg){
     const el = document.getElementById(canvasId);
+    if (!el) return;
     const box = el.closest('.chart-box');
     if (box) box.innerHTML = `<div class="empty-note"><i class="fas fa-chart-simple"></i>${msg}</div>`;
 }
-
-// ───────────────────── KPI CARDS ─────────────────────
 function kpiCard(icon, color, bg, val, label, sub){
     return `<div class="kpi">
         <div class="icn" style="background:${bg};color:${color};"><i class="fas ${icon}"></i></div>
@@ -345,63 +382,49 @@ function kpiCard(icon, color, bg, val, label, sub){
         ${sub ? `<div class="sub">${sub}</div>` : ''}
     </div>`;
 }
-
 function sumCounts(obj){
     if (!obj) return 0;
     return Object.values(obj).reduce((s,v)=> s + (typeof v==='object' ? (v.count||0) : (v||0)), 0);
 }
+function topEntries(obj, limit){
+    if (!obj) return [];
+    return Object.entries(obj)
+        .map(([k,v]) => ({ key:k, count:(typeof v==='object'?(v.count||0):v), title:(v&&v.title)||k, term:(v&&v.term)||k }))
+        .sort((a,b)=>b.count-a.count).slice(0, limit);
+}
 
-async function loadKpis(){
-    const snap = await db.ref(ROOT).once('value');
-    const data = snap.val() || {};
-
+// ───────────────────── KPIs ─────────────────────
+function renderKpis(data){
     const homeViews = (data.pageviews && data.pageviews.home_total) || 0;
     const playerViews = (data.pageviews && data.pageviews.player_total) || 0;
     const searches = sumCounts(data.searches);
     const watchlist = sumCounts(data.watchlist_adds);
     let episodeWatches = 0;
-    if (data.episode_watches){
-        Object.values(data.episode_watches).forEach(slugObj => {
-            Object.values(slugObj).forEach(ep => episodeWatches += (ep.count||0));
-        });
-    }
-    const downloadsCount = (() => {
-        let t = 0;
-        if (data.downloads) Object.values(data.downloads).forEach(slugObj => {
-            Object.values(slugObj).forEach(e => t += (e.count||0));
-        });
-        return t;
-    })();
+    if (data.episode_watches) Object.values(data.episode_watches).forEach(s=>Object.values(s).forEach(e=>episodeWatches+=(e.count||0)));
+    let downloadsCount = 0;
+    if (data.downloads) Object.values(data.downloads).forEach(s=>Object.values(s).forEach(e=>downloadsCount+=(e.count||0)));
     const joinClicks = sumCounts(data.join_clicks);
-    const brokenLinks = (() => {
-        let t = 0;
-        if (data.broken_links) Object.values(data.broken_links).forEach(slugObj => {
-            Object.values(slugObj).forEach(e => t += (e.count||0));
-        });
-        return t;
-    })();
+    let brokenLinks = 0;
+    if (data.broken_links) Object.values(data.broken_links).forEach(s=>Object.values(s).forEach(e=>brokenLinks+=(e.count||0)));
     const serverErrors = sumCounts(data.server_errors);
     const notifGranted = (data.notif_permission && data.notif_permission.granted) || 0;
     const notifDenied = (data.notif_permission && data.notif_permission.denied) || 0;
 
-    const grid = document.getElementById('kpiGrid');
-    grid.innerHTML = [
-        kpiCard('fa-house', '#f47521', 'rgba(244,117,33,0.12)', fmtNum(homeViews), 'Home Pageviews'),
-        kpiCard('fa-play-circle', '#ff6b35', 'rgba(255,107,53,0.12)', fmtNum(playerViews), 'Player Pageviews'),
-        kpiCard('fa-magnifying-glass', '#8b5cf6', 'rgba(139,92,246,0.12)', fmtNum(searches), 'Total Searches'),
+    document.getElementById('kpiGrid').innerHTML = [
+        kpiCard('fa-house', '#f47521', 'rgba(244,117,33,0.12)', fmtNum(homeViews), 'Home Views'),
+        kpiCard('fa-play-circle', '#ff6b35', 'rgba(255,107,53,0.12)', fmtNum(playerViews), 'Player Views'),
+        kpiCard('fa-magnifying-glass', '#8b5cf6', 'rgba(139,92,246,0.12)', fmtNum(searches), 'Searches'),
         kpiCard('fa-heart', '#ff3d68', 'rgba(255,61,104,0.12)', fmtNum(watchlist), 'Watchlist Adds'),
         kpiCard('fa-clapperboard', '#2ecc71', 'rgba(46,204,113,0.12)', fmtNum(episodeWatches), 'Episode Watches'),
         kpiCard('fa-download', '#f47521', 'rgba(244,117,33,0.12)', fmtNum(downloadsCount), 'Downloads'),
         kpiCard('fa-paper-plane', '#229ED9', 'rgba(34,158,217,0.12)', fmtNum(joinClicks), 'Telegram Joins'),
-        kpiCard('fa-triangle-exclamation', '#ff3d68', 'rgba(255,61,104,0.12)', fmtNum(brokenLinks), 'Broken Link Reports'),
+        kpiCard('fa-triangle-exclamation', '#ff3d68', 'rgba(255,61,104,0.12)', fmtNum(brokenLinks), 'Broken Links'),
         kpiCard('fa-bug', '#ff3d68', 'rgba(255,61,104,0.12)', fmtNum(serverErrors), 'Server Errors'),
         kpiCard('fa-bell', '#f47521', 'rgba(244,117,33,0.12)', fmtNum(notifGranted), 'Notifs Allowed', `${fmtNum(notifDenied)} denied`)
     ].join('');
-
-    return data;
 }
 
-// ───────────────────── PAGEVIEWS + VISITORS ─────────────────────
+// ───────────────────── OVERVIEW: traffic charts ─────────────────────
 async function loadTrafficCharts(days){
     const keys = lastNDays(days);
     const snap = await db.ref(ROOT + '/pageviews_daily').once('value');
@@ -410,189 +433,144 @@ async function loadTrafficCharts(days){
     const playerSeries = keys.map(k => (pv[k] && pv[k].player) || 0);
     const labels = keys.map(k => { const d=new Date(k); return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'}); });
 
+    document.querySelector('#pageviewsChart').closest('.panel').querySelector('.chart-box').innerHTML = '<canvas id="pageviewsChart"></canvas>';
     const hasData = homeSeries.some(v=>v>0) || playerSeries.some(v=>v>0);
-    const ctx = document.getElementById('pageviewsChart');
-    if (charts.pv) charts.pv.destroy();
-    if (!hasData){
-        emptyState('pageviewsChart', 'No pageview data for this range yet');
-    } else {
-        charts.pv = new Chart(ctx, {
+    if (!hasData){ emptyState('pageviewsChart', 'No pageview data for this range yet'); }
+    else {
+        if (charts.pv) charts.pv.destroy();
+        charts.pv = new Chart(document.getElementById('pageviewsChart'), {
             type:'line',
             data:{ labels, datasets:[
                 { label:'Home', data:homeSeries, borderColor:'#f47521', backgroundColor:'rgba(244,117,33,0.12)', tension:.35, fill:true, pointRadius:2, borderWidth:2.5 },
                 { label:'Player', data:playerSeries, borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.1)', tension:.35, fill:true, pointRadius:2, borderWidth:2.5 }
             ]},
-            options:{
-                responsive:true, maintainAspectRatio:false,
-                plugins:{ legend:{ position:'top', align:'end', labels:{ boxWidth:8, boxHeight:8, usePointStyle:true, font:{size:11,weight:700} } } },
-                scales:{
-                    x:{ grid:{ display:false }, ticks:{ font:{size:10.5} } },
-                    y:{ grid:{ color:'rgba(255,255,255,0.05)' }, beginAtZero:true, ticks:{ font:{size:10.5}, precision:0 } }
-                }
+            options:{ responsive:true, maintainAspectRatio:false,
+                plugins:{ legend:{ position:'top', align:'end', labels:{ boxWidth:8, boxHeight:8, usePointStyle:true, font:{size:10.5,weight:700} } } },
+                scales:{ x:{ grid:{ display:false }, ticks:{ font:{size:9.5}, maxRotation:0, autoSkip:true, maxTicksLimit:7 } },
+                          y:{ grid:{ color:'rgba(255,255,255,0.05)' }, beginAtZero:true, ticks:{ font:{size:9.5}, precision:0 } } }
             }
         });
     }
 
-    // visitors
     const vsnap = await db.ref(ROOT + '/visitors').once('value');
     const visitors = vsnap.val() || {};
     const visSeries = keys.map(k => visitors[k] ? Object.keys(visitors[k]).length : 0);
-    const vHasData = visSeries.some(v=>v>0);
-    const vctx = document.getElementById('visitorsChart');
-    if (charts.visitors) charts.visitors.destroy();
-    if (!vHasData){
-        emptyState('visitorsChart', 'No visitor data for this range yet');
-    } else {
-        charts.visitors = new Chart(vctx, {
+    document.querySelector('#visitorsChart').closest('.panel').querySelector('.chart-box').innerHTML = '<canvas id="visitorsChart"></canvas>';
+    if (!visSeries.some(v=>v>0)){ emptyState('visitorsChart', 'No visitor data yet'); }
+    else {
+        if (charts.visitors) charts.visitors.destroy();
+        charts.visitors = new Chart(document.getElementById('visitorsChart'), {
             type:'bar',
-            data:{ labels, datasets:[{ data:visSeries, backgroundColor:'#f47521', borderRadius:5, maxBarThickness:26 }] },
-            options:{
-                responsive:true, maintainAspectRatio:false,
-                plugins:{ legend:{ display:false } },
-                scales:{
-                    x:{ grid:{ display:false }, ticks:{ font:{size:10.5} } },
-                    y:{ grid:{ color:'rgba(255,255,255,0.05)' }, beginAtZero:true, ticks:{ font:{size:10.5}, precision:0 } }
-                }
+            data:{ labels, datasets:[{ data:visSeries, backgroundColor:'#f47521', borderRadius:5, maxBarThickness:24 }] },
+            options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } },
+                scales:{ x:{ grid:{ display:false }, ticks:{ font:{size:9.5}, maxRotation:0, autoSkip:true, maxTicksLimit:7 } },
+                          y:{ grid:{ color:'rgba(255,255,255,0.05)' }, beginAtZero:true, ticks:{ font:{size:9.5}, precision:0 } } }
             }
         });
     }
 }
 
-// ───────────────────── TOP ANIME / SEARCHES ─────────────────────
-function topEntries(obj, limit){
-    if (!obj) return [];
-    return Object.entries(obj)
-        .map(([k,v]) => ({ key:k, count:(typeof v==='object'?(v.count||0):v), title:(v&&v.title)||k, term:(v&&v.term)||k }))
-        .sort((a,b)=>b.count-a.count)
-        .slice(0, limit);
-}
-
-async function loadTopCharts(data){
-    // top anime by episode watches
+// ───────────────────── CONTENT tab ─────────────────────
+function loadContentCharts(data){
     const ewByTitle = data.episode_watches_by_title || {};
     const topAnime = topEntries(ewByTitle, 10);
-    const actx = document.getElementById('topAnimeChart');
-    if (charts.topAnime) charts.topAnime.destroy();
-    if (!topAnime.length){
-        emptyState('topAnimeChart', 'No episode-watch data yet');
-    } else {
-        charts.topAnime = new Chart(actx, {
+    document.querySelector('#topAnimeChart').closest('.panel').querySelector('.chart-box').innerHTML = '<canvas id="topAnimeChart"></canvas>';
+    if (!topAnime.length){ emptyState('topAnimeChart', 'No episode-watch data yet'); }
+    else {
+        if (charts.topAnime) charts.topAnime.destroy();
+        charts.topAnime = new Chart(document.getElementById('topAnimeChart'), {
             type:'bar',
-            data:{ labels: topAnime.map(a=>a.title.length>18?a.title.slice(0,18)+'…':a.title),
-                datasets:[{ data: topAnime.map(a=>a.count), backgroundColor:'#8b5cf6', borderRadius:5, maxBarThickness:18 }] },
-            options:{
-                indexAxis:'y', responsive:true, maintainAspectRatio:false,
-                plugins:{ legend:{ display:false } },
-                scales:{
-                    x:{ grid:{ color:'rgba(255,255,255,0.05)' }, beginAtZero:true, ticks:{ precision:0, font:{size:10.5} } },
-                    y:{ grid:{ display:false }, ticks:{ font:{size:10.5} } }
-                }
-            }
+            data:{ labels: topAnime.map(a=>a.title.length>16?a.title.slice(0,16)+'…':a.title),
+                datasets:[{ data: topAnime.map(a=>a.count), backgroundColor:'#8b5cf6', borderRadius:5, maxBarThickness:16 }] },
+            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } },
+                scales:{ x:{ grid:{ color:'rgba(255,255,255,0.05)' }, beginAtZero:true, ticks:{ precision:0, font:{size:9.5} } },
+                          y:{ grid:{ display:false }, ticks:{ font:{size:10} } } } }
         });
     }
 
-    // top searches
     const searches = topEntries(data.searches, 10);
-    const sctx = document.getElementById('topSearchChart');
-    if (charts.topSearch) charts.topSearch.destroy();
-    if (!searches.length){
-        emptyState('topSearchChart', 'No searches logged yet');
-    } else {
-        charts.topSearch = new Chart(sctx, {
+    document.querySelector('#topSearchChart').closest('.panel').querySelector('.chart-box').innerHTML = '<canvas id="topSearchChart"></canvas>';
+    if (!searches.length){ emptyState('topSearchChart', 'No searches logged yet'); }
+    else {
+        if (charts.topSearch) charts.topSearch.destroy();
+        charts.topSearch = new Chart(document.getElementById('topSearchChart'), {
             type:'bar',
-            data:{ labels: searches.map(s=>s.term.length>16?s.term.slice(0,16)+'…':s.term),
-                datasets:[{ data: searches.map(s=>s.count), backgroundColor:'#f47521', borderRadius:5, maxBarThickness:18 }] },
-            options:{
-                indexAxis:'y', responsive:true, maintainAspectRatio:false,
-                plugins:{ legend:{ display:false } },
-                scales:{
-                    x:{ grid:{ color:'rgba(255,255,255,0.05)' }, beginAtZero:true, ticks:{ precision:0, font:{size:10.5} } },
-                    y:{ grid:{ display:false }, ticks:{ font:{size:10.5} } }
-                }
-            }
+            data:{ labels: searches.map(s=>s.term.length>14?s.term.slice(0,14)+'…':s.term),
+                datasets:[{ data: searches.map(s=>s.count), backgroundColor:'#f47521', borderRadius:5, maxBarThickness:16 }] },
+            options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } },
+                scales:{ x:{ grid:{ color:'rgba(255,255,255,0.05)' }, beginAtZero:true, ticks:{ precision:0, font:{size:9.5} } },
+                          y:{ grid:{ display:false }, ticks:{ font:{size:10} } } } }
         });
     }
 
-    // notif permission doughnut
     const notif = data.notif_permission || {};
-    const nctx = document.getElementById('notifChart');
-    if (charts.notif) charts.notif.destroy();
+    document.querySelector('#notifChart').closest('.panel').querySelector('.chart-box').innerHTML = '<canvas id="notifChart"></canvas>';
     const notifVals = [notif.granted||0, notif.denied||0, notif.default||0];
-    if (!notifVals.some(v=>v>0)){
-        emptyState('notifChart', 'No responses yet');
-    } else {
-        charts.notif = new Chart(nctx, {
+    if (!notifVals.some(v=>v>0)){ emptyState('notifChart', 'No responses yet'); }
+    else {
+        if (charts.notif) charts.notif.destroy();
+        charts.notif = new Chart(document.getElementById('notifChart'), {
             type:'doughnut',
             data:{ labels:['Allowed','Denied','Dismissed'], datasets:[{ data:notifVals, backgroundColor:['#2ecc71','#ff3d68','#555566'], borderWidth:0 }] },
             options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
-                plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, boxHeight:8, usePointStyle:true, font:{size:10.5,weight:700} } } } }
+                plugins:{ legend:{ position:'bottom', labels:{ boxWidth:7, boxHeight:7, usePointStyle:true, font:{size:9.5,weight:700} } } } }
         });
     }
 
-    // join clicks doughnut
     const join = data.join_clicks || {};
-    const jctx = document.getElementById('joinChart');
-    if (charts.join) charts.join.destroy();
+    document.querySelector('#joinChart').closest('.panel').querySelector('.chart-box').innerHTML = '<canvas id="joinChart"></canvas>';
     const joinLabels = Object.keys(join);
     const joinVals = Object.values(join).map(v=>typeof v==='object'?(v.count||0):v);
-    if (!joinLabels.length || !joinVals.some(v=>v>0)){
-        emptyState('joinChart', 'No join clicks yet');
-    } else {
-        charts.join = new Chart(jctx, {
+    if (!joinLabels.length || !joinVals.some(v=>v>0)){ emptyState('joinChart', 'No join clicks yet'); }
+    else {
+        if (charts.join) charts.join.destroy();
+        charts.join = new Chart(document.getElementById('joinChart'), {
             type:'doughnut',
             data:{ labels: joinLabels, datasets:[{ data: joinVals, backgroundColor:['#229ED9','#f47521','#8b5cf6','#ff3d68'], borderWidth:0 }] },
             options:{ responsive:true, maintainAspectRatio:false, cutout:'68%',
-                plugins:{ legend:{ position:'bottom', labels:{ boxWidth:8, boxHeight:8, usePointStyle:true, font:{size:10.5,weight:700} } } } }
+                plugins:{ legend:{ position:'bottom', labels:{ boxWidth:7, boxHeight:7, usePointStyle:true, font:{size:9.5,weight:700} } } } }
         });
     }
 
-    // watch time list
     const wd = data.watch_duration || {};
-    const topWatch = Object.entries(wd)
-        .map(([slug,v])=>({ slug, title:v.title||slug, minutes: Math.round((v.totalSeconds||0)/60) }))
+    const topWatch = Object.entries(wd).map(([slug,v])=>({ title:v.title||slug, minutes: Math.round((v.totalSeconds||0)/60) }))
         .sort((a,b)=>b.minutes-a.minutes).slice(0,6);
     const wl = document.getElementById('watchTimeList');
     if (!topWatch.length){
-        wl.innerHTML = `<div class="empty-note" style="height:180px;"><i class="fas fa-clock"></i>No watch-time data yet</div>`;
+        wl.innerHTML = `<div class="empty-note" style="height:150px;"><i class="fas fa-clock"></i>No watch-time data yet</div>`;
     } else {
         const max = topWatch[0].minutes || 1;
         wl.innerHTML = topWatch.map((w,i)=>`
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 2px;">
+            <div style="display:flex;align-items:center;gap:8px;padding:7px 1px;">
                 <span class="rank ${i===0?'top1':''}">${i+1}</span>
                 <div style="flex:1;min-width:0;">
-                    <div style="font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${w.title}</div>
-                    <div class="mini-bar" style="margin-top:5px;"><i style="width:${Math.max(6,(w.minutes/max)*100)}%;"></i></div>
+                    <div style="font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${w.title}</div>
+                    <div class="mini-bar" style="margin-top:4px;"><i style="width:${Math.max(6,(w.minutes/max)*100)}%;"></i></div>
                 </div>
-                <div class="mono" style="font-size:11.5px;color:var(--text-muted);font-weight:700;white-space:nowrap;">${fmtNum(w.minutes)}m</div>
+                <div class="mono" style="font-size:10.5px;color:var(--text-muted);font-weight:700;white-space:nowrap;">${fmtNum(w.minutes)}m</div>
             </div>`).join('');
     }
 }
 
-// ───────────────────── TABLES ─────────────────────
-function renderTables(data){
-    const brokenBody = document.querySelector('#brokenLinksTable tbody');
+// ───────────────────── HEALTH tab ─────────────────────
+function renderHealth(data){
     const rows = [];
-    if (data.broken_links){
-        Object.entries(data.broken_links).forEach(([slug, eps]) => {
-            Object.entries(eps).forEach(([epKey, v]) => {
-                rows.push({ title:v.title||slug, season:v.season, episode:v.episode, count:v.count||0, lastAt:v.lastAt });
-            });
-        });
-    }
+    if (data.broken_links) Object.entries(data.broken_links).forEach(([slug, eps]) => {
+        Object.entries(eps).forEach(([epKey, v]) => rows.push({ title:v.title||slug, season:v.season, episode:v.episode, count:v.count||0, lastAt:v.lastAt }));
+    });
     rows.sort((a,b)=>b.count-a.count);
-    brokenBody.innerHTML = rows.length ? rows.slice(0,15).map(r=>`
-        <tr><td>${r.title}</td><td class="muted">S${r.season ?? '–'} E${r.episode ?? '–'}</td>
+    document.querySelector('#brokenLinksTable tbody').innerHTML = rows.length ? rows.slice(0,20).map(r=>`
+        <tr><td>${r.title}</td><td class="muted">S${r.season ?? '–'}E${r.episode ?? '–'}</td>
         <td><span class="tag red">${r.count}</span></td><td class="muted">${fmtTime(r.lastAt)}</td></tr>`).join('')
-        : `<tr><td colspan="4" class="muted" style="text-align:center;padding:24px;">No broken-link reports 🎉</td></tr>`;
+        : `<tr><td colspan="4" class="muted" style="text-align:center;padding:22px;">No broken-link reports 🎉</td></tr>`;
 
-    const errBody = document.querySelector('#serverErrorsTable tbody');
     const errs = Object.entries(data.server_errors||{}).map(([ctx,v])=>({ ctx, count:v.count||0, lastAt:v.lastAt })).sort((a,b)=>b.count-a.count);
-    errBody.innerHTML = errs.length ? errs.map(e=>`
+    document.querySelector('#serverErrorsTable tbody').innerHTML = errs.length ? errs.map(e=>`
         <tr><td>${e.ctx}</td><td><span class="tag red">${e.count}</span></td><td class="muted">${fmtTime(e.lastAt)}</td></tr>`).join('')
-        : `<tr><td colspan="3" class="muted" style="text-align:center;padding:24px;">No server errors logged 🎉</td></tr>`;
+        : `<tr><td colspan="3" class="muted" style="text-align:center;padding:22px;">No server errors logged 🎉</td></tr>`;
 }
 
-// ───────────────────── LIVE FEED ─────────────────────
+// ───────────────────── ACTIVITY tab ─────────────────────
 function feedLine(ev){
     const meta = EVENT_META[ev.type] || { icon:'fa-circle', color:'#8a8a9a', bg:'rgba(138,138,154,0.12)' };
     let text = '';
@@ -604,67 +582,91 @@ function feedLine(ev){
         case 'episode_watch': text = `Watching <b>${ev.title}</b> S${ev.season} E${ev.episode}`; break;
         case 'watch_duration': text = `Watched ${Math.round((ev.seconds||0)/60)}m of <b>${ev.title}</b>`; break;
         case 'watchlist_add': text = `Added <b>${ev.title}</b> to watchlist`; break;
-        case 'download': text = `Downloaded <b>${ev.title}</b> S${ev.season} E${ev.episode} (${ev.quality||'—'})`; break;
+        case 'download': text = `Downloaded <b>${ev.title}</b> S${ev.season}E${ev.episode} (${ev.quality||'—'})`; break;
         case 'join_click': text = `Clicked Telegram join (${ev.location})`; break;
-        case 'broken_link': text = `Reported broken link — <b>${ev.title}</b> S${ev.season} E${ev.episode}`; break;
+        case 'broken_link': text = `Reported broken link — <b>${ev.title}</b> S${ev.season}E${ev.episode}`; break;
         case 'server_error': text = `Server error — <b>${ev.context}</b>`; break;
         case 'notif_permission': text = `Notification permission: <b>${ev.result}</b>`; break;
         default: text = ev.type;
     }
     return `<div class="feed-item">
         <div class="feed-icn" style="background:${meta.bg};color:${meta.color};"><i class="fas ${meta.icon}"></i></div>
-        <div>
-            <div class="feed-text">${text}</div>
-            <div class="feed-time">${fmtTime(ev.ts)}</div>
-        </div>
+        <div><div class="feed-text">${text}</div><div class="feed-time">${fmtTime(ev.ts)}</div></div>
     </div>`;
 }
-
 function listenFeed(){
+    if (feedStarted) return;
+    feedStarted = true;
     db.ref(ROOT + '/recent_events').orderByChild('ts').limitToLast(40).on('value', snap => {
         const items = [];
         snap.forEach(c => items.push(c.val()));
         items.reverse();
         const feed = document.getElementById('feed');
-        if (!items.length){
-            feed.innerHTML = `<div class="empty-note" style="height:200px;"><i class="fas fa-satellite-dish"></i>Waiting for activity…</div>`;
-            return;
-        }
-        feed.innerHTML = items.map(feedLine).join('');
+        feed.innerHTML = items.length ? items.map(feedLine).join('')
+            : `<div class="empty-note" style="height:180px;"><i class="fas fa-satellite-dish"></i>Waiting for activity…</div>`;
     });
 }
 
 // ───────────────────── ORCHESTRATION ─────────────────────
+async function fetchAllData(){
+    const snap = await db.ref(ROOT).once('value');
+    latestData = snap.val() || {};
+    return latestData;
+}
+function ensureViewLoaded(view){
+    if (initedViews.has(view)) return;
+    initedViews.add(view);
+    if (view==='content') loadContentCharts(latestData);
+    if (view==='health') renderHealth(latestData);
+    if (view==='activity') listenFeed();
+}
 async function refreshAll(){
     const btn = document.getElementById('refreshBtn');
     btn.classList.add('spinning');
     try{
-        const data = await loadKpis();
+        await fetchAllData();
+        renderKpis(latestData);
         await loadTrafficCharts(currentRangeDays);
-        await loadTopCharts(data);
-        renderTables(data);
-    } catch(e){
-        console.error('Dashboard load error', e);
-    } finally {
-        setTimeout(()=>btn.classList.remove('spinning'), 400);
-    }
+        if (initedViews.has('content')) loadContentCharts(latestData);
+        if (initedViews.has('health')) renderHealth(latestData);
+    } catch(e){ console.error('Dashboard load error', e); }
+    finally { setTimeout(()=>btn.classList.remove('spinning'), 400); }
 }
 
+function switchView(view){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+view).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+    document.querySelectorAll('.bn-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+    ensureViewLoaded(view);
+    Object.values(charts).forEach(c => { if (c) setTimeout(()=>c.resize(), 50); });
+}
+
+document.querySelectorAll('.tab-btn, .bn-item').forEach(btn=>{
+    btn.addEventListener('click', ()=> switchView(btn.dataset.view));
+});
 document.getElementById('rangeGroup').addEventListener('click', (e)=>{
     const btn = e.target.closest('.range-btn');
     if (!btn) return;
     document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     currentRangeDays = parseInt(btn.dataset.range, 10);
-    document.getElementById('rangeLabel').textContent =
-        currentRangeDays===1 ? 'Today' : `Last ${currentRangeDays} days`;
     loadTrafficCharts(currentRangeDays);
 });
 document.getElementById('refreshBtn').addEventListener('click', refreshAll);
 
-refreshAll();
-listenFeed();
-setInterval(refreshAll, 45000);
+(async function init(){
+    await fetchAllData();
+    renderKpis(latestData);
+    await loadTrafficCharts(currentRangeDays);
+    setInterval(async ()=>{
+        await fetchAllData();
+        renderKpis(latestData);
+        loadTrafficCharts(currentRangeDays);
+        if (initedViews.has('content')) loadContentCharts(latestData);
+        if (initedViews.has('health')) renderHealth(latestData);
+    }, 45000);
+})();
 </script>
 </body>
 </html>
