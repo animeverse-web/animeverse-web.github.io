@@ -72,6 +72,10 @@
         });
     }
 
+    function dailyInc(metric, amount) {
+        inc(ROOT + '/daily/' + todayKey() + '/' + safeKey(metric), amount);
+    }
+
     function logEvent(type, data) {
         var d = db();
         if (!d) return;
@@ -100,30 +104,35 @@
             inc(ROOT + '/pageviews_daily/' + day + '/' + page);
             var d = db();
             if (d) d.ref(ROOT + '/visitors/' + day + '/' + getClientId()).set(Date.now());
+            dailyInc('pageviews_' + page);
             logEvent('pageview', { page: page });
         },
 
         trackJoinClick: function (location) {
             location = safeKey(location);
             inc(ROOT + '/join_clicks/' + location);
+            dailyInc('join_clicks');
             logEvent('join_click', { location: location });
         },
 
         trackServerError: function (context) {
             context = safeKey(context);
             bump(ROOT + '/server_errors/' + context);
+            dailyInc('server_errors');
             logEvent('server_error', { context: context });
         },
 
         trackModalOpen: function (slug, title, genres) {
             slug = safeKey(slug);
             bump(ROOT + '/modal_opens/' + slug, { title: title || slug, genres: genres || '' });
+            dailyInc('modal_opens');
             logEvent('modal_open', { slug: slug, title: title || slug });
         },
 
         trackWatchlistAdd: function (slug, title) {
             slug = safeKey(slug);
             bump(ROOT + '/watchlist_adds/' + slug, { title: title || slug });
+            dailyInc('watchlist_adds');
             logEvent('watchlist_add', { slug: slug, title: title || slug });
         },
 
@@ -131,18 +140,21 @@
             if (!term) return;
             var key = safeKey(String(term).toLowerCase());
             bump(ROOT + '/searches/' + key, { term: term });
+            dailyInc('searches');
             logEvent('search', { term: term });
         },
 
         trackNotifPermission: function (result) {
             result = safeKey(result);
             inc(ROOT + '/notif_permission/' + result);
+            dailyInc('notif_' + result);
             logEvent('notif_permission', { result: result });
         },
 
         trackAnimeView: function (slug, title) {
             slug = safeKey(slug);
             bump(ROOT + '/anime_views/' + slug, { title: title || slug });
+            dailyInc('anime_views');
             logEvent('anime_view', { slug: slug, title: title || slug });
         },
 
@@ -152,6 +164,7 @@
             bump(ROOT + '/broken_links/' + slug + '/' + epKey, {
                 title: title || slug, season: season, episode: episode
             });
+            dailyInc('broken_links');
             logEvent('broken_link', { slug: slug, title: title || slug, season: season, episode: episode });
         },
 
@@ -162,23 +175,40 @@
                 title: title || slug, season: season, episode: episode
             });
             bump(ROOT + '/episode_watches_by_title/' + slug, { title: title || slug });
+            dailyInc('episode_watches');
             logEvent('episode_watch', { slug: slug, title: title || slug, season: season, episode: episode });
         },
 
+        // Stored per-episode (so "top watched" can show S/E, not just the anime) AND
+        // rolled up per-anime under /total for quick leaderboards.
         trackWatchDuration: function (slug, title, season, episode, seconds) {
             slug = safeKey(slug);
             seconds = Math.max(0, Math.round(Number(seconds) || 0));
+            var epKey = 's' + safeKey(season) + 'e' + safeKey(episode);
             var d = db();
-            if (!d) return;
-            var ref = d.ref(ROOT + '/watch_duration/' + slug);
-            ref.transaction(function (cur) {
-                cur = cur || { title: title || slug, totalSeconds: 0, sessions: 0 };
-                cur.title = title || slug;
-                cur.totalSeconds = (cur.totalSeconds || 0) + seconds;
-                cur.sessions = (cur.sessions || 0) + 1;
-                cur.lastAt = Date.now();
-                return cur;
-            });
+            if (d) {
+                var totalRef = d.ref(ROOT + '/watch_duration/' + slug + '/total');
+                totalRef.transaction(function (cur) {
+                    cur = cur || { title: title || slug, totalSeconds: 0, sessions: 0 };
+                    cur.title = title || slug;
+                    cur.totalSeconds = (cur.totalSeconds || 0) + seconds;
+                    cur.sessions = (cur.sessions || 0) + 1;
+                    cur.lastAt = Date.now();
+                    return cur;
+                });
+                var epRef = d.ref(ROOT + '/watch_duration/' + slug + '/episodes/' + epKey);
+                epRef.transaction(function (cur) {
+                    cur = cur || { title: title || slug, season: season, episode: episode, totalSeconds: 0, sessions: 0 };
+                    cur.title = title || slug;
+                    cur.season = season;
+                    cur.episode = episode;
+                    cur.totalSeconds = (cur.totalSeconds || 0) + seconds;
+                    cur.sessions = (cur.sessions || 0) + 1;
+                    cur.lastAt = Date.now();
+                    return cur;
+                });
+            }
+            dailyInc('watch_seconds', seconds);
             logEvent('watch_duration', { slug: slug, title: title || slug, season: season, episode: episode, seconds: seconds });
         },
 
@@ -188,6 +218,7 @@
             bump(ROOT + '/downloads/' + slug + '/' + key, {
                 title: title || slug, season: season, episode: episode, quality: quality || ''
             });
+            dailyInc('downloads');
             logEvent('download', { slug: slug, title: title || slug, season: season, episode: episode, quality: quality });
         }
     };
