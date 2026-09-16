@@ -76,6 +76,23 @@
         inc(ROOT + '/daily/' + todayKey() + '/' + safeKey(metric), amount);
     }
 
+    // Per-day item breakdown (which anime/search/quality — not just a daily total),
+    // so the dashboard's Content tab can be filtered to a specific day or range.
+    function dailyBump(subpath, extra) {
+        var d = db();
+        if (!d) return;
+        var ref = d.ref(ROOT + '/daily/' + todayKey() + '/' + subpath);
+        ref.transaction(function (cur) {
+            cur = cur || { count: 0 };
+            cur.count = (cur.count || 0) + 1;
+            cur.lastAt = Date.now();
+            if (extra) {
+                Object.keys(extra).forEach(function (k) { cur[k] = extra[k]; });
+            }
+            return cur;
+        });
+    }
+
     function logEvent(type, data) {
         var d = db();
         if (!d) return;
@@ -112,6 +129,7 @@
             location = safeKey(location);
             inc(ROOT + '/join_clicks/' + location);
             dailyInc('join_clicks');
+            dailyBump('join_clicks_by_loc/' + location);
             logEvent('join_click', { location: location });
         },
 
@@ -141,6 +159,7 @@
             var key = safeKey(String(term).toLowerCase());
             bump(ROOT + '/searches/' + key, { term: term });
             dailyInc('searches');
+            dailyBump('searches/' + key, { term: term });
             logEvent('search', { term: term });
         },
 
@@ -176,6 +195,7 @@
             });
             bump(ROOT + '/episode_watches_by_title/' + slug, { title: title || slug });
             dailyInc('episode_watches');
+            dailyBump('episode_watches_by_title/' + slug, { title: title || slug });
             logEvent('episode_watch', { slug: slug, title: title || slug, season: season, episode: episode });
         },
 
@@ -207,6 +227,17 @@
                     cur.lastAt = Date.now();
                     return cur;
                 });
+                // same episode's seconds, scoped to today's date bucket for the Content-tab date filter
+                var dailyEpRef = d.ref(ROOT + '/daily/' + todayKey() + '/watch_duration/' + slug + '/' + epKey);
+                dailyEpRef.transaction(function (cur) {
+                    cur = cur || { title: title || slug, season: season, episode: episode, totalSeconds: 0 };
+                    cur.title = title || slug;
+                    cur.season = season;
+                    cur.episode = episode;
+                    cur.totalSeconds = (cur.totalSeconds || 0) + seconds;
+                    cur.lastAt = Date.now();
+                    return cur;
+                });
             }
             dailyInc('watch_seconds', seconds);
             logEvent('watch_duration', { slug: slug, title: title || slug, season: season, episode: episode, seconds: seconds });
@@ -219,6 +250,16 @@
                 title: title || slug, season: season, episode: episode, quality: quality || ''
             });
             dailyInc('downloads');
+            var d2 = db();
+            if (d2) {
+                var dref = d2.ref(ROOT + '/daily/' + todayKey() + '/downloads/' + slug + '/' + key);
+                dref.transaction(function (cur) {
+                    cur = cur || { title: title || slug, season: season, episode: episode, quality: quality || '', count: 0 };
+                    cur.count = (cur.count || 0) + 1;
+                    cur.lastAt = Date.now();
+                    return cur;
+                });
+            }
             logEvent('download', { slug: slug, title: title || slug, season: season, episode: episode, quality: quality });
         }
     };
