@@ -62,7 +62,7 @@
     <link rel="icon" type="image/png" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
     <link rel="apple-touch-icon" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
     
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
@@ -71,25 +71,29 @@
 
     <style>
         :root {
-            --bg: #0a0a0f;
-            --surface: #13131a;
+            --bg: #0b0b0f;
+            --surface: #15151c;
             --surface2: #1c1c26;
             --surface3: #23232f;
-            --accent: #f47521;
-            --accent2: #ff6b35;
-            --accent-hot: #ff3d68;
-            --accent-violet: #8b5cf6;
-            --gradient-brand: linear-gradient(120deg, #f47521 0%, #ff5a3d 50%, #ff3d68 100%);
-            --text: #ffffff;
-            --text-muted: #8a8a9a;
-            --text-dim: #555566;
-            --border: rgba(255,255,255,0.07);
-            --border-hover: rgba(244,117,33,0.4);
-            --card-radius: 10px;
+            --accent: #ff2e43;
+            --accent2: #ff5a3d;
+            --accent-hot: #ff2e43;
+            --accent-violet: #29f1c3;
+            --yellow: #ffd23f;
+            --paper: #ebe7db;
+            --red-dark: #c4111f;
+            --gradient-brand: linear-gradient(120deg, #ff2e43 0%, #c4111f 50%, #ff2e43 100%);
+            --text: #f3f1ea;
+            --text-muted: #9b98a3;
+            --text-dim: #55555f;
+            --border: rgba(255,255,255,0.08);
+            --border-hover: rgba(255,46,67,0.4);
+            --card-radius: 2px;
             --nav-h: 60px;
-            --glow-accent: 0 6px 24px rgba(244,58,73,0.28);
+            --glow-accent: 0 6px 24px rgba(255,46,67,0.28);
             --shadow-card: 0 14px 34px rgba(0,0,0,0.5);
             --ease: cubic-bezier(.22,1,.36,1);
+            --font-display: 'Rajdhani', 'Poppins', sans-serif;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -98,11 +102,11 @@
 
         body {
             background:
-                radial-gradient(1100px 600px at 12% -8%, rgba(244,117,33,0.10), transparent 60%),
-                radial-gradient(900px 560px at 108% 8%, rgba(255,61,104,0.08), transparent 55%),
+                radial-gradient(1100px 600px at 12% -8%, rgba(255,46,67,0.10), transparent 60%),
+                radial-gradient(900px 560px at 108% 8%, rgba(41,241,195,0.05), transparent 55%),
                 var(--bg);
             color: var(--text);
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Poppins', sans-serif;
             -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
@@ -125,7 +129,7 @@
         /* ─── FOOTER ─── */
         .site-footer {
             margin-top: 24px;
-            padding: 22px 16px 24px;
+            padding: 30px 16px 24px;
             border-top: 1px solid var(--border);
             background: var(--surface);
             position: relative;
@@ -134,16 +138,18 @@
             content: '';
             position: absolute;
             top: -1px; left: 0; right: 0;
-            height: 1px;
+            height: 2px;
             background: var(--gradient-brand);
-            opacity: 0.5;
+            opacity: 0.8;
         }
         .site-footer .footer-brand {
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: -0.3px;
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
             color: var(--text);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .site-footer .footer-brand span {
             background: var(--gradient-brand);
@@ -164,9 +170,10 @@
             gap: 8px;
             margin-top: 14px;
             padding: 10px 12px;
-            background: rgba(244,117,33,0.1);
-            border: 1px solid rgba(244,117,33,0.3);
-            border-radius: var(--card-radius);
+            background: rgba(255,46,67,0.08);
+            border: 1px solid rgba(255,46,67,0.25);
+            border-left: 3px solid var(--accent);
+            border-radius: 0;
         }
         .site-footer .footer-note i {
             color: var(--accent);
@@ -183,20 +190,25 @@
         .site-footer .footer-links {
             display: flex;
             flex-wrap: wrap;
-            gap: 14px;
-            margin-top: 16px;
+            gap: 18px;
+            margin-top: 18px;
         }
         .site-footer .footer-links a {
-            font-size: 11px;
-            font-weight: 800;
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
             color: var(--text-muted);
             text-decoration: none;
-            transition: color 0.2s var(--ease);
+            border-bottom: 1px solid transparent;
+            padding-bottom: 2px;
+            transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
         }
         .site-footer .footer-links a:hover,
-        .site-footer .footer-links a:active { color: var(--accent); }
+        .site-footer .footer-links a:active { color: var(--accent); border-color: var(--accent); }
         .site-footer .footer-bottom {
-            margin-top: 16px;
+            margin-top: 18px;
             padding-top: 14px;
             border-top: 1px solid var(--border);
             font-size: 9.5px;
@@ -214,22 +226,23 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             height: 56px;
-            background: rgba(10,10,15,0.96);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: linear-gradient(to bottom, rgba(11,11,15,0.85) 0%, rgba(11,11,15,0.35) 65%, rgba(11,11,15,0) 100%);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
             z-index: 2000;
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 1px 0 rgba(244,117,33,0.12), 0 12px 24px -12px rgba(0,0,0,0.6);
+            border-bottom: none;
         }
         .cr-logo {
-            font-size: 22px;
-            font-weight: 900;
-            letter-spacing: -0.5px;
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
             color: var(--text);
+            text-transform: uppercase;
         }
         .cr-logo span {
             background: var(--gradient-brand);
@@ -240,50 +253,52 @@
         .cr-header-actions { display: flex; gap: 8px; align-items: center; }
         .icon-btn {
             width: 38px; height: 38px;
-            border-radius: 50%;
-            background: var(--surface2);
-            border: 1px solid var(--border);
+            border-radius: 0;
+            background: rgba(11,11,15,0.35);
+            border: 1.5px solid rgba(255,255,255,0.18);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             transition: background 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.2s var(--ease);
-            color: #ccc;
+            color: #eee;
             font-size: 14px;
         }
         .icon-btn:active { background: var(--surface); transform: scale(0.93); }
         @media (hover: hover) and (pointer: fine) {
-            .icon-btn:hover { border-color: var(--border-hover); color: var(--text); transform: translateY(-1px); }
+            .icon-btn:hover { border-color: var(--accent); color: var(--text); transform: translateY(-1px); }
         }
 
         /* ─── CATEGORY TABS ─── */
         .category-tabs {
             position: fixed;
             top: 56px; left: 0; right: 0;
-            background: rgba(10,10,15,0.97);
-            backdrop-filter: blur(20px);
+            background: linear-gradient(to bottom, rgba(11,11,15,0.55) 0%, rgba(11,11,15,0.1) 100%);
+            backdrop-filter: blur(3px);
             z-index: 1800;
             display: flex;
             gap: 0;
             overflow-x: auto;
             padding: 0 12px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: none;
         }
         .category-tabs::-webkit-scrollbar { display: none; }
         .tab-item {
             flex-shrink: 0;
             padding: 12px 14px;
-            font-size: 12px;
-            font-weight: 800;
+            font-family: var(--font-display);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
             color: var(--text-muted);
             cursor: pointer;
-            border-bottom: 2px solid transparent;
+            border-bottom: 3px solid transparent;
             white-space: nowrap;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.7);
             transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
         }
         .tab-item.active {
             color: var(--text);
-            border-bottom: 2px solid;
-            border-image: var(--gradient-brand) 1;
+            border-bottom: 3px solid var(--accent);
         }
         @media (hover: hover) and (pointer: fine) {
             .tab-item:not(.active):hover { color: #ccc; }
@@ -292,109 +307,126 @@
         /* ─── GENRE CHIPS ─── */
         .genre-chip {
             flex-shrink: 0;
-            padding: 7px 14px;
-            font-size: 11px;
-            font-weight: 800;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 700;
             color: var(--text-muted);
-            background: var(--surface2);
-            border: 1px solid var(--border);
-            border-radius: 20px;
+            background: transparent;
+            border: 1.5px solid var(--border);
+            border-radius: 0;
             cursor: pointer;
             white-space: nowrap;
             transition: all 0.2s var(--ease);
         }
         .genre-chip.active {
-            color: white;
-            background: var(--gradient-brand);
-            border-color: transparent;
-            box-shadow: var(--glow-accent);
+            color: var(--bg);
+            background: var(--text);
+            border-color: var(--text);
+            box-shadow: none;
         }
         @media (hover: hover) and (pointer: fine) {
-            .genre-chip:not(.active):hover { color: #ddd; border-color: var(--border-hover); }
+            .genre-chip:not(.active):hover { color: var(--text); border-color: var(--text); }
         }
 
         /* ─── MAIN CONTENT ─── */
         main {
-            margin-top: 96px; /* header + tabs */
+            margin-top: 104px; /* header + tabs — hero ab inke peeche hide nahi hoga */
         }
 
-        /* ─── HERO BANNER ─── */
-        .hero-section {
+        /* ─── FEATURED CAROUSEL (rebuilt from scratch) ─── */
+        .ft-hero {
             position: relative;
             width: 100%;
-            aspect-ratio: 16/9;
-            max-height: 220px;
+            aspect-ratio: 16 / 9;
+            min-height: 200px;
+            max-height: 46vh;
             overflow: hidden;
             background: var(--surface);
         }
-        .hero-img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-            display: block;
-            animation: heroKenBurns 16s ease-in-out infinite alternate, imgReveal .5s var(--ease);
-            will-change: transform;
-        }
-        @keyframes heroKenBurns {
-            from { transform: scale(1); }
-            to   { transform: scale(1.08); }
-        }
-        .hero-overlay {
+        .ft-track {
             position: absolute;
             inset: 0;
-            background: linear-gradient(
-                to bottom,
-                rgba(10,10,15,0.1) 0%,
-                rgba(10,10,15,0.25) 40%,
-                rgba(10,10,15,0.9) 82%,
-                #0a0a0f 100%
-            );
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 14px 16px;
         }
-        .hero-badge {
+        .ft-slide-img {
+            position: absolute;
+            inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: center;
+            opacity: 0;
+            transform: scale(1.04);
+            transition: opacity 0.6s var(--ease), transform 8s linear;
+            pointer-events: none;
+        }
+        .ft-slide-img.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .ft-gradient {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(11,11,15,0.55) 0%, rgba(11,11,15,0.05) 22%, rgba(11,11,15,0.15) 45%, rgba(11,11,15,0.92) 82%, var(--bg) 100%),
+                linear-gradient(90deg, rgba(11,11,15,0.55) 0%, transparent 35%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .ft-badge {
+            position: absolute;
+            top: 16px; left: 16px;
+            z-index: 2;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            background: var(--gradient-brand);
+            gap: 6px;
+            background: var(--accent);
             color: white;
-            font-size: 9px;
-            font-weight: 900;
-            letter-spacing: 1px;
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            padding: 4px 9px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-            width: fit-content;
+            padding: 5px 12px;
             box-shadow: var(--glow-accent);
         }
-        .hero-title {
-            font-size: 19px;
-            font-weight: 900;
-            line-height: 1.15;
-            margin-bottom: 5px;
-            letter-spacing: -0.3px;
-            text-shadow: 0 2px 16px rgba(0,0,0,0.6);
+        .ft-content {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            z-index: 2;
+            padding: 16px 16px 14px;
         }
-        .hero-meta {
+        .ft-title {
+            font-family: var(--font-display);
+            font-size: clamp(20px, 6vw, 34px);
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1.05;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.9);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .ft-meta {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
-        .hero-meta span {
-            font-size: 10px;
+        .ft-meta span {
+            font-size: 11px;
             font-weight: 700;
             color: var(--text-muted);
+            text-shadow: 0 1px 4px rgba(0,0,0,0.85);
         }
-        .hero-meta .rating {
+        .ft-meta .ft-rating {
             display: flex; align-items: center; gap: 3px;
-            color: #ffd700;
+            color: var(--accent-violet);
             font-weight: 800;
         }
-        .hero-actions { display: flex; gap: 8px; }
-        .btn-play {
+        .ft-actions { display: flex; gap: 10px; }
+        .ft-play {
             flex: 1;
             background: var(--gradient-brand);
             background-size: 160% 100%;
@@ -410,11 +442,11 @@
             box-shadow: var(--glow-accent);
             transition: transform 0.2s var(--ease), background-position 0.4s var(--ease), box-shadow 0.2s var(--ease);
         }
-        .btn-play:active { filter: brightness(0.9); transform: scale(0.97); }
+        .ft-play:active { filter: brightness(0.9); transform: scale(0.97); }
         @media (hover: hover) and (pointer: fine) {
-            .btn-play:hover { background-position: 100% 0; box-shadow: 0 8px 30px rgba(244,58,73,0.4); }
+            .ft-play:hover { background-position: 100% 0; box-shadow: 0 8px 30px rgba(244,58,73,0.4); }
         }
-        .btn-info {
+        .ft-info {
             width: 40px;
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.16);
@@ -426,23 +458,24 @@
             backdrop-filter: blur(8px);
             transition: background 0.2s var(--ease);
         }
-        .btn-info:active { background: rgba(255,255,255,0.2); }
+        .ft-info:active { background: rgba(255,255,255,0.2); }
         @media (hover: hover) and (pointer: fine) {
-            .btn-info:hover { background: rgba(255,255,255,0.18); }
+            .ft-info:hover { background: rgba(255,255,255,0.18); }
         }
 
-        /* ─── HERO DOTS ─── */
-        .hero-dots {
+        /* ─── FEATURED DOTS ─── */
+        .ft-dots {
             display: flex; justify-content: center; gap: 5px;
             padding: 8px 0 4px;
         }
-        .hero-dot {
+        .ft-dot {
             width: 5px; height: 5px;
             border-radius: 50%;
             background: var(--text-dim);
+            cursor: pointer;
             transition: all 0.3s;
         }
-        .hero-dot.active {
+        .ft-dot.active {
             width: 18px;
             border-radius: 3px;
             background: var(--gradient-brand);
@@ -459,35 +492,40 @@
             margin-bottom: 10px;
         }
         .section-title {
-            font-size: 14px;
-            font-weight: 900;
-            letter-spacing: 0.2px;
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
             display: flex;
-            align-items: center;
-            gap: 7px;
+            align-items: baseline;
+            gap: 10px;
         }
-        .section-title::before {
-            content: '';
-            display: block;
-            width: 3px; height: 15px;
-            background: var(--gradient-brand);
-            border-radius: 2px;
-            box-shadow: 0 0 6px rgba(244,58,73,0.4);
+        .section-title .jp {
+            font-family: 'Poppins', sans-serif;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-dim);
+            text-transform: none;
+            letter-spacing: 0;
         }
         .see-all {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--accent);
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: var(--text-muted);
             cursor: pointer;
-            letter-spacing: 0.3px;
-            transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+            transition: color 0.2s var(--ease);
             display: inline-flex;
             align-items: center;
             gap: 3px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
         }
-        .see-all::after { content: '\f105'; font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 9px; }
         @media (hover: hover) and (pointer: fine) {
-            .see-all:hover { color: var(--accent-hot); transform: translateX(2px); }
+            .see-all:hover { color: var(--accent); border-color: var(--accent); }
         }
 
         /* ─── HORIZONTAL SCROLL ROW ─── */
@@ -512,8 +550,9 @@
             border-radius: var(--card-radius);
             overflow: hidden;
             background: var(--surface2);
+            border: 1px solid var(--border);
             box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
         }
         .p-card img {
             width: 100%; height: 100%;
@@ -522,30 +561,61 @@
             transition: transform 0.4s var(--ease);
         }
         @media (hover: hover) and (pointer: fine) {
-            .p-card:hover .p-card-img-wrap { transform: translateY(-5px); box-shadow: var(--shadow-card), var(--glow-accent); will-change: transform; }
+            .p-card:hover .p-card-img-wrap { transform: translateY(-5px); border-color: var(--accent); box-shadow: var(--shadow-card), var(--glow-accent); will-change: transform; }
             .p-card:hover img { transform: scale(1.08); }
             .p-card:hover .p-card-title { color: var(--accent); }
         }
         .p-card-badge {
             position: absolute;
-            bottom: 5px; left: 5px;
-            background: rgba(0,0,0,0.75);
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(4px);
-            padding: 2px 5px;
-            border-radius: 3px;
+            bottom: 0; left: 0;
+            background: rgba(11,11,15,0.85);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 3px 7px;
+            border-radius: 0;
             font-size: 8.5px;
             font-weight: 800;
             color: white;
             display: flex; align-items: center; gap: 3px;
         }
-        .p-card-badge i { color: #ffd700; font-size: 7px; }
+        .p-card-badge i { color: var(--yellow); font-size: 7px; }
+        /* ─── TOP-LEFT TAGS (NEW / DUBBED) — stacked so dono ek saath bhi dikh sakein ─── */
+        .p-card-tags {
+            position: absolute;
+            top: 5px; left: 5px;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 3px;
+        }
+        .p-tag {
+            font-size: 7.5px;
+            font-weight: 900;
+            padding: 2px 5px;
+            border-radius: 3px;
+            letter-spacing: 0.3px;
+            color: white;
+            white-space: nowrap;
+        }
+        .p-tag-new { background: var(--accent); }
+        .p-tag-dub { background: #1db954; }
+        .l-dub-tag {
+            position: absolute;
+            top: 0; left: 0;
+            background: #1db954;
+            color: white;
+            font-size: 8px;
+            font-weight: 900;
+            padding: 3px 6px;
+            letter-spacing: 0.3px;
+        }
         .upcoming-date-badge {
             position: absolute;
-            bottom: 5px; left: 5px; right: 5px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            padding: 3px 5px;
-            border-radius: 3px;
+            bottom: 0; left: 0; right: 0;
+            background: var(--accent);
+            padding: 4px 5px;
+            border-radius: 0;
             font-size: 8px;
             font-weight: 800;
             color: white;
@@ -558,14 +628,14 @@
         .upcoming-date-badge i { font-size: 7px; }
         .jp-only-tag {
             position: absolute;
-            top: 5px; left: 5px; right: 5px;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: #ffb84d;
+            top: 0; left: 0; right: 0;
+            background: rgba(11,11,15,0.85);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            color: var(--yellow);
             font-size: 7px;
             font-weight: 900;
-            padding: 2px 4px;
-            border-radius: 3px;
+            padding: 3px 4px;
+            border-radius: 0;
             text-align: center;
             letter-spacing: 0.2px;
             display: flex; align-items: center; justify-content: center; gap: 3px;
@@ -575,15 +645,15 @@
             position: absolute;
             top: 5px; right: 5px;
             width: 26px; height: 26px;
-            border-radius: 4px;
-            background: rgba(0,0,0,0.6);
+            border-radius: 0;
+            background: rgba(11,11,15,0.6);
             backdrop-filter: blur(4px);
             display: flex; align-items: center; justify-content: center;
             font-size: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.15s var(--ease), background 0.15s var(--ease);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: transform 0.15s var(--ease), background 0.15s var(--ease), border-color 0.15s var(--ease);
         }
-        .p-card-fav:active { transform: scale(0.85); background: rgba(0,0,0,0.8); }
+        .p-card-fav:active { transform: scale(0.85); background: rgba(0,0,0,0.8); border-color: var(--accent); }
         .p-card-title {
             font-size: 10px;
             font-weight: 700;
@@ -612,8 +682,9 @@
             border-radius: var(--card-radius);
             overflow: hidden;
             background: var(--surface2);
+            border: 1px solid var(--border);
             box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
         }
         .l-card img {
             width: 100%; height: 100%;
@@ -621,7 +692,7 @@
             transition: transform 0.4s var(--ease);
         }
         @media (hover: hover) and (pointer: fine) {
-            .l-card:hover .l-card-img-wrap { transform: translateY(-4px); box-shadow: var(--shadow-card), var(--glow-accent); }
+            .l-card:hover .l-card-img-wrap { transform: translateY(-4px); border-color: var(--accent); box-shadow: var(--shadow-card), var(--glow-accent); }
             .l-card:hover img { transform: scale(1.08); }
         }
         .l-card-overlay {
@@ -642,26 +713,27 @@
         }
         .l-ep-badge {
             position: absolute;
-            top: 5px; right: 5px;
-            background: var(--gradient-brand);
+            top: 0; right: 0;
+            background: var(--accent);
             color: white;
             font-size: 8px;
             font-weight: 900;
-            padding: 2px 5px;
-            border-radius: 3px;
-            box-shadow: var(--glow-accent);
+            padding: 3px 6px;
+            border-radius: 0;
+            box-shadow: none;
         }
         .cw-play-btn {
             position: absolute; top: 6px; right: 6px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(11,11,15,0.7);
             backdrop-filter: blur(4px);
-            border-radius: 50%;
+            border-radius: 0;
             width: 28px; height: 28px;
             display: flex; align-items: center; justify-content: center;
-            transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: transform 0.2s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease);
         }
         @media (hover: hover) and (pointer: fine) {
-            .l-card:hover .cw-play-btn { background: var(--gradient-brand); transform: scale(1.1); }
+            .l-card:hover .cw-play-btn { background: var(--accent); border-color: var(--accent); transform: scale(1.1); }
         }
 
         /* ─── WATCHLIST STORIES ROW ─── */
@@ -742,7 +814,7 @@
             overflow: hidden;
             transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
         }
-        .search-input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(244,117,33,0.12); }
+        .search-input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,46,67,0.12); }
         #searchInput {
             flex: 1;
             background: transparent;
@@ -750,7 +822,7 @@
             outline: none;
             color: white;
             font-size: 14px;
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-weight: 600;
             padding: 11px 14px;
         }
@@ -818,10 +890,10 @@
             bottom: 0; left: 0; right: 0;
             height: calc(var(--nav-h) + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
-            background: rgba(13,13,20,0.98);
+            background: rgba(11,11,15,0.97);
             backdrop-filter: blur(20px);
             border-top: 1px solid var(--border);
-            box-shadow: 0 -1px 0 rgba(244,117,33,0.1), 0 -12px 24px -12px rgba(0,0,0,0.6);
+            box-shadow: 0 -1px 0 rgba(255,46,67,0.18), 0 -12px 24px -12px rgba(0,0,0,0.6);
             display: flex;
             align-items: flex-start;
             justify-content: space-around;
@@ -832,16 +904,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 4px;
             cursor: pointer;
-            padding: 4px 12px;
-            border-radius: 12px;
+            padding: 4px 12px 2px;
+            border-radius: 0;
+            border-bottom: 2px solid transparent;
             color: var(--text-dim);
             text-decoration: none;
-            transition: color 0.2s var(--ease), background 0.2s var(--ease), transform 0.15s var(--ease);
+            transition: color 0.2s var(--ease), border-color 0.2s var(--ease), transform 0.15s var(--ease);
             min-width: 50px;
         }
-        .nav-item.active { color: var(--accent); background: rgba(244,117,33,0.1); }
+        .nav-item.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
         .nav-item i { font-size: 20px; }
         .nav-item span {
             font-size: 9px;
@@ -872,7 +945,8 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-bottom: none;
-            border-radius: 18px 18px 0 0;
+            border-top: 3px solid var(--accent);
+            border-radius: 0;
             overflow: hidden;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
@@ -884,7 +958,7 @@
         .modal-handle {
             width: 36px; height: 4px;
             background: rgba(255,255,255,0.2);
-            border-radius: 2px;
+            border-radius: 0;
             margin: 12px auto 0;
         }
         .modal-banner-wrap {
@@ -903,36 +977,39 @@
             position: absolute;
             top: 12px; right: 12px;
             width: 32px; height: 32px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.6);
+            border-radius: 0;
+            background: rgba(11,11,15,0.7);
             backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.18);
             display: flex; align-items: center; justify-content: center;
             color: white; font-size: 13px;
             cursor: pointer;
-            transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+            transition: background 0.2s var(--ease), transform 0.2s var(--ease), border-color 0.2s var(--ease);
         }
         .modal-close:active { transform: scale(0.9); }
         @media (hover: hover) and (pointer: fine) {
-            .modal-close:hover { background: rgba(0,0,0,0.8); }
+            .modal-close:hover { background: rgba(0,0,0,0.85); border-color: var(--accent); }
         }
         .modal-body { padding: 0 16px 24px; margin-top: -20px; position: relative; }
         .modal-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
         .modal-tag {
             font-size: 9px;
             font-weight: 900;
-            padding: 3px 7px;
-            border-radius: 3px;
+            padding: 4px 9px;
+            border-radius: 0;
             letter-spacing: 0.5px;
             text-transform: uppercase;
+            font-family: var(--font-display);
         }
-        .tag-accent { background: var(--gradient-brand); color: white; box-shadow: var(--glow-accent); }
-        .tag-dim { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+        .tag-accent { background: var(--accent); color: white; box-shadow: none; }
+        .tag-dim { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
         #modal-title {
-            font-size: 22px;
-            font-weight: 900;
-            line-height: 1.15;
-            letter-spacing: -0.3px;
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1.05;
+            letter-spacing: 0.2px;
             margin-bottom: 10px;
         }
         #modal-desc {
@@ -961,7 +1038,8 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-bottom: none;
-            border-radius: 18px 18px 0 0;
+            border-top: 3px solid var(--accent);
+            border-radius: 0;
             overflow: hidden;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
@@ -987,10 +1065,12 @@
         }
         #upcoming-modal-poster.contain-mode { object-fit: contain; }
         #upcoming-modal-title {
-            font-size: 22px;
-            font-weight: 900;
-            line-height: 1.15;
-            letter-spacing: -0.3px;
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 800;
+            text-transform: uppercase;
+            line-height: 1.05;
+            letter-spacing: 0.2px;
             margin-bottom: 10px;
         }
         #upcoming-modal-desc {
@@ -1003,7 +1083,8 @@
             display: flex; align-items: center; gap: 8px;
             background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: var(--card-radius);
+            border-left: 3px solid var(--accent);
+            border-radius: 0;
             padding: 10px 12px;
             font-size: 11.5px;
             color: var(--text-muted);
@@ -1013,33 +1094,40 @@
         .modal-actions { display: flex; gap: 10px; }
         .modal-btn-play {
             flex: 1;
-            background: var(--gradient-brand);
+            background: var(--accent);
             color: white;
             border: none;
-            border-radius: 6px;
-            padding: 12px;
-            font-size: 13px;
-            font-weight: 900;
+            border-radius: 0;
+            padding: 13px;
+            font-size: 14px;
+            font-weight: 700;
             display: flex; align-items: center; justify-content: center; gap: 7px;
             cursor: pointer;
-            letter-spacing: 0.5px;
-            font-family: 'Nunito', sans-serif;
-            box-shadow: var(--glow-accent);
-            transition: transform 0.2s var(--ease), filter 0.2s var(--ease);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: var(--font-display);
+            box-shadow: none;
+            transition: transform 0.2s var(--ease), filter 0.2s var(--ease), background 0.2s var(--ease);
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .modal-btn-play:hover { background: var(--text); color: var(--accent); }
         }
         .modal-btn-play:active { filter: brightness(0.85); transform: scale(0.98); }
         .modal-btn-fav {
             width: 46px;
             background: var(--surface2);
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 0;
             display: flex; align-items: center; justify-content: center;
             font-size: 16px;
             cursor: pointer;
             color: white;
-            transition: background 0.2s var(--ease), transform 0.2s var(--ease);
+            transition: background 0.2s var(--ease), transform 0.2s var(--ease), border-color 0.2s var(--ease);
         }
         .modal-btn-fav:active { background: var(--surface); transform: scale(0.92); }
+        @media (hover: hover) and (pointer: fine) {
+            .modal-btn-fav:hover { border-color: var(--accent); }
+        }
 
         /* ─── TOAST ─── */
         #toast {
@@ -1047,12 +1135,13 @@
             bottom: 75px;
             left: 50%;
             transform: translateX(-50%) translateY(10px);
-            background: rgba(28,28,38,0.92);
+            background: rgba(21,21,28,0.94);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-hover);
+            border-left: 3px solid var(--accent);
             color: white;
             padding: 9px 20px;
-            border-radius: 100px;
+            border-radius: 0;
             font-size: 11px;
             font-weight: 800;
             z-index: 9999;
@@ -1066,7 +1155,7 @@
 
         body.modal-open { overflow: hidden; }
 
-        /* Continue Watching progress bar */
+        /* Continue Watching progress bar (legacy — ab .cw-card wale naye design ke liye use nahi hota) */
         .cw-progress-wrap {
             position: absolute;
             bottom: 0; left: 0; right: 0;
@@ -1077,6 +1166,108 @@
             height: 100%;
             background: var(--accent);
             border-radius: 0 2px 2px 0;
+        }
+
+        /* ─── CONTINUE WATCHING (redesigned — apna alag look, doosre landscape cards se distinct) ─── */
+        .cw-card {
+            flex-shrink: 0;
+            width: 220px;
+            cursor: pointer;
+        }
+        .cw-card:active .cw-img-wrap { transform: scale(0.96); }
+        .cw-img-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            background: var(--surface2);
+            border: 1px solid var(--border-hover);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+            transition: transform 0.25s var(--ease), border-color 0.25s var(--ease);
+        }
+        .cw-img-wrap img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .cw-img-wrap::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 48%, transparent 68%);
+            z-index: 1;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .cw-card:hover .cw-img-wrap { border-color: var(--accent); }
+        }
+        .cw-center-play {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: rgba(11,11,15,0.5);
+            backdrop-filter: blur(4px);
+            border: 1.5px solid rgba(255,255,255,0.45);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2;
+            transition: transform 0.2s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease);
+        }
+        .cw-card:active .cw-center-play { transform: translate(-50%, -50%) scale(0.9); }
+        @media (hover: hover) and (pointer: fine) {
+            .cw-card:hover .cw-center-play { background: var(--accent); border-color: var(--accent); transform: translate(-50%, -50%) scale(1.12); }
+        }
+        .cw-resume-tag {
+            position: absolute;
+            top: 6px; left: 6px;
+            z-index: 2;
+            display: flex; align-items: center; gap: 4px;
+            background: rgba(11,11,15,0.65);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--accent-violet);
+            font-size: 8.5px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 3px 7px;
+        }
+        .cw-info-row {
+            position: absolute;
+            left: 0; right: 0; bottom: 6px;
+            z-index: 2;
+            padding: 0 9px;
+        }
+        .cw-info-title {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: white;
+            line-height: 1.25;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+        }
+        .cw-info-sub {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 3px;
+            font-size: 9.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.2px;
+        }
+        .cw-progress-track {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 4px;
+            background: rgba(255,255,255,0.16);
+            z-index: 2;
+        }
+        .cw-progress-fill {
+            height: 100%;
+            background: var(--gradient-brand);
+            box-shadow: 0 0 8px rgba(255,46,67,0.55);
         }
 
         /* Hidden utility */
@@ -1106,7 +1297,7 @@
             cursor: pointer;
             padding: 0 8px;
             transition: all 0.2s;
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Poppins', sans-serif;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
@@ -1127,6 +1318,83 @@
             50% { opacity: 0.4; transform: scale(0.7); }
         }
 
+        /* ─── DAILY STREAK BANNER ─── */
+        @keyframes streak-flame {
+            0%, 100% { transform: scale(1) rotate(-2deg); }
+            50% { transform: scale(1.12) rotate(2deg); }
+        }
+        .streak-banner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 16px 0;
+            padding: 12px 14px;
+            background: linear-gradient(120deg, rgba(255,46,67,0.14), rgba(255,210,63,0.08));
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .streak-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-brand);
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        .streak-flame {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,46,67,0.15);
+            border-radius: 50%;
+            color: var(--yellow);
+            font-size: 17px;
+            animation: streak-flame 1.6s ease-in-out infinite;
+        }
+        .streak-body { flex: 1; min-width: 0; }
+        .streak-title {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.2px;
+        }
+        .streak-title span.count-num {
+            color: var(--yellow);
+            font-size: 15px;
+        }
+        .streak-sub {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .streak-days {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .streak-day-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+        .streak-day-dot.lit {
+            background: var(--accent2);
+            box-shadow: 0 0 6px rgba(255,90,61,0.7);
+        }
+        @media (min-width: 900px) {
+            .streak-banner { margin: 14px 0 0; }
+        }
+
         /* ─── ADDED TODAY CARD ─── */
         .at-card {
             flex-shrink: 0;
@@ -1141,8 +1409,9 @@
             border-radius: var(--card-radius);
             overflow: hidden;
             background: var(--surface2);
+            border: 1px solid var(--border);
             box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
         }
         .at-card-img img {
             width: 100%; height: 100%;
@@ -1150,7 +1419,7 @@
             transition: transform 0.4s var(--ease);
         }
         @media (hover: hover) and (pointer: fine) {
-            .at-card:hover .at-card-img { transform: translateY(-4px); box-shadow: var(--shadow-card), var(--glow-accent); }
+            .at-card:hover .at-card-img { transform: translateY(-4px); border-color: var(--accent); box-shadow: var(--shadow-card), var(--glow-accent); }
             .at-card:hover .at-card-img img { transform: scale(1.08); }
         }
         .at-ep-label {
@@ -1166,14 +1435,14 @@
             justify-content: space-between;
         }
         .at-new-pill {
-            background: var(--gradient-brand);
-            color: white;
+            background: var(--accent-violet);
+            color: #04231c;
             font-size: 7px;
             font-weight: 900;
-            padding: 1px 5px;
-            border-radius: 20px;
+            padding: 2px 6px;
+            border-radius: 0;
             letter-spacing: 0.5px;
-            box-shadow: var(--glow-accent);
+            box-shadow: none;
         }
         .at-card-title {
             font-size: 10px;
@@ -1193,6 +1462,105 @@
             padding: 0 16px;
         }
 
+        /* ─── TOP 10 RANKING (numbered list, not a card grid) ─── */
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            padding: 0 16px;
+        }
+        .rank-row {
+            display: grid;
+            grid-template-columns: 46px 62px 1fr auto;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 4px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s var(--ease);
+        }
+        .rank-row:last-child { border-bottom: none; }
+        @media (hover: hover) and (pointer: fine) {
+            .rank-row:hover { background: var(--surface2); }
+            .rank-row:hover .rank-num { -webkit-text-stroke: 1.5px var(--accent); color: transparent; }
+            .rank-row:hover .rank-thumb { border-color: var(--accent); }
+        }
+        .rank-row:active { background: var(--surface2); }
+        .rank-num {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 34px;
+            line-height: 1;
+            color: transparent;
+            -webkit-text-stroke: 1.5px var(--ink-line, var(--border));
+            -webkit-text-stroke-color: rgba(255,255,255,0.22);
+            transition: -webkit-text-stroke-color 0.2s var(--ease);
+        }
+        .rank-thumb {
+            width: 62px; height: 84px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            position: relative;
+            background: var(--surface2);
+            transition: border-color 0.2s var(--ease);
+        }
+        .rank-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .rank-info-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            line-height: 1.15;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .rank-info-genres {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        .rank-score {
+            font-family: var(--font-display);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--yellow);
+            text-align: right;
+            white-space: nowrap;
+        }
+        .rank-score small {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-size: 8.5px;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        /* ─── GENRE EXPLORER (chips driving a filtered grid, not a static rail) ─── */
+        .genre-chip-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 0 16px 14px;
+        }
+        .genre-chip-scroll::-webkit-scrollbar { display: none; }
+        .genre-explorer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 0 16px;
+            min-height: 60px;
+        }
+        .genre-explorer-empty {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-dim);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
         /* ─── PAGE TRANSITIONS — only on tab/seeAll switch ─── */
         .page-anim {
             animation: fadeSlideUp 0.22s ease forwards;
@@ -1202,7 +1570,7 @@
             to   { opacity: 1; transform: translateY(0); }
         }
         /* ─── PERFORMANCE: zero tap delay ─── */
-        .p-card, .l-card, .at-card, .nav-item, .tab-item, .see-all, .icon-btn, .btn-play, .btn-info, .modal-btn-play, .modal-btn-fav, .story-item {
+        .p-card, .l-card, .at-card, .nav-item, .tab-item, .see-all, .icon-btn, .ft-play, .ft-info, .ft-dot, .modal-btn-play, .modal-btn-fav, .story-item {
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
         }
@@ -1240,7 +1608,7 @@
             opacity: 0;
             pointer-events: none;
             transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(244,117,33,0.06);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,46,67,0.06);
         }
         #notif-panel.open {
             transform: translateY(0);
@@ -1268,7 +1636,7 @@
             transition: background 0.15s;
         }
         .notif-item:active { background: var(--surface2); }
-        .notif-item.unread { background: rgba(244,117,33,0.06); border-left: 2px solid var(--accent); }
+        .notif-item.unread { background: rgba(255,46,67,0.06); border-left: 2px solid var(--accent); }
         .notif-thumb {
             width: 46px; height: 46px;
             border-radius: 6px;
@@ -1310,7 +1678,7 @@
             border: 1.5px solid var(--border);
             border-radius: 8px;
             color: white;
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-size: 12px;
             font-weight: 600;
             padding: 10px 12px;
@@ -1329,7 +1697,7 @@
             padding: 10px;
             font-size: 12px;
             font-weight: 900;
-            font-family: 'Nunito', sans-serif;
+            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             letter-spacing: 0.5px;
         }
@@ -1366,7 +1734,7 @@
 
             /* Hide mobile hero, show PC strip */
             #featured-section { display: none !important; }
-            .hero-dots { display: none !important; }
+            .ft-dots { display: none !important; }
 
             .pc-featured-strip {
                 display: flex;
@@ -1424,7 +1792,7 @@
                 color: white;
                 border: none; border-radius: 6px;
                 padding: 9px 14px; font-size: 13px; font-weight: 900;
-                cursor: pointer; font-family: 'Nunito', sans-serif;
+                cursor: pointer; font-family: 'Poppins', sans-serif;
                 letter-spacing: 0.3px; width: 100%;
                 box-shadow: var(--glow-accent);
                 transition: background-position 0.4s var(--ease), transform 0.2s var(--ease);
@@ -1479,7 +1847,7 @@
                 cursor: pointer; transition: background 0.15s var(--ease); flex: 1;
             }
             .pc-trending-item:last-child { border-bottom: none; }
-            .pc-trending-item:hover { background: rgba(244,117,33,0.06); }
+            .pc-trending-item:hover { background: rgba(255,46,67,0.06); }
             .pc-trending-item:hover .pc-trending-name { color: var(--accent); }
             .pc-trending-num {
                 font-size: 17px; font-weight: 900; color: var(--text-dim);
@@ -1537,30 +1905,25 @@
 
             /* ─── MAIN CONTENT ─── */
             main {
-                margin-top: 112px;
+                margin-top: 122px;
                 max-width: 1400px;
                 margin-left: auto;
                 margin-right: auto;
                 padding: 0 24px;
             }
 
-            /* ─── HERO BANNER ─── */
-            .hero-section {
-                max-height: 480px;
-                border-radius: 12px;
-                overflow: hidden;
-            }
-            .hero-title { font-size: 34px; }
-            .hero-meta span { font-size: 15px; }
-            .hero-badge { font-size: 13px; padding: 5px 12px; }
-            .btn-play { font-size: 16px; padding: 13px 0; max-width: 220px; }
-            .btn-info { width: 50px; }
+            /* ─── FEATURED CAROUSEL (hidden on desktop — pc-featured-strip used instead) ─── */
+            .ft-title { font-size: 46px; }
+            .ft-meta span { font-size: 15px; }
+            .ft-badge { font-size: 13px; padding: 5px 12px; }
+            .ft-play { font-size: 16px; padding: 13px 0; max-width: 220px; }
+            .ft-info { width: 50px; }
 
             /* ─── SECTION HEADERS ─── */
             .section { margin-bottom: 32px; }
             .section-header { padding: 0 0 4px; }
             .section-title { font-size: 20px; }
-            .section-title::before { width: 4px; height: 20px; }
+            .section-title .jp { font-size: 13px; }
             .see-all { font-size: 15px; }
 
             /* ─── HORIZONTAL SCROLL ROW ─── */
@@ -1672,10 +2035,9 @@
             .l-card-title { font-size: 16px; }
             .at-card { width: 260px; }
             .at-card-title { font-size: 15px; }
-            .hero-section { max-height: 540px; }
-            .hero-title { font-size: 40px; }
-            .hero-meta span { font-size: 16px; }
-            .hero-badge { font-size: 14px; }
+            .ft-title { font-size: 58px; }
+            .ft-meta span { font-size: 16px; }
+            .ft-badge { font-size: 14px; }
             .section-title { font-size: 22px; }
             .see-all { font-size: 16px; }
             .tab-item { font-size: 16px; }
@@ -1813,20 +2175,21 @@
         <!-- REAL CONTENT -->
         <div id="real-content" class="hidden">
 
-            <!-- HERO BANNER -->
-            <div class="hero-section" id="featured-section">
-                <img id="featured-img" class="hero-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='500'%3E%3Crect fill='%2313131a' width='1000' height='500'/%3E%3C/svg%3E">
-                <div class="hero-overlay">
-                    <div class="hero-badge"><i class="fas fa-fire" style="font-size:8px;"></i> Featured Today</div>
-                    <div id="featured-title" class="hero-title"></div>
-                    <div class="hero-meta">
-                        <span class="rating"><i class="fas fa-star" style="font-size:9px;"></i>&nbsp;<span id="featured-rating-val"></span></span>
+            <!-- FEATURED CAROUSEL (rebuilt from scratch — dedicated multi-API banner fetch with fallbacks) -->
+            <div class="ft-hero" id="featured-section">
+                <div class="ft-track" id="ft-track"></div>
+                <div class="ft-gradient"></div>
+                <div class="ft-badge"><i class="fas fa-fire" style="font-size:8px;"></i> Featured Today</div>
+                <div class="ft-content">
+                    <div id="featured-title" class="ft-title"></div>
+                    <div class="ft-meta">
+                        <span class="ft-rating"><i class="fas fa-star" style="font-size:9px;"></i>&nbsp;<span id="featured-rating-val"></span></span>
                         <span>•</span>
                         <span>Anime</span>
                     </div>
-                    <div class="hero-actions">
-                        <button class="btn-play" id="featured-play"><i class="fas fa-play" style="font-size:10px;"></i> WATCH NOW</button>
-                        <div class="btn-info" id="featured-info-btn"><i class="fas fa-info"></i></div>
+                    <div class="ft-actions">
+                        <button class="ft-play" id="featured-play"><i class="fas fa-play" style="font-size:10px;"></i> WATCH NOW</button>
+                        <div class="ft-info" id="featured-info-btn"><i class="fas fa-info"></i></div>
                     </div>
                 </div>
             </div>
@@ -1855,7 +2218,7 @@
                     <!-- Stats Bar -->
                     <div class="pc-stats-bar">
                         <div class="pc-stat-card">
-                            <div class="pc-stat-icon" style="background:rgba(244,117,33,0.15);color:var(--accent);">
+                            <div class="pc-stat-icon" style="background:rgba(255,46,67,0.15);color:var(--accent);">
                                 <i class="fas fa-film"></i>
                             </div>
                             <div>
@@ -1903,13 +2266,17 @@
                 </div>
             </div>
 
-                        <!-- HERO DOTS -->
-            <div class="hero-dots">
-                <div class="hero-dot active"></div>
-                <div class="hero-dot"></div>
-                <div class="hero-dot"></div>
-                <div class="hero-dot"></div>
-                <div class="hero-dot"></div>
+            <!-- FEATURED DOTS (filled by JS based on how many slides actually loaded) -->
+            <div class="ft-dots" id="ft-dots"></div>
+
+            <!-- DAILY STREAK (localStorage based — koi backend/Firebase nahi chahiye) -->
+            <div class="streak-banner" id="streak-banner" style="display:none;">
+                <div class="streak-flame"><i class="fas fa-fire"></i></div>
+                <div class="streak-body">
+                    <div class="streak-title"><span class="count-num" id="streak-count-num">1</span> Day Streak <span class="jp">連続記録</span></div>
+                    <div class="streak-sub" id="streak-sub-text">Aaj visit karne ke liye shukriya!</div>
+                </div>
+                <div class="streak-days" id="streak-days-row"></div>
             </div>
 
             <!-- ADDED TODAY -->
@@ -1917,7 +2284,7 @@
                 <div class="section-header">
                     <div class="section-title" style="gap:7px;">
                         <span style="width:8px;height:8px;background:#ff4444;border-radius:50%;display:inline-block;animation:pulse-dot 1s infinite;"></span>
-                        Added Today
+                        Added Today <span class="jp">今日追加</span>
                         <span id="added-today-date" style="font-size:9px;font-weight:700;color:var(--text-muted);margin-left:2px;"></span>
                     </div>
                 </div>
@@ -1927,7 +2294,7 @@
             <!-- WATCHLIST / MY LIST -->
             <div class="section" style="margin-top:10px;">
                 <div class="section-header">
-                    <div class="section-title">My List</div>
+                    <div class="section-title">My List <span class="jp">続きを見る</span></div>
                 </div>
                 <div class="h-scroll no-scrollbar" id="stories-row">
                     <div class="story-item" onclick="toggleSearch()">
@@ -1938,78 +2305,84 @@
                 </div>
             </div>
 
+            <!-- RECENTLY ADDED (site par abhi-abhi upload hua — Continue Watching se upar rakha hai) -->
+            <div class="section" id="recent-added-section" style="display:none; margin-top:10px;">
+                <div class="section-header">
+                    <div class="section-title">Recently Added <span class="jp">最近追加</span></div>
+                    <div class="see-all" onclick="seeAll('recent')">See All</div>
+                </div>
+                <div class="h-scroll no-scrollbar" id="recent-grid"></div>
+            </div>
+
             <!-- CONTINUE WATCHING -->
             <div class="section" id="continue-watching-section" style="display:none;">
                 <div class="section-header">
-                    <div class="section-title">Continue Watching</div>
+                    <div class="section-title">Continue Watching <span class="jp">視聴中</span></div>
                     <div class="see-all" onclick="localStorage.removeItem('continue_watching'); renderGrids();">Clear</div>
                 </div>
-                <div class="h-scroll no-scrollbar" id="continue-watching-grid"></div>
+                <div class="h-scroll no-scrollbar" id="continue-watching-grid" style="gap:12px;"></div>
             </div>
 
             <!-- FOR YOU (TRENDING CAROUSEL) -->
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">For You</div>
+                    <div class="section-title">For You <span class="jp">あなたに</span></div>
                     <div class="see-all" onclick="seeAll('foryou')">See All</div>
                 </div>
                 <div class="h-scroll no-scrollbar" id="auto-scroll-container"></div>
             </div>
 
-            <!-- HINDI DUB CONFIRMED (manual Firebase entries) -->
-            <div class="section" id="hindi-dub-section" style="display:none;">
+            <!-- TOP 10 RANKING (numbered rows, not cards) -->
+            <div class="section" id="ranking-section" style="display:none;">
                 <div class="section-header">
-                    <div class="section-title" style="gap:7px;">
-                        Hindi Dub Confirmed
-                        <i class="fas fa-circle-check" style="color:#1db954; font-size:13px;"></i>
-                    </div>
+                    <div class="section-title">Top 10 This Week <span class="jp">週間ランキング</span></div>
                 </div>
-                <div class="h-scroll no-scrollbar" id="hindi-dub-grid"></div>
+                <div class="ranking-list" id="ranking-list"></div>
             </div>
 
-            <!-- LATEST UPLOAD -->
-            <div class="section" id="latest-upload-section" style="display:none;">
+            <!-- GENRE EXPLORER (chips drive a filtered grid) -->
+            <div class="section" id="genre-explorer-section" style="display:none;">
                 <div class="section-header">
-                    <div class="section-title">Latest Upload</div>
-                    <div class="see-all" onclick="seeAll('latest')">See All</div>
+                    <div class="section-title">Explore by Genre <span class="jp">ジャンル</span></div>
                 </div>
-                <div class="h-scroll no-scrollbar" id="latest-upload-grid"></div>
+                <div class="genre-chip-scroll" id="home-genre-chips"></div>
+                <div class="genre-explorer-grid" id="home-genre-grid"></div>
             </div>
 
             <!-- MUST WATCH SERIES -->
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">Must Watch</div>
+                    <div class="section-title">Must Watch <span class="jp">必見</span></div>
                     <div class="see-all" onclick="seeAll('mustwatch')">See All</div>
                 </div>
-                <div class="v-grid" id="series-grid"></div>
+                <div class="h-scroll no-scrollbar" id="series-grid"></div>
             </div>
 
             <!-- TOP RATED -->
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">Top Rated</div>
+                    <div class="section-title">Top Rated <span class="jp">高評価</span></div>
                     <div class="see-all" onclick="seeAll('toprated')">See All</div>
                 </div>
                 <div class="h-scroll no-scrollbar" id="top-rated-grid"></div>
             </div>
 
-            <!-- RECENTLY ADDED -->
+            <!-- LATEST MOVIES -->
             <div class="section">
                 <div class="section-header">
-                    <div class="section-title">Recently Added</div>
-                    <div class="see-all" onclick="seeAll('recent')">See All</div>
-                </div>
-                <div class="v-grid" id="recent-grid"></div>
-            </div>
-
-            <!-- LATEST MOVIES -->
-            <div class="section" style="margin-bottom:30px;">
-                <div class="section-header">
-                    <div class="section-title">Latest Movies</div>
+                    <div class="section-title">Latest Movies <span class="jp">映画</span></div>
                     <div class="see-all" onclick="seeAll('movies')">See All</div>
                 </div>
                 <div class="h-scroll no-scrollbar" id="movies-grid"></div>
+            </div>
+
+            <!-- RANDOM SERIES (sabse niche — har baar page load pe shuffled) -->
+            <div class="section" style="margin-bottom:30px;">
+                <div class="section-header">
+                    <div class="section-title">Random Series <span class="jp">ランダム</span></div>
+                    <div class="see-all" onclick="renderRandomSeries()"><i class="fas fa-shuffle" style="font-size:10px;"></i> Shuffle</div>
+                </div>
+                <div class="h-scroll no-scrollbar" id="random-series-grid"></div>
             </div>
 
             <!-- ─── FOOTER ─── -->
@@ -2147,7 +2520,15 @@
         const FIREBASE_DB = 'https://animeverse-9eada-default-rtdb.firebaseio.com';
 
         let allAnimeData = [];
-        let featuredData = null;
+        // Featured carousel state — dedicated multi-source banner pipeline (see fetchFeaturedBanner below)
+        let featuredSlides = [];
+        let featuredSlideIndex = 0;
+        let featuredAutoTimer = null;
+        let featuredHeroInitialized = false;
+        // Ek baar featured ho chuke titles yahan track hote hain taaki agla loop
+        // alag posters laaye — jab sab titles use ho jayein to list reset ho jaati hai
+        let featuredUsedTitles = new Set();
+        let featuredLoopRefreshing = false;
         let autoScrollInterval = null;
         let resumeTimeout = null;
 
@@ -2385,7 +2766,30 @@
             return { genres: [], type, score, popularity: 99999, members: 0, status: '', isFallback: true };
         }
 
+        // ════════════════════════════════
+        // 🇮🇳 HINDI DUB DETECTION
+        // Zaroori baat: AniList/Jikan/Kitsu jaisi anime APIs sirf global anime info
+        // dete hain (genre, score, episodes...) — unhe ye pata hi nahi hota ki
+        // HAMARI website par is specific anime ka Hindi audio upload hua hai ya
+        // nahi, kyunki wo site-specific data hai, kisi bhi third-party database
+        // mein store hi nahi hota. Isliye "API se pata lagana" possible nahi hai.
+        //
+        // Jo reliably kaam karta hai: apna khud ka Firebase data check karna —
+        // jab bhi koi anime upload karte ho, uska title ya category field mein
+        // "Hindi" / "Hindi Dub" jaisa word likhne se ye function usko khud-ba-khud
+        // pakad kar DUBBED tag laga dega. Bina kisi keyword ke auto-detect
+        // possible nahi (site ka apna data hi source of truth hai).
+        // ════════════════════════════════
+        function isHindiDubbed(title, item) {
+            const cat = (item?.category || '').toLowerCase();
+            const lang = (item?.language || item?.audio || item?.lang || '').toLowerCase();
+            const t = (title || '').toLowerCase();
+            const HINT = /hindi|hin.?dub|\bdubbed\b|\[dub\]|\(dub\)/i;
+            return HINT.test(cat) || HINT.test(lang) || HINT.test(t);
+        }
+
         // Sare anime ka meta (genre, type, score, popularity) background mein scan/fetch karo
+
         let metaLoadInProgress = false;
         async function ensureMetaLoaded() {
             // renderUIAndShow() ab progressive loading ke dauraan baar baar call hoti hai —
@@ -2449,7 +2853,15 @@
 
         // Active tab ko silently re-render karo (bina flicker ke)
         function refreshCurrentTab() {
-            if (!currentTab || currentTab === 'home') return;
+            // Genre Explorer home par rehta hai, isliye tab se independent hamesha refresh karo
+            renderHomeGenreExplorer();
+            if (!currentTab || currentTab === 'home') {
+                // For You ka genre-based personalization tabhi sahi hoti hai jab meta
+                // (genres/type) load ho chuki ho — jaise jaise background mein aata hai,
+                // yahan se carousel ko akela refresh karte rehte hain (poori grid nahi)
+                renderForYouCarousel();
+                return;
+            }
             if (currentTab === 'genre') { renderGenreView(); return; }
             // filter page visible hai to re-render
             const filterPage = document.getElementById('filter-page');
@@ -2477,6 +2889,79 @@
             if (anime.meta) return anime.meta;
             const cache = getMetaCache();
             return cache[anime.title] || { genres: [], type: '', score: 0, popularity: 99999, members: 0, status: '' };
+        }
+
+        // ════════════════════════════════
+        // 🎯 FOR YOU — genre + type ke hisaab se personalized recommendations
+        // Continue Watching aur Watchlist se signal leta hai ki user kaunsa
+        // genre/type dekh/pasand kar raha hai, phir wahi genre/type match
+        // karne wala baaki catalog upar dikhata hai. Koi history na ho to
+        // simple shuffled catalog hi dikhta hai (jaisa pehle tha).
+        // ════════════════════════════════
+        function getForYouSeedTitles() {
+            let watchlist = [], cw = [];
+            try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
+            try { cw = JSON.parse(localStorage.getItem('continue_watching') || '[]'); } catch(e) {}
+            // Continue Watching pehle (zyada strong signal — actually dekha ja raha hai),
+            // phir watchlist — dono milaake duplicate hata do
+            return [...new Set([...cw, ...watchlist])];
+        }
+
+        function buildForYouList(limit, excludeSeeds = true) {
+            const seedTitles = getForYouSeedTitles();
+            const seedAnime = seedTitles.map(t => allAnimeData.find(a => a.title === t)).filter(Boolean);
+
+            // Koi watch history/watchlist nahi hai — abhi tak jaisa tha waisa hi generic shuffle
+            if (seedAnime.length === 0) {
+                return shuffleArray([...allAnimeData]).slice(0, limit);
+            }
+
+            // Seed anime se genre aur type ki frequency nikalo
+            const genreCount = {};
+            const typeCount = {};
+            seedAnime.forEach(a => {
+                const meta = getMetaFor(a);
+                (meta.genres && meta.genres.length ? meta.genres : (a.genres || [])).forEach(g => {
+                    genreCount[g] = (genreCount[g] || 0) + 1;
+                });
+                const type = (meta.type || '').toLowerCase().replace('movie', 'movie').trim();
+                if (type) typeCount[type] = (typeCount[type] || 0) + 1;
+            });
+
+            const seedTitleSet = new Set(seedTitles);
+            const scored = allAnimeData
+                .filter(a => !excludeSeeds || !seedTitleSet.has(a.title)) // home row mein already dekhe/list kiye anime chhupao, "See All" mein sab dikhao
+                .map(anime => {
+                    const meta = getMetaFor(anime);
+                    const genres = meta.genres && meta.genres.length ? meta.genres : (anime.genres || []);
+                    let score = 0;
+                    genres.forEach(g => { score += (genreCount[g] || 0); });
+                    const type = (meta.type || '').toLowerCase().trim();
+                    if (type && typeCount[type]) score += typeCount[type] * 0.5; // type match ko genre se kam weight
+                    return { anime, score };
+                });
+
+            // Genre/type match wale (score > 0) upar, shuffle karke score se sort —
+            // taaki same-score anime ka order har baar thoda badalta rahe (variety)
+            const relevant = shuffleArray(scored.filter(s => s.score > 0)).sort((x, y) => y.score - x.score);
+            // Jinka abhi tak genre meta load nahi hua (score 0) wo end mein filler ke taur par
+            const rest = shuffleArray(scored.filter(s => s.score === 0));
+
+            return [...relevant, ...rest].slice(0, limit).map(s => s.anime);
+        }
+
+        // "For You" carousel ko akela refresh karta hai (poori grid rebuild kiye bina) —
+        // genre metadata background mein load hote hi ise dobara call kiya jaata hai
+        // taaki personalization jaise hi data aaye turant update ho jaaye.
+        function renderForYouCarousel() {
+            const carousel = document.getElementById('auto-scroll-container');
+            if (!carousel || allAnimeData.length === 0) return;
+            const ROW_LIMIT = 18;
+            const list = buildForYouList(ROW_LIMIT);
+            carousel.innerHTML = list.map(({title, slug, poster, banner, rating, item}) =>
+                `<div class="trending-item" style="flex-shrink:0;">` + makeLandscapeCard({title, slug, poster, banner, rating, item}) + `</div>`
+            ).join('');
+            initInfiniteAutoScroll(carousel);
         }
 
         function clearCache() {
@@ -2545,7 +3030,7 @@
                     <div class="at-card" onclick="openInfoModal('${safeTitle}','${slug}','${banner}','${rating}')">
                         <div class="at-card-img">
                             <img src="${thumb}" loading="lazy" 
-                                onerror="this.src='${poster || `https://placehold.co/300x169/13131a/f47521?text=${encodeURIComponent(title.substring(0,10))}`}'">
+                                onerror="this.src='${poster || `https://placehold.co/300x169/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,10))}`}'">
                             <div class="at-ep-label">
                                 <span>${epLabel}</span>
                                 <span class="at-new-pill">NEW</span>
@@ -2734,17 +3219,19 @@
             }
 
             // ── Source 4: TMDB — "backdrop_path" bhi ek asli widescreen image hai, sabse LAST resort ──
-            // (movies/TV/celebrities sab isme mix hote hain, isliye sirf tv/movie type
-            // aur strict title-match ke baad hi accept karte hain)
+            // (movies/TV/celebrities sab isme mix hote hain, isliye sirf tv/movie type,
+            // "Animation" genre (16) HARD requirement, aur strict title-match ke baad hi accept karte hain —
+            // warna kabhi kabhi same-naam wali live-action movie/show ka poster galti se aa jaata tha)
             if (!poster || !banner || !rating) {
                 try {
                     const tmdbRes = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}`);
                     const tmdb = await tmdbRes.json();
-                    const results = (tmdb.results || []).filter(r => r.media_type === 'tv' || r.media_type === 'movie');
+                    const results = (tmdb.results || []).filter(r =>
+                        (r.media_type === 'tv' || r.media_type === 'movie') && (r.genre_ids || []).includes(16)
+                    );
                     let best = null, bestScore = 0;
                     results.forEach(r => {
-                        let score = bestTitleMatch(title, [r.title, r.name, r.original_title, r.original_name]);
-                        if ((r.genre_ids || []).includes(16)) score += 0.1; // Animation genre ko thoda boost
+                        const score = bestTitleMatch(title, [r.title, r.name, r.original_title, r.original_name]);
                         if (score > bestScore) { bestScore = score; best = r; }
                     });
                     if (best && bestScore >= MATCH_THRESHOLD) {
@@ -2759,8 +3246,8 @@
             // ── portrait poster ko kabhi crop/blur karke fake banner nahi banayenge ──
             const encoded = encodeURIComponent(title.substring(0, 20));
             return {
-                p: poster || `https://placehold.co/500x750/13131a/f47521?text=${encoded}`,
-                b: banner || `https://placehold.co/1000x500/13131a/f47521?text=${encoded}`,
+                p: poster || `https://placehold.co/500x750/13131a/ff2e43?text=${encoded}`,
+                b: banner || `https://placehold.co/1000x500/13131a/ff2e43?text=${encoded}`,
                 r: rating || '7.0'
             };
         }
@@ -2768,6 +3255,301 @@
         function showContent() {
             document.getElementById('skeleton-loader').classList.add('hidden');
             document.getElementById('real-content').classList.remove('hidden');
+        }
+
+        // ════════════════════════════════
+        // 🎬 FEATURED CAROUSEL — rebuilt from scratch
+        // Dedicated banner-only fetcher for the hero: har source ko strictly ek
+        // genuine WIDESCREEN field ke liye hi check karte hain (kabhi bhi poster ko
+        // stretch/crop karke banner nahi banate). Priority order best-quality-first:
+        //   1) AniList  → bannerImage           (sabse consistent, purpose-built widescreen art)
+        //   2) Jikan    → trailer thumbnail      (YouTube 16:9, high-res)
+        //   3) TMDB     → backdrop_path          (studio-quality widescreen)
+        //   4) Kitsu    → coverImage             (dedicated widescreen field)
+        // Jis source mein bhi genuine banner na mile, us anime ko featured list se
+        // skip kar dete hain — hero mein kabhi bhi khींchi hui/dhundhli image nahi lagegi.
+        // ════════════════════════════════
+        async function fetchFeaturedBanner(title) {
+            // ── Source 1: AniList ──
+            try {
+                const query = `
+                    query ($search: String) {
+                        Media(search: $search, type: ANIME) {
+                            title { romaji english native }
+                            bannerImage
+                            averageScore
+                        }
+                    }`;
+                const res = await fetch('https://graphql.anilist.co', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query, variables: { search: title } })
+                });
+                const data = await res.json();
+                const m = data?.data?.Media;
+                if (m && m.bannerImage) {
+                    const match = bestTitleMatch(title, [m.title?.romaji, m.title?.english, m.title?.native]);
+                    if (match >= MATCH_THRESHOLD) {
+                        return { banner: m.bannerImage, rating: m.averageScore ? (m.averageScore / 10).toFixed(1) : null };
+                    }
+                }
+            } catch (e) { console.warn('Featured banner (AniList) failed:', title); }
+
+            // ── Source 2: Jikan trailer thumbnail ──
+            try {
+                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(title)}&limit=5`);
+                const data = await res.json();
+                const entries = data?.data || [];
+                let best = null, bestScore = 0;
+                entries.forEach(e => {
+                    const s = bestTitleMatch(title, [e.title, e.title_english, e.title_japanese]);
+                    if (s > bestScore) { bestScore = s; best = e; }
+                });
+                if (best && bestScore >= MATCH_THRESHOLD) {
+                    const trailerImg = best.trailer?.images?.maximum_image_url || best.trailer?.images?.large_image_url;
+                    if (trailerImg) {
+                        return { banner: trailerImg, rating: best.score ? best.score.toFixed(1) : null };
+                    }
+                }
+            } catch (e) { console.warn('Featured banner (Jikan) failed:', title); }
+
+            // ── Source 3: TMDB backdrop (Animation genre hard filter — koi bhi live-action ya
+            // unrelated movie/show ka backdrop yahan se kabhi featured hero mein nahi aayega) ──
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(title)}`);
+                const data = await res.json();
+                const results = (data.results || []).filter(r =>
+                    (r.media_type === 'tv' || r.media_type === 'movie') && (r.genre_ids || []).includes(16)
+                );
+                let best = null, bestScore = 0;
+                results.forEach(r => {
+                    const s = bestTitleMatch(title, [r.title, r.name, r.original_title, r.original_name]);
+                    if (s > bestScore) { bestScore = s; best = r; }
+                });
+                if (best && bestScore >= MATCH_THRESHOLD && best.backdrop_path) {
+                    return {
+                        banner: 'https://image.tmdb.org/t/p/original' + best.backdrop_path,
+                        rating: best.vote_average ? best.vote_average.toFixed(1) : null
+                    };
+                }
+            } catch (e) { console.warn('Featured banner (TMDB) failed:', title); }
+
+            // ── Source 4: Kitsu coverImage ──
+            try {
+                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=5`);
+                const data = await res.json();
+                const list = data?.data || [];
+                let best = null, bestScore = 0;
+                list.forEach(e => {
+                    const a = e.attributes || {};
+                    const s = bestTitleMatch(title, [a.canonicalTitle, a.titles?.en, a.titles?.en_jp, a.titles?.ja_jp]);
+                    if (s > bestScore) { bestScore = s; best = a; }
+                });
+                if (best) {
+                    const cover = best.coverImage?.original || best.coverImage?.large;
+                    if (cover && bestScore >= MATCH_THRESHOLD) {
+                        return { banner: cover, rating: best.averageRating ? (best.averageRating / 10).toFixed(1) : null };
+                    }
+                }
+            } catch (e) { console.warn('Featured banner (Kitsu) failed:', title); }
+
+            return null; // kisi bhi source se genuine widescreen banner nahi mila
+        }
+
+        // renderUIAndShow() baar baar (progressive loading ke dauraan) call hoti hai —
+        // guard laga diya taaki carousel sirf ek hi baar build ho, warna har re-render
+        // pe naya fetch chain + naya autoplay timer stack ho jaata
+        function initFeaturedHero() {
+            if (featuredHeroInitialized || allAnimeData.length === 0) return;
+            featuredHeroInitialized = true;
+            buildFeaturedSlides();
+        }
+
+        async function buildFeaturedSlides() {
+            // Candidate pool: catalog ke top-rated anime mein se shuffle karke variety lao —
+            // pehle se featured ho chuke titles ko exclude karo taaki naya loop naye posters laaye
+            let candidatePool = allAnimeData.filter(a => !featuredUsedTitles.has(a.title));
+            if (candidatePool.length < 5) {
+                // Sab titles ek baar dikha chuke — ab dobara se shuru karo
+                featuredUsedTitles.clear();
+                candidatePool = allAnimeData;
+            }
+            const pool = shuffleArray(
+                [...candidatePool].sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0)).slice(0, 15)
+            );
+
+            for (const anime of pool) {
+                if (featuredSlides.length >= 5) break;
+                const found = await fetchFeaturedBanner(anime.title);
+                if (found && found.banner) {
+                    featuredSlides.push({
+                        title: anime.title,
+                        slug: anime.slug,
+                        banner: found.banner,
+                        rating: found.rating || anime.rating || '—'
+                    });
+                    featuredUsedTitles.add(anime.title);
+                    // Jaise hi ek slide mil jaaye turant render karo — user ko khali hero na dikhe
+                    renderFeaturedSlides();
+                }
+            }
+
+            // Aakhri fallback: koi bhi API source se genuine banner na mile to catalog ke
+            // apne (pehle se fetched) banner use karo — sirf tab jab wo placeholder na ho
+            if (featuredSlides.length === 0) {
+                allAnimeData.slice(0, 20).forEach(a => {
+                    if (featuredSlides.length >= 5) return;
+                    if (a.banner && !a.banner.includes('placehold')) {
+                        featuredSlides.push({ title: a.title, slug: a.slug, banner: a.banner, rating: a.rating });
+                        featuredUsedTitles.add(a.title);
+                    }
+                });
+                renderFeaturedSlides();
+            }
+        }
+
+        // Ek poora loop (5 posters) complete hone ke baad ye function call hoti hai —
+        // purane slides hata kar bilkul naye posters ka set fetch + render karti hai,
+        // taaki agla loop fresh dikhe. buildFeaturedSlides() khud hi featuredUsedTitles
+        // ke through purane titles ko avoid karti hai.
+        async function refreshFeaturedLoop() {
+            if (featuredLoopRefreshing) return;
+            featuredLoopRefreshing = true;
+            clearInterval(featuredAutoTimer);
+
+            featuredSlides = [];
+            featuredSlideIndex = 0;
+            const track = document.getElementById('ft-track');
+            const dotsWrap = document.getElementById('ft-dots');
+            if (track) track.innerHTML = '';
+            if (dotsWrap) dotsWrap.innerHTML = '';
+
+            await buildFeaturedSlides(); // naya set fetch + progressively render karegi (autoplay khud iske andar se restart hoga)
+
+            featuredLoopRefreshing = false;
+        }
+
+        // Naya slide array mein add hote hi DOM ko sync karta hai — poora rebuild nahi,
+        // sirf jo naye slides/dots abhi tak add nahi hue wahi add karta hai (koi flicker nahi)
+        function renderFeaturedSlides() {
+            const track = document.getElementById('ft-track');
+            const dotsWrap = document.getElementById('ft-dots');
+            if (!track || !dotsWrap) return;
+
+            const alreadyRendered = track.children.length;
+            for (let i = alreadyRendered; i < featuredSlides.length; i++) {
+                const s = featuredSlides[i];
+                const img = document.createElement('img');
+                img.className = 'ft-slide-img' + (i === 0 ? ' active' : '');
+                img.dataset.i = i;
+                img.loading = i === 0 ? 'eager' : 'lazy';
+                img.src = s.banner;
+                track.appendChild(img);
+
+                const dot = document.createElement('div');
+                dot.className = 'ft-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => goToFeaturedSlide(i);
+                dotsWrap.appendChild(dot);
+            }
+
+            // Pehli baar kam-se-kam ek slide render hote hi text/actions bhi bhar do
+            if (alreadyRendered === 0 && featuredSlides.length > 0) {
+                showFeaturedSlide(0);
+            }
+            // Har baar re-check karo — pehli call ke time sirf 1 slide hoti hai (autoplay
+            // ka length<=1 guard usse skip kar deta), baad mein 2+ ho jaane par yahi call
+            // ise start kar degi. startFeaturedAutoplay khud purana interval clear karta hai,
+            // isliye baar baar call karna safe hai.
+            startFeaturedAutoplay();
+        }
+
+        function showFeaturedSlide(i) {
+            const s = featuredSlides[i];
+            if (!s) return;
+            featuredSlideIndex = i;
+
+            document.querySelectorAll('.ft-slide-img').forEach(img => img.classList.toggle('active', +img.dataset.i === i));
+            document.querySelectorAll('.ft-dot').forEach((d, di) => d.classList.toggle('active', di === i));
+
+            document.getElementById('featured-title').innerText = s.title;
+            document.getElementById('featured-rating-val').innerText = s.rating;
+            document.getElementById('featured-info-btn').onclick = () => openInfoModal(s.title, s.slug, s.banner, s.rating);
+            document.getElementById('featured-play').onclick = (e) => { e.stopPropagation(); addToContinueWatching(s.title); location.href = `player.html?id=${s.slug}`; };
+        }
+
+        function goToFeaturedSlide(i) {
+            showFeaturedSlide(i);
+            startFeaturedAutoplay(); // manual tap pe timer restart karo
+        }
+
+        function startFeaturedAutoplay() {
+            clearInterval(featuredAutoTimer);
+            if (featuredSlides.length <= 1) return;
+            featuredAutoTimer = setInterval(() => {
+                if (featuredLoopRefreshing) return;
+                if (featuredSlideIndex === featuredSlides.length - 1) {
+                    // Ek poora loop complete ho gaya — agle loop ke liye naye posters laao
+                    refreshFeaturedLoop();
+                    return;
+                }
+                showFeaturedSlide(featuredSlideIndex + 1);
+            }, 6000);
+        }
+
+        // Sequential navigation (swipe ya autoplay) ke liye common step function —
+        // dot click (goToFeaturedSlide) alag rehta hai kyunki wo ek specific slide
+        // pe seedha jaata hai, loop-refresh trigger nahi karta.
+        function manualAdvanceFeatured(direction) {
+            if (featuredLoopRefreshing || featuredSlides.length <= 1) return;
+            const len = featuredSlides.length;
+
+            if (direction === 1 && featuredSlideIndex === len - 1) {
+                refreshFeaturedLoop(); // ek loop complete — agla loop naye posters ke saath shuru hoga
+                return;
+            }
+            if (direction === -1 && featuredSlideIndex === 0) {
+                showFeaturedSlide(len - 1); // peeche se bhi wrap ho sakta hai, seedha last slide pe
+                startFeaturedAutoplay();
+                return;
+            }
+            showFeaturedSlide(featuredSlideIndex + direction);
+            startFeaturedAutoplay();
+        }
+
+        // ════════════════════════════════
+        // 👆 FEATURED HERO — MANUAL SWIPE (auto-swipe ke saath saath)
+        // Left swipe = next slide, Right swipe = previous slide.
+        // Aage swipe karte karte jab poora loop (sab posters) khatam ho jaaye to
+        // agla swipe seedha naye posters ka fresh loop shuru kar deta hai.
+        // ════════════════════════════════
+        function initFeaturedSwipe() {
+            const hero = document.getElementById('featured-section');
+            if (!hero) return;
+
+            let startX = 0, startY = 0, dragging = false;
+            const SWIPE_THRESHOLD = 40; // px — isse kam movement ko tap/scroll maana jaata hai
+
+            hero.addEventListener('touchstart', (e) => {
+                if (featuredSlides.length <= 1) return;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                dragging = true;
+            }, { passive: true });
+
+            hero.addEventListener('touchend', (e) => {
+                if (!dragging) return;
+                dragging = false;
+                if (featuredSlides.length <= 1) return;
+
+                const diffX = e.changedTouches[0].clientX - startX;
+                const diffY = e.changedTouches[0].clientY - startY;
+
+                // Horizontal movement vertical se zyada honi chahiye, warna
+                // ye normal up/down page scroll hai, swipe nahi
+                if (Math.abs(diffX) < SWIPE_THRESHOLD || Math.abs(diffX) < Math.abs(diffY)) return;
+
+                manualAdvanceFeatured(diffX < 0 ? 1 : -1);
+            }, { passive: true });
         }
 
         // Concurrency-limited map — ek saath sirf N titles fetch karta hai (default 6).
@@ -2843,8 +3625,8 @@
                         const encoded = encodeURIComponent(title.substring(0, 20));
                         return {
                             title, item: data[title], slug,
-                            poster: `https://placehold.co/500x750/13131a/f47521?text=${encoded}`,
-                            banner: `https://placehold.co/1000x500/13131a/f47521?text=${encoded}`,
+                            poster: `https://placehold.co/500x750/13131a/ff2e43?text=${encoded}`,
+                            banner: `https://placehold.co/1000x500/13131a/ff2e43?text=${encoded}`,
                             rating: '—',
                             addedAt: data[title]?.addedAt || data[title]?.timestamp || Date.now(),
                             firebaseIndex: index,
@@ -2909,17 +3691,7 @@
                 if (currentTab === 'genre') renderGenreView();
             });
             
-            if (!featuredData) featuredData = allAnimeData[Math.floor(Math.random() * allAnimeData.length)];
-            
-            const featImg = document.getElementById('featured-img');
-            if (featuredData.banner || featuredData.poster) {
-                featImg.src = featuredData.banner || featuredData.poster;
-                featImg.onerror = () => { featImg.src = featuredData.poster || ''; };
-            }
-            document.getElementById('featured-title').innerText = featuredData.title;
-            document.getElementById('featured-rating-val').innerText = featuredData.rating;
-            document.getElementById('featured-info-btn').onclick = () => openInfoModal(featuredData.title, featuredData.slug, featuredData.banner, featuredData.rating);
-            document.getElementById('featured-play').onclick = (e) => { e.stopPropagation(); location.href = `player.html?id=${featuredData.slug}`; };
+            initFeaturedHero(); // apna dedicated multi-API banner fetch + carousel (guarded, ek hi baar chalega)
 
             renderGrids();
             loadAddedToday();
@@ -3029,7 +3801,7 @@
             grid.innerHTML = list.map((m, idx) => `
                 <div class="p-card" onclick="openUpcomingModal(${idx})">
                     <div class="p-card-img-wrap">
-                        <img src="${m.poster}" loading="lazy" onerror="this.src='https://placehold.co/500x750/13131a/f47521?text=${encodeURIComponent((m.title||'').substring(0,10))}'">
+                        <img src="${m.poster}" loading="lazy" onerror="this.src='https://placehold.co/500x750/13131a/ff2e43?text=${encodeURIComponent((m.title||'').substring(0,10))}'">
                         <div style="position:absolute;top:5px;left:5px;background:#1db954;color:white;font-size:7.5px;font-weight:900;padding:2px 5px;border-radius:3px;">HINDI DUB</div>
                         <div class="upcoming-date-badge"><i class="fas fa-clock"></i> ${m.dateLabel}</div>
                     </div>
@@ -3050,7 +3822,7 @@
             const content = document.getElementById('upcoming-modal-content');
             const bgImg = document.getElementById('upcoming-modal-bg');
             const posterImg = document.getElementById('upcoming-modal-poster');
-            const fallbackImg = `https://placehold.co/800x450/13131a/f47521?text=${encodeURIComponent((item.title||'').substring(0,15))}`;
+            const fallbackImg = `https://placehold.co/800x450/13131a/ff2e43?text=${encodeURIComponent((item.title||'').substring(0,15))}`;
 
             // Text/tags pehle set karo
             document.getElementById('upcoming-modal-title').innerText = item.title;
@@ -3124,33 +3896,38 @@
             const lastUpdated = item?.lastUpdated || 0;
             const isNew = lastUpdated > 0 && (Date.now() - lastUpdated) < 7 * 24 * 60 * 60 * 1000; // 7 din ke andar
             const epBadge = lastEp ? `S${lastS||1} E${lastEp}` : null;
+            const dubbed = isHindiDubbed(title, item);
 
             return `
             <div class="p-card" onclick="openInfoModal('${safeTitle}','${slug}','${banner}','${rating}')">
                 <div class="p-card-img-wrap">
-                    <img src="${poster}" loading="lazy" onerror="this.src='https://placehold.co/500x750/13131a/f47521?text=${encodeURIComponent(title.substring(0,10))}'" >
+                    <img src="${poster}" loading="lazy" onerror="this.src='https://placehold.co/500x750/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,10))}'" >
                     <div class="p-card-badge"><i class="fas fa-star"></i> ${rating}</div>
                     <div class="p-card-fav" onclick="event.stopPropagation(); toggleWatchlist('${safeTitle}')">
                         <i class="fa-heart ${isLiked ? 'fa-solid' : 'fa-regular'}" style="color:${isLiked ? 'var(--accent)' : 'white'}; font-size:10px;"></i>
                     </div>
-                    ${isNew ? `<div style="position:absolute;top:5px;left:5px;background:var(--accent);color:white;font-size:7.5px;font-weight:900;padding:2px 5px;border-radius:3px;letter-spacing:0.3px;">NEW</div>` : ''}
+                    ${(isNew || dubbed) ? `<div class="p-card-tags">
+                        ${isNew ? `<div class="p-tag p-tag-new">NEW</div>` : ''}
+                        ${dubbed ? `<div class="p-tag p-tag-dub">DUBBED</div>` : ''}
+                    </div>` : ''}
                     ${epBadge ? `<div style="position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.8);color:white;font-size:7.5px;font-weight:800;padding:2px 5px;border-radius:3px;">${epBadge}</div>` : ''}
                 </div>
                 <div class="p-card-title">${title}</div>
             </div>`;
         }
 
-        function makeLandscapeCard({title, slug, poster, banner, rating}) {
+        function makeLandscapeCard({title, slug, poster, banner, rating, item}) {
             const safeTitle = title.replace(/'/g, "\\'");
-            const img = banner || poster;
+            const img = banner || `https://placehold.co/400x225/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,10))}`;
+            const dubbed = isHindiDubbed(title, item);
             return `
             <div class="l-card" onclick="openInfoModal('${safeTitle}','${slug}','${banner}','${rating}')">
                 <div class="l-card-img-wrap">
-                    <img src="${img}" loading="lazy" onerror="this.src='https://placehold.co/400x225/13131a/f47521?text=${encodeURIComponent(title.substring(0,10))}'">
+                    <img src="${img}" loading="lazy" onerror="this.src='https://placehold.co/400x225/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,10))}'">
                     <div class="l-card-overlay">
                         <div class="l-card-title">${title}</div>
                     </div>
-                    <div class="l-ep-badge">NEW</div>
+                    ${dubbed ? `<div class="l-dub-tag">DUBBED</div>` : `<div class="l-ep-badge">NEW</div>`}
                 </div>
             </div>`;
         }
@@ -3220,10 +3997,9 @@
             const carousel = document.getElementById('auto-scroll-container');
             const watchlistArea = document.getElementById('watchlist-items');
             const cwGrid = document.getElementById('continue-watching-grid');
-            const latestGrid = document.getElementById('latest-upload-grid');
             
             seriesGrid.innerHTML = ''; moviesGrid.innerHTML = ''; carousel.innerHTML = ''; 
-            watchlistArea.innerHTML = ''; cwGrid.innerHTML = ''; latestGrid.innerHTML = '';
+            watchlistArea.innerHTML = ''; cwGrid.innerHTML = '';
             
             let watchlist = [];
             try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) { watchlist = []; }
@@ -3238,7 +4014,7 @@
                     <div class="story-item" onclick="openInfoModal('${safeTitle}','${a.slug}','${a.banner}','${a.rating}')">
                         <div class="story-ring">
                             <div class="story-ring-inner">
-                                <img src="${a.poster}" loading="lazy" onerror="this.src='https://placehold.co/64x64/13131a/f47521?text=?'">
+                                <img src="${a.poster}" loading="lazy" onerror="this.src='https://placehold.co/64x64/13131a/ff2e43?text=?'">
                             </div>
                         </div>
                         <div class="story-label">${t}</div>
@@ -3274,42 +4050,32 @@
                     const a = allAnimeData.find(i => i.title === t);
                     if (!a) return '';
                     const progress = (() => { try { return parseInt(localStorage.getItem('progress_' + a.slug) || '40'); } catch(e) { return 40; } })();
+                    const remaining = Math.max(0, 100 - progress);
+                    const epLabel = a.item?.lastEpisode ? `EP ${a.item.lastEpisode}` : 'Series';
                     return `
-                    <div class="l-card" onclick="location.href='player.html?id=${a.slug}'">
-                        <div class="l-card-img-wrap">
-                            <img src="${a.banner || a.poster}" loading="lazy" onerror="this.src='https://placehold.co/400x225/13131a/f47521?text=${encodeURIComponent(a.title.substring(0,10))}'">
-                            <div class="l-card-overlay">
-                                <div class="l-card-title">${a.title}</div>
+                    <div class="cw-card" onclick="location.href='player.html?id=${a.slug}'">
+                        <div class="cw-img-wrap">
+                            <img src="${a.banner || `https://placehold.co/400x225/13131a/ff2e43?text=${encodeURIComponent(a.title.substring(0,10))}`}" loading="lazy" onerror="this.src='https://placehold.co/400x225/13131a/ff2e43?text=${encodeURIComponent(a.title.substring(0,10))}'">
+                            <div class="cw-resume-tag"><i class="fas fa-rotate-right" style="font-size:8px;"></i> Resume</div>
+                            <div class="cw-center-play"><i class="fas fa-play" style="font-size:12px;color:white;margin-left:2px;"></i></div>
+                            <div class="cw-info-row">
+                                <div class="cw-info-title">${a.title}</div>
+                                <div class="cw-info-sub">${epLabel} • ${remaining}% left</div>
                             </div>
-                            <div class="cw-progress-wrap"><div class="cw-progress-bar" style="width:${progress}%"></div></div>
-                            <div class="cw-play-btn">
-                                <i class="fas fa-play" style="font-size:9px;color:white;margin-left:2px;"></i>
-                            </div>
+                            <div class="cw-progress-track"><div class="cw-progress-fill" style="width:${progress}%"></div></div>
                         </div>
                     </div>`;
                 }).join('');
             }
 
-            // ── LATEST UPLOAD ──
-            const latestList = allAnimeData.filter(a => {
-                const cat = a.item?.category?.toLowerCase() || '';
-                return cat.includes('latest') || cat.includes('upload') || cat.includes('new');
-            });
-            // Fallback: latest 8 by array order (Firebase mein naye entries end mein hoti hain)
-            const toShowLatest = latestList.length > 0 ? latestList : allAnimeData.slice(-8).reverse();
-            if (toShowLatest.length > 0) {
-                document.getElementById('latest-upload-section').style.display = '';
-                latestGrid.innerHTML = toShowLatest.map(({title, slug, poster, banner, rating}) => {
-                    const isLiked = watchlist.includes(title);
-                    return makePortraitCard({title, slug, poster, banner, rating, isLiked});
-                }).join('');
-            }
+            // ── HINDI DUBBED — dedicated section hata di gayi hai, lekin isHindiDubbed()
+            // function abhi bhi har card (portrait/landscape) par DUBBED tag lagane ke
+            // liye use ho raha hai (see makePortraitCard / makeLandscapeCard) ──
 
-            // ── FOR YOU carousel — bounded subset, warna bade catalog pe clone ke saath DOM bahut bada ho jaata ──
-            carousel.innerHTML = shuffledForYou.slice(0, ROW_LIMIT).map(({title, slug, poster, banner, rating}) =>
-                `<div class="trending-item" style="flex-shrink:0;">` + makeLandscapeCard({title, slug, poster, banner, rating}) + `</div>`
-            ).join('');
-            initInfiniteAutoScroll(carousel);
+            // ── FOR YOU carousel — ab user ke Continue Watching + Watchlist se genre/type
+            // detect karke personalize hoti hai (dedicated function, taaki genre data baad
+            // mein load hone par bhi isko akela refresh kiya ja sake — see renderForYouCarousel) ──
+            renderForYouCarousel();
 
             // ── MUST WATCH SERIES ──
             seriesGrid.innerHTML = allAnimeData.slice(0, 12).map(({title, slug, poster, banner, rating, item}) => {
@@ -3318,8 +4084,8 @@
             }).join('');
 
             // ── LATEST MOVIES ──
-            moviesGrid.innerHTML = shuffledForYou.slice(0, ROW_LIMIT).map(({title, slug, poster, banner, rating}) =>
-                makeLandscapeCard({title, slug, poster, banner, rating})
+            moviesGrid.innerHTML = shuffledForYou.slice(0, ROW_LIMIT).map(({title, slug, poster, banner, rating, item}) =>
+                makeLandscapeCard({title, slug, poster, banner, rating, item})
             ).join('');
 
             // ── TOP RATED ──
@@ -3330,11 +4096,16 @@
                     const isLiked = watchlist.includes(title);
                     return makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
                 }).join('');
+
+                // ── TOP 10 RANKING (same rating sort, different layout: numbered rows) ──
+                renderRankingSection(sorted);
             }
 
-            // ── RECENTLY ADDED ──
+            // ── RECENTLY ADDED (site par abhi-abhi upload hua — Continue Watching se upar) ──
             const recentGrid = document.getElementById('recent-grid');
-            if (recentGrid) {
+            const recentSection = document.getElementById('recent-added-section');
+            if (recentGrid && allAnimeData.length > 0) {
+                if (recentSection) recentSection.style.display = '';
                 const recentSorted = [...allAnimeData].sort((a, b) => {
                     const aTime = a.item?.lastUpdated || a.addedAt || a.firebaseIndex || 0;
                     const bTime = b.item?.lastUpdated || b.addedAt || b.firebaseIndex || 0;
@@ -3346,8 +4117,117 @@
                 }).join('');
             }
 
+            // ── GENRE EXPLORER ──
+            renderHomeGenreExplorer();
+
+            // ── RANDOM SERIES (sabse niche, har renderGrids call pe naya shuffle) ──
+            renderRandomSeries();
+
             // ── PC FEATURED STRIP ──
             renderPcStrip();
+        }
+
+        // Sirf "series" (movies exclude) mein se random shuffle karke dikhata hai —
+        // header ke "Shuffle" button se bhi dobara call hoti hai naya set dikhane ke liye
+        function renderRandomSeries() {
+            const grid = document.getElementById('random-series-grid');
+            if (!grid || allAnimeData.length === 0) return;
+
+            const seriesOnly = allAnimeData.filter(a => {
+                const type = (getMetaFor(a).type || '').toLowerCase();
+                if (type) return !type.includes('movie');
+                return !(a.item?.category || '').toLowerCase().includes('movie');
+            });
+            const pool = seriesOnly.length > 0 ? seriesOnly : allAnimeData;
+
+            let watchlist = [];
+            try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
+
+            grid.innerHTML = shuffleArray([...pool]).slice(0, 18).map(({title, slug, poster, banner, rating, item}) => {
+                const isLiked = watchlist.includes(title);
+                return makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
+            }).join('');
+        }
+
+        // ════════════════════════════════
+        // 🏆 TOP 10 RANKING — numbered-row layout (not a card grid)
+        // ════════════════════════════════
+        function renderRankingSection(sortedByRating) {
+            const section = document.getElementById('ranking-section');
+            const list = document.getElementById('ranking-list');
+            if (!section || !list) return;
+
+            const top10 = sortedByRating.slice(0, 10);
+            if (top10.length === 0) { section.style.display = 'none'; return; }
+
+            list.innerHTML = top10.map(({title, slug, poster, banner, rating, item}, idx) => {
+                const meta = getMetaFor({ title, genres: item?.genres });
+                const genreLabel = (meta.genres && meta.genres.length) ? meta.genres.slice(0, 2).join(' · ') : '';
+                const posterFallback = `https://placehold.co/200x280/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,8))}`;
+                return `
+                    <div class="rank-row" onclick="openInfoModal('${title.replace(/'/g,"\\'")}','${slug}','${banner||''}','${rating}')">
+                        <div class="rank-num">${String(idx + 1).padStart(2,'0')}</div>
+                        <div class="rank-thumb">
+                            <img src="${poster}" loading="lazy" onerror="this.src='${posterFallback}'">
+                        </div>
+                        <div>
+                            <div class="rank-info-title">${title}</div>
+                            ${genreLabel ? `<div class="rank-info-genres">${genreLabel}</div>` : ''}
+                        </div>
+                        <div class="rank-score"><i class="fas fa-star" style="font-size:12px;"></i> ${rating}<small>/ 10</small></div>
+                    </div>`;
+            }).join('');
+
+            section.style.display = '';
+        }
+
+        // ════════════════════════════════
+        // 🎭 GENRE EXPLORER (home) — chips drive a filtered grid, live on the home feed
+        // ════════════════════════════════
+        let homeSelectedGenre = null;
+        function renderHomeGenreExplorer() {
+            const section = document.getElementById('genre-explorer-section');
+            const chipRow = document.getElementById('home-genre-chips');
+            const grid = document.getElementById('home-genre-grid');
+            if (!section || !chipRow || !grid) return;
+
+            const genres = getAllGenres();
+            if (genres.length === 0) { section.style.display = 'none'; return; }
+
+            section.style.display = '';
+            if (!homeSelectedGenre || !genres.includes(homeSelectedGenre)) homeSelectedGenre = genres[0];
+
+            chipRow.innerHTML = genres.map(g => `
+                <div class="genre-chip ${g === homeSelectedGenre ? 'active' : ''}" onclick="filterHomeGenre('${g.replace(/'/g,"\\'")}')">${g}</div>
+            `).join('');
+
+            filterHomeGenre(homeSelectedGenre);
+        }
+
+        function filterHomeGenre(genreName) {
+            homeSelectedGenre = genreName;
+            const grid = document.getElementById('home-genre-grid');
+            const metaCache = getMetaCache();
+            const watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]');
+
+            document.querySelectorAll('#home-genre-chips .genre-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.innerText === genreName);
+            });
+
+            const filtered = allAnimeData.filter(a => {
+                const g = (a.genres && a.genres.length) ? a.genres : (metaCache[a.title]?.genres || []);
+                return g.includes(genreName);
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="genre-explorer-empty">Is genre mein abhi kuch nahi mila</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.slice(0, 12).map(({title, slug, poster, banner, rating, item}) => {
+                const isLiked = watchlist.includes(title);
+                return makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
+            }).join('');
         }
 
         function initInfiniteAutoScroll(container) {
@@ -3478,7 +4358,7 @@
             document.getElementById('modal-desc').innerText = "Loading details...";
             
             const bannerImg = document.getElementById('modal-banner');
-            const bannerFallback = `https://placehold.co/800x450/13131a/f47521?text=${encodeURIComponent(title.substring(0,15))}`;
+            const bannerFallback = `https://placehold.co/800x450/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,15))}`;
             bannerImg.src = banner || bannerFallback;
             bannerImg.onerror = () => { bannerImg.src = bannerFallback; };
 
@@ -3571,7 +4451,7 @@
             if (matches.length > 0) {
                 box.innerHTML = matches.map(a => `
                     <div class="sugg-item" onclick="openInfoModal('${a.title.replace(/'/g, "\\'")}','${a.slug}','${a.banner}','${a.rating}')">
-                        <img src="${a.poster}" onerror="this.src='https://placehold.co/48x64/13131a/f47521?text=?'">
+                        <img src="${a.poster}" onerror="this.src='https://placehold.co/48x64/13131a/ff2e43?text=?'">
                         <div class="sugg-title">${a.title}</div>
                         <i class="fas fa-chevron-right" style="color:var(--text-dim); font-size:11px; margin-left:auto;"></i>
                     </div>`).join('');
@@ -3831,7 +4711,7 @@
                 <div class="notif-item ${n.unread ? 'unread' : ''}"
                      onclick="closeNotifAndOpen('${n.title.replace(/'/g,"\\'")}','${n.slug}','${banner}','')">
                     <img class="notif-thumb" src="${n.poster || ''}" 
-                         onerror="this.src='https://placehold.co/46x46/13131a/f47521?text=?'">
+                         onerror="this.src='https://placehold.co/46x46/13131a/ff2e43?text=?'">
                     <div class="notif-text">
                         <div class="notif-title">${n.title}</div>
                         <div class="notif-sub">S${n.season} E${n.episode} is available</div>
@@ -3911,6 +4791,69 @@
             if ('Notification' in window && Notification.permission === 'default') {
                 const result = await Notification.requestPermission();
                 if (window.AVAnalytics) window.AVAnalytics.trackNotifPermission(result);
+            }
+        }
+
+        // ════════════════════════════════
+        // 🔥 DAILY STREAK — fully local, koi Firebase/API call nahi
+        // Roz aane par count badhta hai, ek din bhi miss hua to reset ho jaata hai
+        // ════════════════════════════════
+        function toDateKey(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function initStreak() {
+            try {
+                const banner = document.getElementById('streak-banner');
+                if (!banner) return;
+
+                const today = new Date();
+                const todayKey = toDateKey(today);
+
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayKey = toDateKey(yesterday);
+
+                let data = {};
+                try { data = JSON.parse(localStorage.getItem('av_streak') || '{}'); } catch (e) { data = {}; }
+
+                let { count = 0, lastDate = null } = data;
+
+                if (lastDate === todayKey) {
+                    // aaj already visit ho chuka — count same rahega
+                } else if (lastDate === yesterdayKey) {
+                    count += 1; // consecutive din — streak badhi
+                } else {
+                    count = 1; // naya streak (pehli visit ya gap ke baad)
+                }
+
+                localStorage.setItem('av_streak', JSON.stringify({ count, lastDate: todayKey }));
+
+                document.getElementById('streak-count-num').textContent = count;
+
+                const subEl = document.getElementById('streak-sub-text');
+                if (count === 1) {
+                    subEl.textContent = 'Streak shuru! Kal bhi aana, aage badhaane ke liye.';
+                } else if (count < 5) {
+                    subEl.textContent = 'Nice! Roz aate raho, streak mat todna.';
+                } else if (count < 15) {
+                    subEl.textContent = 'On fire! Tum regular viewer ban chuke ho.';
+                } else {
+                    subEl.textContent = 'Legendary streak! AnimeVerse ka sabse loyal fan.';
+                }
+
+                // Chhote 7 dots — last few days ka visual streak indicator
+                const dotsRow = document.getElementById('streak-days-row');
+                if (dotsRow) {
+                    const lit = Math.min(count, 7);
+                    dotsRow.innerHTML = Array.from({ length: 7 }, (_, i) =>
+                        `<span class="streak-day-dot${i >= 7 - lit ? ' lit' : ''}"></span>`
+                    ).join('');
+                }
+
+                banner.style.display = '';
+            } catch (e) {
+                console.warn('Streak init failed:', e);
             }
         }
 
@@ -4006,8 +4949,7 @@
 
         function seeAll(section) {
             const sectionMap = {
-                foryou:    { title: 'For You',        getData: () => shuffleArray([...allAnimeData]) },
-                latest:    { title: 'Latest Upload',  getData: () => [...allAnimeData].sort((a,b) => (b.item?.lastUpdated||b.addedAt||0) - (a.item?.lastUpdated||a.addedAt||0)) },
+                foryou:    { title: 'For You',        getData: () => buildForYouList(allAnimeData.length, false) },
                 mustwatch: { title: 'Must Watch',     getData: () => allAnimeData.filter(a => {
                     const type = (getMetaFor(a).type || '').toLowerCase();
                     if (type) return !type.includes('movie');
@@ -4146,6 +5088,8 @@
         if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
 
         initApp();
+        initFeaturedSwipe();
+        initStreak();
         requestNotifPermission();
         fetchUpcomingAnime();
         if (window.AVAnalytics) window.AVAnalytics.trackPageview('home');

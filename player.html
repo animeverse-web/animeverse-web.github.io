@@ -6,7 +6,7 @@
     <title>AnimeVerse | Player</title>
 
     <link rel="icon" type="image/png" href="/Gemini_Generated_Image_u4n26yu4n26yu4n2.png">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-6XVHNP2C9G"></script>
@@ -23,32 +23,34 @@
 
     <style>
         :root {
-            --bg: #08080c;
-            --surface: #121218;
-            --surface2: #191922;
-            --surface3: #22222d;
-            --accent: #2fe6c9;
-            --accent2: #ff3e7f;
-            --accent-dim: rgba(47,230,201,0.13);
-            --accent-border: rgba(47,230,201,0.35);
-            --accent2-dim: rgba(255,62,127,0.13);
-            --text: #f4f4f7;
-            --text-muted: #86868f;
-            --text-dim: #3c3c46;
-            --border: rgba(255,255,255,0.07);
-            --border2: rgba(255,255,255,0.13);
+            --bg: #0b0b0f;
+            --surface: #15151c;
+            --surface2: #1c1c26;
+            --surface3: #23232f;
+            --accent: #ff2e43;
+            --accent2: #ff5a3d;
+            --accent-dim: rgba(255,46,67,0.13);
+            --accent-border: rgba(255,46,67,0.35);
+            --accent2-dim: rgba(255,90,61,0.13);
+            --text: #f3f1ea;
+            --text-muted: #9b98a3;
+            --text-dim: #55555f;
+            --border: rgba(255,255,255,0.08);
+            --border2: rgba(255,255,255,0.14);
+            --gradient-brand: linear-gradient(120deg, #ff2e43 0%, #c4111f 50%, #ff2e43 100%);
             --nav-h: 58px;
             --radius: 10px;
-            --font-display: 'Space Grotesk', sans-serif;
-            --font-body: 'Inter', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --font-display: 'Rajdhani', 'Poppins', sans-serif;
+            --font-body: 'Poppins', sans-serif;
+            --font-mono: 'Poppins', sans-serif;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background:
-                repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+                radial-gradient(1100px 600px at 12% -8%, rgba(255,46,67,0.10), transparent 60%),
+                radial-gradient(900px 560px at 108% 8%, rgba(255,90,61,0.05), transparent 55%),
                 var(--bg);
             color: var(--text);
             font-family: var(--font-body);
@@ -61,58 +63,64 @@
            used sparingly on the few labels that should feel like a tape overlay. */
         .vhs-text {
             font-family: var(--font-display);
-            text-shadow: -1px 0 rgba(255,62,127,0.55), 1px 0 rgba(47,230,201,0.55);
+            text-shadow: -1px 0 rgba(255,90,61,0.55), 1px 0 rgba(255,46,67,0.55);
         }
 
         /* ─── HEADER ─── */
         .cr-header {
             position: fixed;
             top: 0; left: 0; right: 0;
-            height: 54px;
-            background: rgba(8,8,12,0.94);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            height: 56px;
+            background: linear-gradient(to bottom, rgba(11,11,15,0.9) 0%, rgba(11,11,15,0.55) 70%, rgba(11,11,15,0.15) 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 14px;
+            padding: 0 16px;
             z-index: 2000;
-            border-bottom: 1px solid var(--border);
+            border-bottom: none;
         }
         .cr-logo {
             font-family: var(--font-display);
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
             color: var(--text);
-            text-shadow: -1px 0 rgba(255,62,127,0.5), 1px 0 rgba(47,230,201,0.5);
+            text-transform: uppercase;
         }
-        .cr-logo span { color: var(--accent); text-shadow: none; }
+        .cr-logo span {
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
         .icon-btn {
-            width: 34px; height: 34px;
-            border-radius: 5px;
-            background: var(--surface2);
-            border: 1px solid var(--border2);
+            width: 36px; height: 36px;
+            border-radius: 0;
+            background: rgba(11,11,15,0.4);
+            border: 1.5px solid rgba(255,255,255,0.18);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
-            color: #aaa;
+            color: #eee;
             font-size: 13px;
             text-decoration: none;
             touch-action: manipulation;
             transition: all 0.18s;
         }
-        .icon-btn:active { background: var(--surface3); transform: scale(0.9); border-color: var(--accent-border); color: var(--accent); }
+        .icon-btn:active { background: var(--surface); transform: scale(0.93); border-color: var(--accent); color: var(--text); }
         .header-actions { display: flex; gap: 8px; align-items: center; }
 
         /* ─── VIDEO PLAYER ─── */
         .player-wrap {
-            margin-top: 54px;
-            width: 100%;
+            width: calc(100% - 32px);
+            margin: 4px 16px 18px;
             background: #000;
             position: relative;
             aspect-ratio: 16/9;
             overflow: hidden;
-            border-bottom: 1px solid var(--border2);
+            border-radius: var(--radius);
+            border: 1px solid var(--border2);
         }
         .player-wrap::after {
             /* faint CRT scanline texture — the signature tape-deck detail */
@@ -128,6 +136,25 @@
             border: none;
             display: block;
         }
+        /* ─── AMBIENT MODE GLOW ───
+           Sits behind .player-wrap (same box) and is blown up + blurred so it
+           reads as a soft colored glow. Color is set from JS by sampling the
+           playing <video> frame; opacity toggles via .active. */
+        #player-ambient-wrap { position: relative; }
+        #ambient-glow {
+            position: absolute;
+            inset: 4px 16px 18px 16px;
+            border-radius: var(--radius);
+            background: radial-gradient(circle at 50% 50%, #3a3a3a 0%, transparent 72%);
+            filter: blur(46px) saturate(1.7);
+            transform: scale(1.22);
+            opacity: 0;
+            transition: opacity 0.7s ease, background 0.7s ease;
+            z-index: 0;
+            pointer-events: none;
+        }
+        #ambient-glow.active { opacity: 0.6; }
+        #player-ambient-wrap .player-wrap { position: relative; z-index: 1; }
         .player-loading {
             position: absolute; inset: 0;
             display: flex; flex-direction: column;
@@ -163,29 +190,242 @@
         .placeholder-text { font-family: var(--font-display); font-size: 13px; font-weight: 700; color: #777; }
         .placeholder-sub { font-family: var(--font-mono); font-size: 10px; font-weight: 500; color: #3a3a3a; margin-top: -2px; }
 
+        /* ─── PREV / NEXT EPISODE NAV BAR ─── */
+        .ep-nav-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 14px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .ep-nav-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 7px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: var(--text-muted);
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.18s;
+        }
+        .ep-nav-btn i { font-size: 11px; color: var(--accent); }
+        .ep-nav-btn:active { background: var(--surface3); transform: scale(0.97); }
+        .ep-nav-btn.disabled { opacity: 0.35; pointer-events: none; }
+        .ep-nav-next { flex-direction: row-reverse; }
+
+        /* ─── MULTI AUDIO / LANGUAGE PILL ROW ─── */
+        .audio-pill-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 14px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .audio-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            border-radius: 20px;
+            background: var(--surface2);
+            border: 1.5px solid var(--border2);
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.18s;
+        }
+        .audio-pill i { font-size: 12px; }
+        .audio-pill:active { transform: scale(0.96); }
+        .audio-pill-active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        /* ─── AUDIO CODEC WARNING NOTE ─── */
+        .codec-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 12px 14px;
+            padding: 12px 14px;
+            background: rgba(255, 176, 32, 0.1);
+            border: 1px solid rgba(255, 176, 32, 0.35);
+            border-radius: var(--radius);
+        }
+        .codec-note-icon {
+            color: #ffb020;
+            font-size: 14px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+        .codec-note-text {
+            font-family: var(--font-body);
+            font-size: 12px;
+            line-height: 1.65;
+            color: #e8c07a;
+        }
+        .codec-note-text b { color: #ffb020; font-weight: 700; }
+
+        /* ─── SERVER SELECT + WATCHLIST ROW ─── */
+        .server-watchlist-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 0 14px 12px;
+        }
+        .server-select-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            color: var(--accent);
+            font-size: 12px;
+        }
+        .server-select-wrap select {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .server-select-wrap select option { background: #1e1e1e; color: #fff; }
+        .server-select-chevron { font-size: 9px; color: var(--text-muted); pointer-events: none; }
+        .watchlist-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 11px 12px;
+            background: var(--accent2-dim);
+            border: 1px solid rgba(255,90,61,0.35);
+            border-radius: 8px;
+            color: var(--accent2);
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.18s;
+        }
+        .watchlist-btn:active { transform: scale(0.97); }
+        .watchlist-btn.active { background: var(--accent2); color: #fff; }
+
+        /* ─── AMBIENT MODE / AUTO SKIP TOGGLES ─── */
+        .toggle-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 0 14px 12px;
+        }
+        .toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.18s;
+        }
+        .toggle-btn i { font-size: 12px; color: var(--text-dim); }
+        .toggle-btn:active { transform: scale(0.97); }
+        .toggle-btn.on { color: var(--accent2); }
+        .toggle-btn.on i { color: var(--accent2); }
+
+        /* ─── PICTURE-IN-PICTURE FULL BUTTON ─── */
+        .pip-full-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            width: calc(100% - 28px);
+            margin: 0 14px 14px;
+            padding: 12px;
+            background: var(--accent2-dim);
+            border: 1px solid rgba(255,90,61,0.35);
+            border-radius: 8px;
+            color: var(--accent2);
+            font-family: var(--font-body);
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.18s;
+        }
+        .pip-full-btn:active { transform: scale(0.98); background: rgba(255,90,61,0.22); }
+
         /* ─── MAIN CONTENT ─── */
         .main-content { padding: 0; }
 
         /* ─── FOOTER ─── */
         .site-footer {
             margin-top: 24px;
-            padding: 22px 16px calc(20px + env(safe-area-inset-bottom));
+            padding: 30px 16px calc(24px + env(safe-area-inset-bottom));
             border-top: 1px solid var(--border);
             background: var(--surface);
+            position: relative;
+        }
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 0; right: 0;
+            height: 2px;
+            background: var(--gradient-brand);
+            opacity: 0.8;
         }
         .site-footer .footer-brand {
             font-family: var(--font-display);
-            font-size: 16px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
             color: var(--text);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
-        .site-footer .footer-brand span { color: var(--accent); }
+        .site-footer .footer-brand span {
+            background: var(--gradient-brand);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
         .site-footer .footer-desc {
             font-family: var(--font-body);
             font-size: 11.5px;
             line-height: 1.6;
+            font-weight: 600;
             color: var(--text-muted);
             max-width: 520px;
         }
@@ -195,9 +435,10 @@
             gap: 8px;
             margin-top: 14px;
             padding: 10px 12px;
-            background: var(--accent-dim);
-            border: 1px solid var(--accent-border);
-            border-radius: var(--radius);
+            background: rgba(255,46,67,0.08);
+            border: 1px solid rgba(255,46,67,0.25);
+            border-left: 3px solid var(--accent);
+            border-radius: 0;
         }
         .site-footer .footer-note i {
             color: var(--accent);
@@ -209,40 +450,61 @@
             font-family: var(--font-body);
             font-size: 10.5px;
             line-height: 1.55;
+            font-weight: 600;
             color: var(--text-muted);
         }
         .site-footer .footer-links {
             display: flex;
             flex-wrap: wrap;
-            gap: 14px;
-            margin-top: 16px;
+            gap: 18px;
+            margin-top: 18px;
         }
         .site-footer .footer-links a {
-            font-family: var(--font-body);
-            font-size: 11px;
-            font-weight: 600;
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
             color: var(--text-muted);
             text-decoration: none;
+            border-bottom: 1px solid transparent;
+            padding-bottom: 2px;
             transition: color 0.18s;
         }
         .site-footer .footer-links a:hover,
-        .site-footer .footer-links a:active { color: var(--accent); }
+        .site-footer .footer-links a:active { color: var(--accent); border-color: var(--accent); }
         .site-footer .footer-bottom {
-            margin-top: 16px;
+            margin-top: 18px;
             padding-top: 14px;
             border-top: 1px solid var(--border);
             font-family: var(--font-mono);
             font-size: 9.5px;
+            font-weight: 700;
             color: var(--text-dim);
             letter-spacing: 0.3px;
         }
 
         /* ─── TITLE BLOCK ─── */
         .title-block {
-            padding: 16px 16px 0;
-            background: linear-gradient(180deg, rgba(47,230,201,0.05) 0%, transparent 100%);
+            margin-top: 56px;
+            padding: 20px 16px 0;
+            background: linear-gradient(180deg, rgba(255,46,67,0.05) 0%, transparent 100%);
             border-bottom: 1px solid var(--border);
             padding-bottom: 16px;
+        }
+        .poster-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .poster-img {
+            width: 140px;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: var(--radius);
+            border: 1px solid var(--border2);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+            background: var(--surface2);
         }
         .now-playing-label {
             font-family: var(--font-mono);
@@ -301,7 +563,31 @@
             border-color: var(--accent-border);
             color: var(--accent);
         }
+        .meta-chip.lang {
+            background: rgba(236,72,153,0.15);
+            border-color: rgba(236,72,153,0.4);
+            color: #f472b6;
+        }
         .meta-chip i { font-size: 8px; }
+        .meta-chip:empty { display: none; }
+
+        /* ─── GENRE TAGS ─── */
+        .genre-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .genre-tag {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 5px;
+            padding: 4px 10px;
+            font-family: var(--font-body);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
 
         /* ─── ACTION BUTTONS ─── */
         .action-row {
@@ -332,6 +618,49 @@
         }
         .action-btn i { font-size: 16px; }
         .action-btn span { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.3px; }
+
+        /* ─── STACKED DOWNLOAD BUTTONS ─── */
+        .dl-btn-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .dl-stacked-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 13px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: all 0.18s;
+        }
+        .dl-stacked-btn:active { transform: scale(0.98); background: var(--surface3); }
+        .dl-stacked-btn span { display: flex; align-items: center; gap: 10px; }
+        .dl-stacked-btn i { font-size: 13px; }
+        .dl-stacked-btn .dl-tick-ok { color: #2fe66f; }
+        .dl-stacked-btn .dl-tick-no { color: var(--text-dim); }
+        .dl-stacked-btn.unavailable { color: var(--text-dim); opacity: 0.6; }
+        .dl-stacked-quality {
+            font-family: var(--font-mono);
+            font-size: 9.5px; font-weight: 700;
+            color: var(--accent);
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-border);
+            border-radius: 4px;
+            padding: 2px 6px;
+            letter-spacing: 0.3px;
+        }
+        .dl-stacked-btn.unavailable .dl-stacked-quality { color: var(--text-dim); background: var(--surface3); border-color: var(--border2); }
 
         /* ─── DESCRIPTION ─── */
         .desc-block {
@@ -428,39 +757,64 @@
         .server-tab.active {
             background: var(--accent);
             border-color: var(--accent);
-            color: #06110f;
+            color: #fff;
         }
 
         /* ─── SEASON TABS ─── */
         .season-tabs {
             display: flex;
-            gap: 6px;
+            gap: 10px;
             overflow-x: auto;
-            margin-bottom: 12px;
+            margin-bottom: 4px;
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
         .season-tabs::-webkit-scrollbar { display: none; }
-        .season-tab {
+        .season-card {
             flex-shrink: 0;
-            padding: 5px 14px;
-            border-radius: 4px;
-            background: var(--surface2);
-            border: 1.5px solid var(--border2);
-            font-family: var(--font-mono);
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--text-muted);
+            width: 100px;
             cursor: pointer;
             touch-action: manipulation;
-            transition: all 0.18s;
-            letter-spacing: 0.3px;
         }
-        .season-tab.active {
+        .season-card-poster {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 2/3;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--surface2);
+            border: 1.5px solid var(--border2);
+            transition: border-color 0.18s, transform 0.15s;
+        }
+        .season-card:active .season-card-poster { transform: scale(0.96); }
+        .season-card.active .season-card-poster { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-border); }
+        .season-card-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .season-card-placeholder {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-dim); font-size: 20px;
+        }
+        .season-card-badge {
+            position: absolute;
+            top: 6px; left: 6px;
             background: var(--accent);
-            border-color: var(--accent);
-            color: #06110f;
+            color: #fff;
+            font-family: var(--font-mono);
+            font-size: 8px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 4px;
         }
+        .season-card-title {
+            margin-top: 7px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .season-card.active .season-card-title { color: var(--accent); }
 
         /* ─── EPISODE GRID - 3 COLUMN THUMBNAIL ─── */
         .ep-grid {
@@ -504,7 +858,7 @@
             position: absolute;
             bottom: 4px; left: 4px;
             background: rgba(0,0,0,0.85);
-            border: 1px solid rgba(47,230,201,0.3);
+            border: 1px solid rgba(255,46,67,0.3);
             color: var(--accent);
             font-family: var(--font-mono);
             font-size: 9px; font-weight: 700;
@@ -518,7 +872,7 @@
             position: absolute;
             inset: 0;
             display: flex; align-items: center; justify-content: center;
-            background: rgba(47,230,201,0.22);
+            background: rgba(255,46,67,0.22);
             backdrop-filter: blur(1px);
         }
         .ep-thumb-playing i { font-size: 14px; color: #fff; }
@@ -579,9 +933,10 @@
             -ms-overflow-style: none; scrollbar-width: none;
         }
         .related-grid::-webkit-scrollbar { display: none; }
-        .rel-card { flex-shrink: 0; width: 95px; cursor: pointer; }
+        .rel-card { flex-shrink: 0; width: 108px; cursor: pointer; }
         .rel-card:active .rel-img { transform: scale(0.94); border-color: var(--accent-border); }
         .rel-img {
+            position: relative;
             width: 100%; aspect-ratio: 2/3;
             border-radius: 6px; overflow: hidden;
             background: var(--surface2);
@@ -589,6 +944,23 @@
             transition: transform 0.15s, border-color 0.15s;
         }
         .rel-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .rel-badges {
+            position: absolute;
+            top: 6px; left: 6px; right: 6px;
+            display: flex;
+            gap: 4px;
+        }
+        .rel-badge {
+            font-family: var(--font-mono);
+            font-size: 7.5px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+        }
+        .rel-badge-lang { background: #fff; }
+        .rel-badge-series { background: var(--accent); }
         .rel-title {
             font-size: 9.5px;
             font-weight: 600;
@@ -695,9 +1067,15 @@
         .dl-quality-group.unavailable { opacity: 0.35; pointer-events: none; }
         .dl-quality-header {
             display: flex; align-items: center;
-            gap: 14px;
+            gap: 12px;
+            padding: 12px 14px;
             margin-bottom: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
         }
+        .dl-tick-ok { color: #2ecc71; font-size: 15px; }
+        .dl-tick-no { color: var(--text-dim); font-size: 15px; }
         .dl-option-row {
             display: flex; gap: 8px;
         }
@@ -718,7 +1096,7 @@
             border: 1px solid var(--accent-border);
             color: var(--accent);
         }
-        .dl-option-shortener:active { background: rgba(47,230,201,0.22); }
+        .dl-option-shortener:active { background: rgba(255,46,67,0.22); }
         .dl-option-direct {
             background: var(--surface2);
             border: 1px solid var(--border2);
@@ -812,8 +1190,8 @@
             border-radius: 5px;
         }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        #skeleton-player { margin-top: 54px; width: 100%; aspect-ratio: 16/9; background: #0c0c10; border-radius: 0; }
-        #skeleton-info { padding: 16px 16px 0; }
+        #skeleton-player { width: 100%; aspect-ratio: 16/9; background: #0c0c10; border-radius: 0; }
+        #skeleton-info { margin-top: 56px; padding: 16px 16px 0; }
         .sk-title { height: 18px; width: 65%; margin-bottom: 10px; }
         .sk-meta { height: 11px; width: 40%; margin-bottom: 16px; }
         .sk-ep { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
@@ -854,21 +1232,47 @@
             object-fit: contain;
             display: block;
         }
-        /* Controls overlay */
+        /* Controls overlay — now spans the full player, top icon row /
+           center transport row / bottom time row + progress bar */
         #cv-controls {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.92));
-            padding: 28px 12px 10px;
+            position: absolute; inset: 0;
+            background: linear-gradient(rgba(0,0,0,0.35), transparent 22%, transparent 68%, rgba(0,0,0,0.85));
+            padding: 10px 10px 8px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            justify-content: space-between;
+            gap: 6px;
             opacity: 0;
+            pointer-events: none;
             transition: opacity 0.25s;
             z-index: 10;
         }
+        #cv-controls > * { pointer-events: auto; }
         #custom-player-wrap.show-controls #cv-controls { opacity: 1; }
         @media (hover: hover) and (pointer: fine) {
             #custom-player-wrap:hover #cv-controls { opacity: 1; }
+        }
+        /* Top row: compact icon controls, top-right aligned */
+        #cv-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+        /* Center row: big transport controls */
+        #cv-center-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            flex: 1;
+        }
+        /* Bottom row: time + fullscreen */
+        #cv-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
         }
         /* Progress bar */
         #cv-progress-wrap {
@@ -879,6 +1283,7 @@
             cursor: pointer;
             position: relative;
             touch-action: none;
+            margin-top: 2px;
         }
         #cv-progress-wrap:hover { height: 7px; }
         #cv-buffered {
@@ -911,14 +1316,6 @@
             pointer-events: none; display: none;
             white-space: nowrap; transform: translateX(-50%);
         }
-        /* Bottom controls row */
-        #cv-bottom {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 6px;
-        }
-        #cv-left, #cv-right { display: flex; align-items: center; gap: 4px; }
         .cv-btn {
             background: none; border: none;
             color: #fff; font-size: 14px;
@@ -931,12 +1328,46 @@
         .cv-btn:hover { background: rgba(255,255,255,0.12); }
         .cv-btn:active { transform: scale(0.85); }
         .cv-btn i { pointer-events: none; }
+        /* Round translucent icon buttons — used in the top row & fullscreen */
+        .cv-btn-round {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+        .cv-btn-round:hover { background: rgba(0,0,0,0.7); }
+        /* Big circular transport buttons — center row */
+        .cv-big-btn {
+            position: relative;
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.16);
+            font-size: 16px;
+            flex-direction: column;
+            gap: 0;
+        }
+        .cv-big-btn:hover { background: rgba(0,0,0,0.7); }
+        .cv-big-btn-play {
+            width: 58px; height: 58px;
+            font-size: 22px;
+            background: rgba(0,0,0,0.55);
+        }
+        .cv-btn-label {
+            font-family: var(--font-mono);
+            font-size: 8px; font-weight: 700;
+            color: rgba(255,255,255,0.85);
+            margin-top: 1px;
+            pointer-events: none;
+        }
         #cv-time {
             font-family: var(--font-mono);
-            font-size: 9.5px; font-weight: 700;
-            color: rgba(255,255,255,0.85);
-            white-space: nowrap; min-width: 70px;
-            text-align: center;
+            font-size: 10px; font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            background: rgba(0,0,0,0.45);
+            padding: 4px 9px;
+            border-radius: 5px;
         }
         /* Volume slider */
         #cv-vol-wrap {
@@ -958,21 +1389,30 @@
             background: var(--accent); cursor: pointer;
         }
         /* Speed selector */
-        #cv-speed {
-            background: transparent; border: 1px solid rgba(255,255,255,0.2);
+        #cv-speed { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
             color: #fff; font-size: 9px; font-weight: 700;
             font-family: var(--font-mono);
-            border-radius: 4px; padding: 3px 4px;
+            border-radius: 6px; padding: 0 6px;
+            height: 32px;
             cursor: pointer; outline: none;
         }
         #cv-speed option { background: #1a1a1a; }
+        #cv-quality {
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+            color: var(--accent); font-size: 9px; font-weight: 800;
+            font-family: var(--font-mono);
+            border-radius: 6px; padding: 0 6px;
+            height: 32px;
+            cursor: pointer; outline: none;
+        }
+        #cv-quality option { background: #1a1a1a; color: #fff; }
         /* Audio track selector */
         #cv-audio-wrap { position: relative; display: none; }
         #cv-audio-wrap.has-tracks { display: inline-flex; }
         #cv-btn-audio.active-track { color: var(--accent); }
         #cv-audio-menu {
             position: absolute;
-            bottom: 38px; right: 0;
+            top: 38px; right: 0;
             background: rgba(20,20,20,0.97);
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 8px;
@@ -1079,12 +1519,14 @@
             <div class="icon-btn" onclick="shareAnime()" title="Share">
                 <i class="fas fa-share-nodes"></i>
             </div>
+            <div class="icon-btn" onclick="reportIssue()" title="Report an issue">
+                <i class="fas fa-flag"></i>
+            </div>
         </div>
     </header>
 
     <!-- ─── SKELETON ─── -->
     <div id="skeleton-loader">
-        <div id="skeleton-player" class="skeleton"></div>
         <div id="skeleton-info">
             <div class="sk-title skeleton"></div>
             <div class="sk-meta skeleton"></div>
@@ -1096,12 +1538,102 @@
                 <div class="sk-ep-btn skeleton"></div><div class="sk-ep-btn skeleton"></div>
             </div>
         </div>
+        <div id="skeleton-player" class="skeleton"></div>
     </div>
 
     <!-- ─── REAL CONTENT ─── -->
     <div id="real-content" style="display:none;">
 
+        <!-- ── POSTER + TITLE BLOCK (STEP 1/8) ── -->
+        <div class="title-block">
+            <div class="poster-wrap" id="poster-wrap" style="display:none;">
+                <img id="player-poster-img" class="poster-img" src="" alt="" onerror="this.closest('.poster-wrap').style.display='none'">
+            </div>
+            <div class="anime-title" id="anime-title" style="text-align:center;">Loading...</div>
+            <div class="meta-row" id="meta-row" style="justify-content:center;">
+                <div class="meta-chip accent"><i class="fas fa-star"></i> <span id="rating-val">—</span></div>
+                <div class="meta-chip" id="chip-season">S1</div>
+                <div class="meta-chip" id="chip-episode">E1</div>
+                <div class="meta-chip" id="chip-status"></div>
+                <div class="meta-chip lang">हिंदी</div>
+            </div>
+            <!-- ── GENRE TAGS (STEP 2/8) ── -->
+            <div class="genre-row" id="genre-row" style="display:none;justify-content:center;"></div>
+            <!-- ── DESCRIPTION (STEP 3/8) ── -->
+            <div class="desc-block" style="padding:0 0 14px;border-bottom:none;">
+                <div class="desc-text" id="anime-desc">Loading description...</div>
+                <span class="desc-toggle" id="desc-toggle" onclick="toggleDesc()">
+                    Show more <i class="fas fa-chevron-down" style="font-size:8px;"></i>
+                </span>
+            </div>
+            <!-- Action Buttons (hidden helpers kept for JS compatibility, functions now live in header/below) -->
+            <div class="action-row" style="display:none;">
+                <button class="action-btn" id="btn-watchlist" onclick="toggleWatchlist()">
+                    <i class="fas fa-heart" id="heart-icon"></i>
+                    <span>My List</span>
+                </button>
+            </div>
+            <!-- ── STACKED DOWNLOAD BUTTONS (STEP 4/8) ── -->
+            <div class="dl-btn-list" id="dl-btn-list"></div>
+        </div>
+
+        <!-- ── STEP 5/8: SERVER + WATCHLIST (moved up) ── -->
+        <!-- ── SERVER SELECT + WATCHLIST ROW ── -->
+        <div class="server-watchlist-row" id="server-watchlist-row">
+            <div class="server-select-wrap">
+                <i class="fas fa-server"></i>
+                <select id="server-select" onchange="selectServer(parseInt(this.value))">
+                    <option value="1">Server 1</option>
+                    <option value="2" id="server2-option" style="display:none;">Server 2</option>
+                </select>
+                <i class="fas fa-chevron-down server-select-chevron"></i>
+            </div>
+            <button class="watchlist-btn" id="btn-watchlist-2" onclick="toggleWatchlist()">
+                <i class="fas fa-heart" id="heart-icon-2"></i> Add to Watchlist
+            </button>
+        </div>
+
+        <!-- ── STEP 6/8: AMBIENT/AUTOSKIP (moved up) ── -->
+        <!-- ── AMBIENT MODE / AUTO SKIP TOGGLES ── -->
+        <div class="toggle-row" id="toggle-row">
+            <button class="toggle-btn on" id="btn-ambient-mode" onclick="uiToggleBtn('btn-ambient-mode','Ambient Mode')">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span id="btn-ambient-mode-label">Ambient Mode: ON</span>
+            </button>
+            <button class="toggle-btn on" id="btn-auto-skip" onclick="uiToggleBtn('btn-auto-skip','Auto Skip')">
+                <i class="fas fa-forward"></i>
+                <span id="btn-auto-skip-label">Auto Skip: ON</span>
+            </button>
+        </div>
+
+        <!-- ── STEP 7/8: PIP + AUDIO ROW + WARNING (moved up) ── -->
+        <!-- ── PICTURE-IN-PICTURE BUTTON ── -->
+        <button class="pip-full-btn" id="btn-pip-full" onclick="document.getElementById('cv-btn-pip').click()">
+            <i class="fas fa-clone"></i> Picture-in-Picture
+        </button>
+
+        <!-- ── MULTI AUDIO / LANGUAGE PILLS ── -->
+        <div class="audio-pill-row" id="audio-pill-row">
+            <button class="audio-pill audio-pill-active" id="pill-multi-audio" onclick="document.getElementById('cv-btn-audio').click()">
+                <i class="fas fa-volume-high"></i> Multi Audio
+            </button>
+            <button class="audio-pill" id="pill-lang">हिंदी</button>
+        </div>
+
+        <!-- ── AUDIO CODEC WARNING NOTE ── -->
+        <div class="codec-note" id="codec-note">
+            <i class="fas fa-volume-xmark codec-note-icon"></i>
+            <div class="codec-note-text">
+                <b>No Audio / Sound in Browser? (EAC3 / Dolby Codec):</b>
+                Web browsers me EAC3 audio decode nahi hota. Solution: Video download karke
+                <b>MX Player / VLC Player</b> me play karein.
+            </div>
+        </div>
+
+        <!-- ── STEP 8/8: VIDEO PLAYER (moved down, after all info/controls) ── -->
         <!-- VIDEO PLAYER -->
+        <div id="player-ambient-wrap">
+        <div id="ambient-glow"></div>
         <div class="player-wrap" id="player-wrap">
             <div class="player-loading" id="player-loading">
                 <div class="loader-spinner"></div>
@@ -1119,7 +1651,7 @@
 
             <!-- ─── CUSTOM PLAYER (Server 2) ─── -->
             <div id="custom-player-wrap">
-                <video id="cv-video" preload="metadata" playsinline></video>
+                <video id="cv-video" preload="auto" playsinline></video>
 
                 <!-- Center tap area -->
                 <div id="cv-tap-area" style="position:absolute;inset:0;z-index:5;cursor:pointer;"></div>
@@ -1134,112 +1666,99 @@
 
                 <!-- Controls -->
                 <div id="cv-controls">
-                    <!-- Progress bar -->
+                    <!-- Top row: compact icon controls -->
+                    <div id="cv-top-row">
+                        <button class="cv-btn cv-btn-round" id="cv-btn-mute" title="Mute">
+                            <i class="fas fa-volume-high" id="cv-mute-icon"></i>
+                        </button>
+                        <div id="cv-vol-wrap">
+                            <input type="range" id="cv-volume" min="0" max="1" step="0.02" value="1">
+                        </div>
+                        <div id="cv-audio-wrap">
+                            <button class="cv-btn cv-btn-round" id="cv-btn-audio" title="Audio Track">
+                                <i class="fas fa-headphones" style="font-size:12px;"></i>
+                            </button>
+                            <div id="cv-audio-menu">
+                                <div class="cv-audio-label">Audio</div>
+                                <div id="cv-audio-list"></div>
+                            </div>
+                        </div>
+                        <select id="cv-speed" title="Playback speed">
+                            <option value="0.5">0.5×</option>
+                            <option value="0.75">0.75×</option>
+                            <option value="1" selected>1×</option>
+                            <option value="1.25">1.25×</option>
+                            <option value="1.5">1.5×</option>
+                            <option value="2">2×</option>
+                        </select>
+                        <select id="cv-quality" title="Quality" onchange="selectQuality(this.value)">
+                            <option value="1080p">1080p</option>
+                            <option value="720p">720p</option>
+                            <option value="480p" selected>480p</option>
+                        </select>
+                        <button class="cv-btn cv-btn-round" id="cv-btn-pip" title="Picture-in-Picture" style="font-size:11px;">
+                            <i class="fas fa-window-restore"></i>
+                        </button>
+                    </div>
+
+                    <!-- Center row: big transport controls -->
+                    <div id="cv-center-row">
+                        <button class="cv-btn cv-big-btn" id="cv-btn-back" title="-10s">
+                            <i class="fas fa-rotate-left"></i>
+                            <span class="cv-btn-label">10s</span>
+                        </button>
+                        <button class="cv-btn cv-big-btn cv-big-btn-play" id="cv-btn-play" title="Play/Pause">
+                            <i class="fas fa-play" id="cv-play-icon"></i>
+                        </button>
+                        <button class="cv-btn cv-big-btn" id="cv-btn-fwd" title="+10s">
+                            <i class="fas fa-rotate-right"></i>
+                            <span class="cv-btn-label">10s</span>
+                        </button>
+                    </div>
+
+                    <!-- Bottom row: time + fullscreen -->
+                    <div id="cv-bottom">
+                        <span id="cv-time">0:00 / 0:00</span>
+                        <button class="cv-btn cv-btn-round" id="cv-btn-fs" title="Fullscreen">
+                            <i class="fas fa-expand" id="cv-fs-icon"></i>
+                        </button>
+                    </div>
+
+                    <!-- Progress bar (very bottom edge) -->
                     <div id="cv-progress-wrap">
                         <div id="cv-buffered"></div>
                         <div id="cv-progress"></div>
                         <div id="cv-thumb"></div>
                         <div id="cv-time-tip"></div>
                     </div>
-                    <!-- Bottom row -->
-                    <div id="cv-bottom">
-                        <div id="cv-left">
-                            <button class="cv-btn" id="cv-btn-play" title="Play/Pause">
-                                <i class="fas fa-play" id="cv-play-icon"></i>
-                            </button>
-                            <button class="cv-btn" id="cv-btn-back" title="-10s">
-                                <i class="fas fa-rotate-left" style="font-size:12px;"></i>
-                            </button>
-                            <button class="cv-btn" id="cv-btn-fwd" title="+10s">
-                                <i class="fas fa-rotate-right" style="font-size:12px;"></i>
-                            </button>
-                            <button class="cv-btn" id="cv-btn-mute" title="Mute">
-                                <i class="fas fa-volume-high" id="cv-mute-icon"></i>
-                            </button>
-                            <div id="cv-vol-wrap">
-                                <input type="range" id="cv-volume" min="0" max="1" step="0.02" value="1">
-                            </div>
-                            <span id="cv-time">0:00 / 0:00</span>
-                        </div>
-                        <div id="cv-right">
-                            <div id="cv-audio-wrap">
-                                <button class="cv-btn" id="cv-btn-audio" title="Audio Track">
-                                    <i class="fas fa-headphones" style="font-size:12px;"></i>
-                                </button>
-                                <div id="cv-audio-menu">
-                                    <div class="cv-audio-label">Audio</div>
-                                    <div id="cv-audio-list"></div>
-                                </div>
-                            </div>
-                            <select id="cv-speed" title="Playback speed">
-                                <option value="0.5">0.5×</option>
-                                <option value="0.75">0.75×</option>
-                                <option value="1" selected>1×</option>
-                                <option value="1.25">1.25×</option>
-                                <option value="1.5">1.5×</option>
-                                <option value="2">2×</option>
-                            </select>
-                            <button class="cv-btn" id="cv-btn-pip" title="Picture-in-Picture" style="font-size:11px;">
-                                <i class="fas fa-window-restore"></i>
-                            </button>
-                            <button class="cv-btn" id="cv-btn-fs" title="Fullscreen">
-                                <i class="fas fa-expand" id="cv-fs-icon"></i>
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
             <!-- ─── END CUSTOM PLAYER ─── -->
+        </div>
+        </div>
+        <!-- /#player-ambient-wrap -->
+
+        <!-- ── PREV / NEXT EPISODE NAV ── -->
+        <div class="ep-nav-bar" id="ep-nav-bar">
+            <button class="ep-nav-btn ep-nav-prev" id="ep-nav-prev" onclick="navEpisode(-1)">
+                <i class="fas fa-backward-step"></i>
+                <span id="ep-nav-prev-label">Episode</span>
+            </button>
+            <button class="ep-nav-btn ep-nav-next" id="ep-nav-next" onclick="navEpisode(1)">
+                <span id="ep-nav-next-label">Episode</span>
+                <i class="fas fa-forward-step"></i>
+            </button>
         </div>
 
         <!-- MAIN CONTENT -->
         <div class="main-content fade-in">
 
-            <!-- ── TITLE BLOCK ── -->
-            <div class="title-block">
-                <div class="now-playing-label">Now Playing</div>
-                <div class="anime-title" id="anime-title">Loading...</div>
-                <div class="meta-row" id="meta-row">
-                    <div class="meta-chip accent"><i class="fas fa-star"></i> <span id="rating-val">—</span></div>
-                    <div class="meta-chip" id="chip-season">S1</div>
-                    <div class="meta-chip" id="chip-episode">E1</div>
-                    <div class="meta-chip" id="chip-status"></div>
-                </div>
-                <!-- Action Buttons -->
-                <div class="action-row">
-                    <button class="action-btn" id="btn-watchlist" onclick="toggleWatchlist()">
-                        <i class="fas fa-heart" id="heart-icon"></i>
-                        <span>My List</span>
-                    </button>
-                    <button class="action-btn" id="btn-download" onclick="downloadEp()">
-                        <i class="fas fa-download"></i>
-                        <span>Download</span>
-                    </button>
-                    <button class="action-btn" onclick="shareAnime()">
-                        <i class="fas fa-share-nodes"></i>
-                        <span>Share</span>
-                    </button>
-                    <button class="action-btn" onclick="reportIssue()">
-                        <i class="fas fa-flag"></i>
-                        <span>Report</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- ── DESCRIPTION ── -->
-            <div class="desc-block">
-                <div class="desc-text" id="anime-desc">Loading description...</div>
-                <span class="desc-toggle" id="desc-toggle" onclick="toggleDesc()">
-                    Show more <i class="fas fa-chevron-down" style="font-size:8px;"></i>
-                </span>
-            </div>
-
-            <!-- ── SERVERS ── -->
+            <!-- ── SEASONS & MOVIES ── -->
             <div class="section">
                 <div class="section-label">
-                    <span class="section-label-left">Servers</span>
+                    <span class="section-label-left"><i class="fas fa-layer-group" style="margin-right:6px;"></i>Seasons &amp; Movies</span>
                 </div>
-                <div class="server-tabs" id="server-tabs"></div>
+                <div class="season-tabs" id="season-tabs"></div>
             </div>
 
             <!-- ── EPISODES ── -->
@@ -1247,16 +1766,23 @@
                 <div class="section-label">
                     <span class="section-label-left">Episodes</span>
                 </div>
-                <div class="season-tabs" id="season-tabs"></div>
                 <div class="ep-grid" id="ep-grid"></div>
             </div>
 
             <!-- ── RELATED ── -->
             <div class="section" style="border-bottom:none;">
                 <div class="section-label">
-                    <span class="section-label-left">More Anime</span>
+                    <span class="section-label-left"><i class="fas fa-fire" style="margin-right:6px;color:var(--accent2);"></i>Trending Now</span>
                 </div>
                 <div class="related-grid no-scrollbar" id="related-grid"></div>
+            </div>
+
+            <!-- ── SERVERS (kept off-screen for JS compatibility; switching now lives in the player + top dropdown) ── -->
+            <div class="section" style="display:none;">
+                <div class="section-label">
+                    <span class="section-label-left">Servers</span>
+                </div>
+                <div class="server-tabs" id="server-tabs"></div>
             </div>
 
         </div>
@@ -1408,13 +1934,20 @@
             const isIn = list.includes(animeTitle);
             const btn  = document.getElementById('btn-watchlist');
             const icon = document.getElementById('heart-icon');
+            const btn2  = document.getElementById('btn-watchlist-2');
+            const icon2 = document.getElementById('heart-icon-2');
             if (isIn) {
                 btn.classList.add('active');
                 icon.style.color = 'var(--accent)';
+                if (btn2)  btn2.classList.add('active');
+                if (icon2) icon2.style.color = '';
             } else {
                 btn.classList.remove('active');
                 icon.style.color = '';
+                if (btn2)  btn2.classList.remove('active');
+                if (icon2) icon2.style.color = '';
             }
+            if (btn2 && btn2.lastChild) btn2.lastChild.textContent = isIn ? ' In Watchlist' : ' Add to Watchlist';
         }
         function toggleWatchlist() {
             let list = getWatchlist();
@@ -1600,6 +2133,50 @@
             }
 
             wrap.innerHTML = tabsHtml + qualityHtml;
+
+            // Keep the compact server <select> (top row) in sync — same state, no new logic
+            const srvSelect = document.getElementById('server-select');
+            const srv2Opt   = document.getElementById('server2-option');
+            if (srv2Opt) srv2Opt.style.display = hasServer2 ? '' : 'none';
+            if (srvSelect) srvSelect.value = String(currentServer);
+
+            // Keep the in-player quality selector in sync
+            const cvQualitySelect = document.getElementById('cv-quality');
+            if (cvQualitySelect) cvQualitySelect.value = currentQuality;
+
+            renderDownloadButtonsList();
+        }
+
+        // ─── STACKED DOWNLOAD BUTTONS (v1/v2/v3 style, STEP 4/8) ───
+        function renderDownloadButtonsList() {
+            const listEl = document.getElementById('dl-btn-list');
+            if (!listEl) return;
+
+            const sKey = 'S' + currentSeason;
+            const eKey = 'E' + currentEpisode;
+            const primaryData = currentServer === 1 ? srv1Data : srv2Data;
+            const epData = primaryData[sKey]?.[eKey];
+
+            const qualities = ['1080p', '720p', '480p'];
+            const labels = { '1080p': 'Download v1', '720p': 'Download v2', '480p': 'Download v3' };
+
+            listEl.innerHTML = qualities.map(q => {
+                const qData = epData?.[q];
+                const url   = qData?.dl_link || qData?.link || null;
+                return `
+                <button class="dl-stacked-btn ${url ? '' : 'unavailable'}" onclick='quickDownload(${JSON.stringify(url)}, ${JSON.stringify(q)})'>
+                    <span><i class="fas fa-cloud-arrow-down"></i> ${labels[q]} <b class="dl-stacked-quality">${q}</b></span>
+                    <i class="fas ${url ? 'fa-circle-check dl-tick-ok' : 'fa-circle-xmark dl-tick-no'}"></i>
+                </button>`;
+            }).join('');
+        }
+
+        // Tapping a v1/v2/v3 button no longer downloads straight away — it opens the
+        // same Shortener/Direct choice popup used by the main Download button, scoped
+        // to just that one quality.
+        function quickDownload(url, quality) {
+            if (!url) { showToast('Not available'); return; }
+            openSingleDlPopup(url, quality);
         }
 
 
@@ -1627,12 +2204,19 @@
             loadVideo();
         }
 
-        // ─── RENDER SEASON TABS ───
+        // ─── RENDER SEASON TABS (poster-card style) ───
         function renderSeasons() {
             const wrap = document.getElementById('season-tabs');
             wrap.innerHTML = Object.keys(totalEpisodes).sort((a,b)=>a-b).map(s => `
-                <div class="season-tab ${parseInt(s) === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
-                    Season ${s}
+                <div class="season-card ${parseInt(s) === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
+                    <div class="season-card-poster">
+                        ${posterUrl
+                            ? `<img src="${posterUrl}" loading="lazy" onerror="this.style.display='none'">`
+                            : `<div class="season-card-placeholder"><i class="fas fa-photo-film"></i></div>`
+                        }
+                        <div class="season-card-badge">Series</div>
+                    </div>
+                    <div class="season-card-title">Season ${s}</div>
                 </div>`).join('');
         }
 
@@ -1839,6 +2423,7 @@
         }
 
         function selectEpisode(e) {
+            clearTimeout(autoNextTimer); // a manual pick cancels any pending auto-next countdown
             currentEpisode = e;
             currentServer = pickBestServer(currentSeason, currentEpisode);
             saveContinueWatching();
@@ -1847,14 +2432,71 @@
             renderEpisodes();
             loadVideo();
             updateChips();
-            // Scroll to player
-            document.getElementById('player-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         // ─── UPDATE META CHIPS ───
         function updateChips() {
             document.getElementById('chip-season').textContent = `S${currentSeason}`;
             document.getElementById('chip-episode').textContent = `E${currentEpisode}`;
+            updateEpNavBar();
+        }
+
+        // ─── Ambient Mode / Auto Skip toggle buttons ───
+        // Ambient Mode: turns the video-color glow behind the player on/off (see
+        // startAmbientMode/stopAmbientMode above).
+        // Auto Skip: when ON, auto-plays the next episode a few seconds after the
+        // current one ends (see scheduleAutoNext below).
+        function uiToggleBtn(id, label) {
+            const btn = document.getElementById(id);
+            const lbl = document.getElementById(id + '-label');
+            const isOn = btn.classList.toggle('on');
+            lbl.textContent = `${label}: ${isOn ? 'ON' : 'OFF'}`;
+
+            if (id === 'btn-ambient-mode') {
+                if (isOn) startAmbientMode(); else stopAmbientMode();
+            }
+            if (id === 'btn-auto-skip' && !isOn) {
+                clearTimeout(autoNextTimer); // cancel a countdown already in progress
+            }
+        }
+
+        // ─── AUTO SKIP → AUTO-NEXT EPISODE ───
+        // Only fires for the custom player (Server 2 / direct video) — the Server 1
+        // iframe embed is a separate document, so we never get its 'ended' event.
+        let autoNextTimer = null;
+        function isAutoSkipOn() {
+            return document.getElementById('btn-auto-skip')?.classList.contains('on');
+        }
+        function scheduleAutoNext() {
+            clearTimeout(autoNextTimer);
+            if (!isAutoSkipOn()) return;
+            const epCount = totalEpisodes[currentSeason] || 1;
+            if (currentEpisode >= epCount) return; // last episode — nothing to auto-play
+            showToast('⏭ Playing next episode in 3s...');
+            autoNextTimer = setTimeout(() => {
+                if (isAutoSkipOn()) navEpisode(1);
+            }, 3000);
+        }
+
+        // ─── PREV / NEXT EPISODE NAV (uses existing selectEpisode, no new logic) ───
+        function navEpisode(dir) {
+            const target = currentEpisode + dir;
+            if (target < 1 || target > (totalEpisodes[currentSeason] || 1)) return;
+            selectEpisode(target);
+        }
+        function updateEpNavBar() {
+            const prevBtn = document.getElementById('ep-nav-prev');
+            const nextBtn = document.getElementById('ep-nav-next');
+            const prevLbl = document.getElementById('ep-nav-prev-label');
+            const nextLbl = document.getElementById('ep-nav-next-label');
+            if (!prevBtn || !nextBtn) return;
+            const epCount = totalEpisodes[currentSeason] || 1;
+            const hasPrev = currentEpisode > 1;
+            const hasNext = currentEpisode < epCount;
+            prevBtn.classList.toggle('disabled', !hasPrev);
+            nextBtn.classList.toggle('disabled', !hasNext);
+            prevLbl.textContent = hasPrev ? `S${currentSeason}E${currentEpisode - 1} Episode ${currentEpisode - 1}` : 'No Previous';
+            nextLbl.textContent = hasNext ? `S${currentSeason}E${currentEpisode + 1} Episode ${currentEpisode + 1}` : 'No Next';
         }
 
         // ─── LOAD VIDEO ───
@@ -1969,6 +2611,7 @@
             if (!isDirectVideo) {
                 if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
                 resetAudioBtn();
+                stopAmbientMode(); // iframe embed is cross-origin — no pixels to sample
                 customWrap.classList.remove('active');
                 loading.style.display     = 'flex';
                 iframe.style.display      = 'none';
@@ -2087,6 +2730,63 @@
             });
         })();
 
+        // ─── AMBIENT MODE ───
+        // Samples the currently-playing <video> frame onto a tiny offscreen canvas,
+        // averages its color, and paints that as a soft blurred glow (#ambient-glow)
+        // behind the player. Only works for the custom HTML5 player (Server 2 /
+        // direct video links) — Server 1's iframe embed is a cross-origin document,
+        // so its pixels can't be read by canvas at all; ambient mode is simply a
+        // no-op while an iframe is showing.
+        let ambientRAF = null;
+        let ambientCanvas = null;
+        let ambientCtx = null;
+        let ambientLastSample = 0;
+
+        function isAmbientModeOn() {
+            return document.getElementById('btn-ambient-mode')?.classList.contains('on');
+        }
+
+        function startAmbientMode() {
+            cancelAnimationFrame(ambientRAF);
+            if (!isAmbientModeOn()) return;
+            const video = document.getElementById('cv-video');
+            const glow  = document.getElementById('ambient-glow');
+            if (!video || !glow) return;
+
+            if (!ambientCanvas) {
+                ambientCanvas = document.createElement('canvas');
+                ambientCanvas.width = 24;
+                ambientCanvas.height = 14;
+                ambientCtx = ambientCanvas.getContext('2d', { willReadFrequently: true });
+            }
+
+            const tick = (ts) => {
+                ambientRAF = requestAnimationFrame(tick);
+                if (!isAmbientModeOn() || video.paused || video.ended || video.readyState < 2) return;
+                if (ts - ambientLastSample < 380) return; // ~2-3 samples/sec is plenty
+                ambientLastSample = ts;
+                try {
+                    ambientCtx.drawImage(video, 0, 0, ambientCanvas.width, ambientCanvas.height);
+                    const { data } = ambientCtx.getImageData(0, 0, ambientCanvas.width, ambientCanvas.height);
+                    let r = 0, g = 0, b = 0, n = 0;
+                    for (let i = 0; i < data.length; i += 4) { r += data[i]; g += data[i+1]; b += data[i+2]; n++; }
+                    r = Math.round(r/n); g = Math.round(g/n); b = Math.round(b/n);
+                    glow.style.background = `radial-gradient(circle at 50% 50%, rgb(${r},${g},${b}) 0%, transparent 72%)`;
+                    glow.classList.add('active');
+                } catch (e) {
+                    // Tainted/cross-origin canvas — quietly stop instead of spamming errors.
+                    stopAmbientMode();
+                }
+            };
+            ambientRAF = requestAnimationFrame(tick);
+        }
+
+        function stopAmbientMode() {
+            cancelAnimationFrame(ambientRAF);
+            ambientRAF = null;
+            document.getElementById('ambient-glow')?.classList.remove('active');
+        }
+
         // ─── CUSTOM PLAYER LOGIC ───
         let cvControlsTimer = null;
         let cvListenersAdded = false;
@@ -2113,6 +2813,7 @@
             if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
             hideAudioMenu();
             resetAudioBtn();
+            stopAmbientMode(); // avoid flashing the previous episode's glow color
 
             const isHls = src.includes('.m3u8');
             const hasSeparateAudioFiles = Array.isArray(audioTracks) && audioTracks.length > 1;
@@ -2167,10 +2868,21 @@
             video.addEventListener('stalled', () => console.log('[AV-TIMING] STALLED (browser waiting on network) @', (performance.now()-cvLoadT0).toFixed(0), 'ms'));
             video.addEventListener('error', () => console.log('[AV-TIMING] ERROR @', (performance.now()-cvLoadT0).toFixed(0), 'ms', video.error));
 
-            // Autoplay as soon as enough data is ready
+            // Autoplay as soon as enough data is ready.
+            // Browsers block autoplay-WITH-sound unless the user already
+            // interacted — that silent rejection is why the video used to
+            // just sit there needing a manual tap. Fallback: retry muted
+            // (always allowed) so playback + the timer actually start,
+            // then nudge the user to tap for sound.
             video.oncanplay = () => {
                 spinner.style.display = 'none';
-                video.play().catch(() => {});
+                video.play().catch(() => {
+                    video.muted = true;
+                    updateVolIcon();
+                    video.play().then(() => {
+                        showToast('Tap 🔊 to unmute');
+                    }).catch(() => {});
+                });
             };
 
             // Show spinner while buffering
@@ -2209,9 +2921,8 @@
             }
             btnPlay.onclick = togglePlay;
             tapArea.onclick = togglePlay;
-            video.onplay  = () => { updatePlayBtn(); showCvControls(); wdLastTimeupdate = video.currentTime; wdStartTimer(); };
-            video.onpause = () => { updatePlayBtn(); wrap.classList.add('show-controls'); clearTimeout(cvControlsTimer); clearInterval(wdFlushTimer); wdFlush(); };
-            video.onended = () => { clearInterval(wdFlushTimer); wdFlush(); };
+            video.onplay  = () => { updatePlayBtn(); showCvControls(); wdLastTimeupdate = video.currentTime; wdStartTimer(); startAmbientMode(); };
+            video.onpause = () => { updatePlayBtn(); wrap.classList.add('show-controls'); clearTimeout(cvControlsTimer); clearInterval(wdFlushTimer); wdFlush(); stopAmbientMode(); };
 
             // ─ Seek ─
             const progWrap = document.getElementById('cv-progress-wrap');
@@ -2228,6 +2939,12 @@
                 if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
                 return `${m}:${String(sec).padStart(2,'0')}`;
             }
+
+            // Show "0:00 / <duration>" as soon as we know it, instead of
+            // leaving "0:00 / 0:00" up until playback actually starts.
+            video.addEventListener('loadedmetadata', () => {
+                timeEl.textContent = fmtTime(video.currentTime) + ' / ' + fmtTime(video.duration);
+            });
 
             video.ontimeupdate = () => {
                 if (!video.duration) return;
@@ -2361,10 +3078,15 @@
                 cvListenersAdded = true;
             }
 
-            // ─ End ─
+            // ─ End ─ (flush watch-duration tracking, stop the ambient glow, and
+            // auto-play the next episode when the Auto Skip toggle is ON)
             video.onended = () => {
                 updatePlayBtn();
                 wrap.classList.add('show-controls');
+                stopAmbientMode();
+                clearInterval(wdFlushTimer);
+                wdFlush();
+                scheduleAutoNext();
             };
 
             // ─ Audio track menu toggle ─
@@ -2643,7 +3365,11 @@
                 <div class="rel-card" onclick="goToAnime('${a.slug}')">
                     <div class="rel-img">
                         <img src="${a.poster}" loading="lazy" 
-                            onerror="this.src='https://placehold.co/300x450/121218/2fe6c9?text=${encodeURIComponent(a.title.substring(0,8))}'">
+                            onerror="this.src='https://placehold.co/300x450/15151c/ff2e43?text=${encodeURIComponent(a.title.substring(0,8))}'">
+                        <div class="rel-badges">
+                            <span class="rel-badge rel-badge-lang">हिंदी</span>
+                            <span class="rel-badge rel-badge-series">Series</span>
+                        </div>
                     </div>
                     <div class="rel-title">${a.title}</div>
                 </div>`;
@@ -2788,13 +3514,14 @@
         function openDlPopup() {
             const sKey = 'S' + currentSeason;
             const eKey = 'E' + currentEpisode;
-            const epData = srv1Data[sKey]?.[eKey];
+            const primaryData = currentServer === 1 ? srv1Data : srv2Data;
+            const epData = primaryData[sKey]?.[eKey];
 
             const qualities = ['1080p', '720p', '480p'];
             const qualityMeta = {
-                '1080p': { label: '1080p Full HD', icon: 'fa-film',   desc: 'Best quality · Large file' },
-                '720p':  { label: '720p HD',       icon: 'fa-tv',     desc: 'Good quality · Medium file' },
-                '480p':  { label: '480p SD',        icon: 'fa-mobile', desc: 'Data saver · Small file' },
+                '1080p': { label: 'Download v1', icon: 'fa-cloud-arrow-down', desc: '1080p Full HD · Large file' },
+                '720p':  { label: 'Download v2', icon: 'fa-cloud-arrow-down', desc: '720p HD · Medium file' },
+                '480p':  { label: 'Download v3', icon: 'fa-cloud-arrow-down', desc: '480p SD · Data saver' },
             };
 
             document.getElementById('dl-popup-sub').textContent =
@@ -2814,6 +3541,7 @@
                             <div class="dl-quality-label">${meta.label}</div>
                             <div class="dl-quality-desc">${url ? meta.desc : 'Not available'}</div>
                         </div>
+                        <i class="fas ${url ? 'fa-circle-check dl-tick-ok' : 'fa-circle-xmark dl-tick-no'}"></i>
                     </div>
                     <div class="dl-option-row">
                         <button class="dl-option-btn dl-option-shortener" onclick='triggerDownload(${JSON.stringify(url)}, ${JSON.stringify(q)}, true)'>
@@ -2833,6 +3561,48 @@
             document.getElementById('dl-popup-overlay').classList.add('open');
         }
 
+        // Same popup as openDlPopup(), but pre-filled for a single quality — used by
+        // the v1/v2/v3 stacked download buttons so a tap always asks Shortener vs
+        // Direct before anything downloads.
+        function openSingleDlPopup(url, quality) {
+            const qualityMeta = {
+                '1080p': { label: 'Download v1', icon: 'fa-cloud-arrow-down', desc: '1080p Full HD · Large file' },
+                '720p':  { label: 'Download v2', icon: 'fa-cloud-arrow-down', desc: '720p HD · Medium file' },
+                '480p':  { label: 'Download v3', icon: 'fa-cloud-arrow-down', desc: '480p SD · Data saver' },
+            };
+            const meta = qualityMeta[quality] || { label: 'Download', icon: 'fa-cloud-arrow-down', desc: quality };
+
+            document.getElementById('dl-popup-sub').textContent =
+                `S${currentSeason} · E${currentEpisode} · ${animeTitle || 'Episode'}`;
+
+            const list = document.getElementById('dl-quality-list');
+            list.innerHTML = `
+                <div class="dl-quality-group">
+                    <div class="dl-quality-header">
+                        <div class="dl-quality-icon"><i class="fas ${meta.icon}"></i></div>
+                        <div class="dl-quality-info">
+                            <div class="dl-quality-label">${meta.label} · ${quality}</div>
+                            <div class="dl-quality-desc">${meta.desc}</div>
+                        </div>
+                        <i class="fas fa-circle-check dl-tick-ok"></i>
+                    </div>
+                    <div class="dl-option-row">
+                        <button class="dl-option-btn dl-option-shortener" onclick='triggerDownload(${JSON.stringify(url)}, ${JSON.stringify(quality)}, true)'>
+                            <i class="fas fa-bolt"></i> Shortener
+                        </button>
+                        <button class="dl-option-btn dl-option-direct" onclick='triggerDownload(${JSON.stringify(url)}, ${JSON.stringify(quality)}, false)'>
+                            <i class="fas fa-download"></i> Direct
+                        </button>
+                    </div>
+                    <div class="dl-shortener-note">
+                        <b>Please use Shortener</b> to download — it helps support the site. <br>
+                        <b>Shortener use karke</b> download karo, isse site ko support milta hai. Thank you! 🙏
+                    </div>
+                </div>`;
+
+            document.getElementById('dl-popup-overlay').classList.add('open');
+        }
+
         function closeDlPopup(e) {
             if (e && e.target !== document.getElementById('dl-popup-overlay')) return;
             document.getElementById('dl-popup-overlay').classList.remove('open');
@@ -2842,7 +3612,8 @@
             const sKey = 'S' + currentSeason;
             const eKey = 'E' + currentEpisode;
 
-            const epData = srv1Data[sKey]?.[eKey];
+            const primaryData = currentServer === 1 ? srv1Data : srv2Data;
+            const epData = primaryData[sKey]?.[eKey];
             if (epData) {
                 const hasAny = ['1080p','720p','480p'].some(q => epData[q]?.dl_link || epData[q]?.link);
                 if (hasAny) {
@@ -2869,16 +3640,22 @@
         // ─── FETCH META FROM KITSU ───
         async function fetchKitsuMeta(title) {
             try {
-                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1`);
+                const res = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(title)}&page[limit]=1&include=categories`);
                 const data = await res.json();
                 if (data.data?.[0]) {
                     const attr = data.data[0].attributes;
+                    const genres = (data.included || [])
+                        .filter(x => x.type === 'categories')
+                        .map(x => x.attributes?.title)
+                        .filter(Boolean)
+                        .slice(0, 4);
                     return {
                         desc: attr.synopsis || '',
                         status: attr.status || '',
                         epCount: attr.episodeCount || null,
                         poster: attr.posterImage?.large || '',
                         banner: attr.coverImage?.large || '',
+                        genres,
                     };
                 }
             } catch(e) {}
@@ -2902,6 +3679,11 @@
                 bannerUrl  = cached.banner || '';
                 document.getElementById('anime-title').textContent = animeTitle;
                 document.getElementById('rating-val').textContent = cached.rating || '—';
+                const posterImgEl = document.getElementById('player-poster-img');
+                if (posterImgEl && posterUrl) {
+                    posterImgEl.src = posterUrl;
+                    document.getElementById('poster-wrap').style.display = 'flex';
+                }
                 renderRelated();
                 updateWatchlistBtn();
             }
@@ -2937,7 +3719,7 @@
             // Render UI
             renderServers();
             renderSeasons();
-            renderEpisodes();
+            renderEpisodes(true); // true = skip auto-scroll on initial page load
             updateChips();
             showContent();
             markWatched(currentSeason, currentEpisode);
@@ -2969,6 +3751,19 @@
             if (kitsu) {
                 document.getElementById('anime-desc').textContent = kitsu.desc || 'No description available.';
                 if (kitsu.status) document.getElementById('chip-status').textContent = kitsu.status.toUpperCase();
+                if (!posterUrl && kitsu.poster) {
+                    posterUrl = kitsu.poster;
+                    const posterImgEl2 = document.getElementById('player-poster-img');
+                    if (posterImgEl2) {
+                        posterImgEl2.src = posterUrl;
+                        document.getElementById('poster-wrap').style.display = 'flex';
+                    }
+                }
+                const genreRowEl = document.getElementById('genre-row');
+                if (genreRowEl && kitsu.genres && kitsu.genres.length) {
+                    genreRowEl.innerHTML = kitsu.genres.map(g => `<span class="genre-tag">${g}</span>`).join('');
+                    genreRowEl.style.display = 'flex';
+                }
             } else {
                 document.getElementById('anime-desc').textContent = 'No description available.';
             }
