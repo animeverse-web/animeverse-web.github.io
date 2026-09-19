@@ -3624,22 +3624,43 @@
                     if (firebaseMetaCache === null) firebaseMetaCache = await metaCachePromise;
 
                     // ── Step 1: Turant ek pass banao aur render kar do ──
-                    // Priority: (1) localStorage cache — is browser mein pehle se fetch ho chuka
+                    // Priority: (0) admin panel ne khud poster save kiya ho ('image' field) — us anime
+                    //               ke liye API call bilkul skip, admin ka poster hamesha use hoga
+                    //           (1) localStorage cache — is browser mein pehle se fetch ho chuka
                     //           (2) Firebase shared meta_cache — kisi bhi aur user ne fetch kiya ho
                     //           (3) placeholder — sirf tab jab kahin bhi na mile, background mein fetch hoga
                     const nextData = titles.map((title, index) => {
-                        const existing = allAnimeData.find(a => a.title === title);
-                        if (existing && existing.poster && !existing.poster.includes('placeholder') && !existing.poster.includes('placehold')) {
-                            return { ...existing, item: data[title], firebaseIndex: index };
+                        const rawItem = data[title];
+                        const slug = title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, '');
+
+                        // Admin panel ke fallback ("Jikan ko anime nahi mila") placeholder ko admin-poster
+                        // mat maano — usko normal fetch flow mein hi jaane do taaki asli poster mil sake
+                        const adminPoster = (rawItem?.image && !rawItem.image.includes('via.placeholder.com'))
+                            ? rawItem.image : null;
+
+                        if (adminPoster) {
+                            return {
+                                title, item: rawItem, slug,
+                                poster: adminPoster,
+                                banner: adminPoster, // admin panel sirf ek hi image save karta hai, wahi banner ke liye bhi
+                                rating: rawItem.rating || '7.0',
+                                addedAt: rawItem?.addedAt || rawItem?.timestamp || 0,
+                                firebaseIndex: index,
+                                _metaPending: false // poster admin se mil gaya — external fetch ki zaroorat nahi
+                            };
                         }
 
-                        const slug = title.toLowerCase().replace(/ /g, '-').replace(/[:']/g, '');
+                        const existing = allAnimeData.find(a => a.title === title);
+                        if (existing && existing.poster && !existing.poster.includes('placeholder') && !existing.poster.includes('placehold')) {
+                            return { ...existing, item: rawItem, firebaseIndex: index };
+                        }
+
                         const shared = firebaseMetaCache[metaCacheKey(title)];
                         if (shared && shared.p) {
                             return {
-                                title, item: data[title], slug,
+                                title, item: rawItem, slug,
                                 poster: shared.p, banner: shared.b, rating: shared.r || '7.0',
-                                addedAt: data[title]?.addedAt || data[title]?.timestamp || 0,
+                                addedAt: rawItem?.addedAt || rawItem?.timestamp || 0,
                                 firebaseIndex: index,
                                 _metaPending: false // Firebase se mil gaya — external fetch ki zaroorat nahi
                             };
@@ -3647,11 +3668,11 @@
 
                         const encoded = encodeURIComponent(title.substring(0, 20));
                         return {
-                            title, item: data[title], slug,
+                            title, item: rawItem, slug,
                             poster: `https://placehold.co/500x750/13131a/ff2e43?text=${encoded}`,
                             banner: `https://placehold.co/1000x500/13131a/ff2e43?text=${encoded}`,
                             rating: '—',
-                            addedAt: data[title]?.addedAt || data[title]?.timestamp || 0,
+                            addedAt: rawItem?.addedAt || rawItem?.timestamp || 0,
                             firebaseIndex: index,
                             _metaPending: true // kahin bhi nahi mila — asli poster/banner abhi fetch hona baaki hai
                         };
