@@ -2988,19 +2988,26 @@
         }
 
         // ── ADDED TODAY — Firebase se direct fetch ──
+        let _addedTodayMidnightScheduled = false;
         async function loadAddedToday() {
             try {
                 const today = new Date();
                 const dateStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
                 document.getElementById('added-today-date').innerText = today.toLocaleDateString('en-IN', {day:'numeric', month:'short'});
 
+                const section = document.getElementById('added-today-section');
+                const grid = document.getElementById('added-today-grid');
+
                 const res = await fetch(`${FIREBASE_DB}/added_today/${dateStr}.json`);
                 const data = await res.json();
 
-                if (!data || Object.keys(data).length === 0) return;
-
-                const section = document.getElementById('added-today-section');
-                const grid = document.getElementById('added-today-grid');
+                // Aaj ke liye koi episode nahi (ya raat 12 baj chuki aur naya din khali hai) —
+                // section poori tarah hide kardo, purana stale data grid mein na reh jaye
+                if (!data || Object.keys(data).length === 0) {
+                    if (grid) grid.innerHTML = '';
+                    if (section) section.style.display = 'none';
+                    return;
+                }
 
                 // timestamp ke hisaab se sort — newest first
                 const sorted = Object.entries(data).sort((a, b) => (b[1].timestamp || 0) - (a[1].timestamp || 0));
@@ -3047,6 +3054,22 @@
             } catch(e) {
                 console.warn('Added Today load failed:', e);
             }
+
+            // Raat 12 baje ke liye ek dafa timer set karo — tab khula reh jaye tab bhi
+            // naya din shuru hote hi ye function dobara chalega aur purana data apne aap hat jayega
+            scheduleAddedTodayMidnightRefresh();
+        }
+
+        function scheduleAddedTodayMidnightRefresh() {
+            if (_addedTodayMidnightScheduled) return; // pehle se ek timer chal raha hai, dobara mat lagao
+            _addedTodayMidnightScheduled = true;
+            const now = new Date();
+            const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5); // 12:00:05 AM
+            const msUntilMidnight = nextMidnight - now;
+            setTimeout(() => {
+                _addedTodayMidnightScheduled = false;
+                loadAddedToday(); // naye din ka date/data check karo, khali hua to section hide ho jayega
+            }, msUntilMidnight);
         }
 
         // ════════════════════════════════
@@ -3616,7 +3639,7 @@
                             return {
                                 title, item: data[title], slug,
                                 poster: shared.p, banner: shared.b, rating: shared.r || '7.0',
-                                addedAt: data[title]?.addedAt || data[title]?.timestamp || Date.now(),
+                                addedAt: data[title]?.addedAt || data[title]?.timestamp || 0,
                                 firebaseIndex: index,
                                 _metaPending: false // Firebase se mil gaya — external fetch ki zaroorat nahi
                             };
@@ -3628,7 +3651,7 @@
                             poster: `https://placehold.co/500x750/13131a/ff2e43?text=${encoded}`,
                             banner: `https://placehold.co/1000x500/13131a/ff2e43?text=${encoded}`,
                             rating: '—',
-                            addedAt: data[title]?.addedAt || data[title]?.timestamp || Date.now(),
+                            addedAt: data[title]?.addedAt || data[title]?.timestamp || 0,
                             firebaseIndex: index,
                             _metaPending: true // kahin bhi nahi mila — asli poster/banner abhi fetch hona baaki hai
                         };
@@ -4107,8 +4130,10 @@
             if (recentGrid && allAnimeData.length > 0) {
                 if (recentSection) recentSection.style.display = '';
                 const recentSorted = [...allAnimeData].sort((a, b) => {
-                    const aTime = a.item?.lastUpdated || a.addedAt || a.firebaseIndex || 0;
-                    const bTime = b.item?.lastUpdated || b.addedAt || b.firebaseIndex || 0;
+                    // Sirf addedAt/firebaseIndex se sort — lastUpdated (edit time) yahan nahi,
+                    // warna sirf update hua purana anime bhi "Recently Added" mein aa jata tha
+                    const aTime = a.addedAt || a.firebaseIndex || 0;
+                    const bTime = b.addedAt || b.firebaseIndex || 0;
                     return bTime - aTime;
                 });
                 recentGrid.innerHTML = recentSorted.slice(0, 12).map(({title, slug, poster, banner, rating, item}) => {
@@ -4542,10 +4567,10 @@
                 filtered = [...hasMeta, ...shuffleArray(noMeta)];
                 if (filtered.length === 0) filtered = shuffleArray([...allAnimeData]);
             } else if (tabName === 'new') {
-                // Auto: lastUpdated ya addedAt se sort — recently added/updated
+                // Auto: addedAt/firebaseIndex se sort — sirf recently ADDED (updated wale nahi)
                 filtered = [...allAnimeData].sort((a, b) => {
-                    const at = a.item?.lastUpdated || a.addedAt || a.firebaseIndex || 0;
-                    const bt = b.item?.lastUpdated || b.addedAt || b.firebaseIndex || 0;
+                    const at = a.addedAt || a.firebaseIndex || 0;
+                    const bt = b.addedAt || b.firebaseIndex || 0;
                     return bt - at;
                 });
             } else if (tabName === 'popular') {
