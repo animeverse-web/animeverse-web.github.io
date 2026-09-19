@@ -66,6 +66,22 @@
             text-shadow: -1px 0 rgba(255,90,61,0.55), 1px 0 rgba(255,46,67,0.55);
         }
 
+        /* ─── BLURRED BACKGROUND POSTER (currently playing anime) ─── */
+        #bg-poster {
+            position: fixed;
+            inset: -60px;
+            z-index: -1;
+            background-size: cover;
+            background-position: center 20%;
+            background-repeat: no-repeat;
+            filter: blur(38px) saturate(1.15);
+            transform: scale(1.12);
+            opacity: 0;
+            transition: opacity 0.7s ease, background-image 0.5s ease-in-out;
+            pointer-events: none;
+        }
+        #bg-poster.show { opacity: 1; }
+
         /* ─── HEADER ─── */
         .cr-header {
             position: fixed;
@@ -1495,6 +1511,8 @@
 </head>
 <body>
 
+    <div id="bg-poster"></div>
+
     <div id="toast"></div>
 
     <!-- ─── DOWNLOAD QUALITY POPUP ─── -->
@@ -1799,7 +1817,7 @@
             </div>
             <div class="footer-links">
                 <a href="index.html">Home</a>
-                <a href="https://t.me/animeverse648" target="_blank" rel="noopener">Telegram</a>
+                <a href="https://t.me/+OPtldvZ9z6hhYTk1" target="_blank" rel="noopener">Telegram</a>
                 <a href="#" onclick="reportIssue(); return false;">Report an Issue</a>
             </div>
             <div class="footer-bottom">&copy; <span id="footer-year"></span> AnimeVerse — All content belongs to their respective owners.</div>
@@ -1821,7 +1839,7 @@
             <i class="fas fa-rotate-right"></i>
             <span>Refresh</span>
         </a>
-        <a href="https://t.me/animeverse648" class="nav-item" target="_blank" onclick="if(window.AVAnalytics) window.AVAnalytics.trackJoinClick('nav')">
+        <a href="https://t.me/+OPtldvZ9z6hhYTk1" class="nav-item" target="_blank" onclick="if(window.AVAnalytics) window.AVAnalytics.trackJoinClick('nav')">
             <i class="fab fa-telegram-plane"></i>
             <span>Join</span>
         </a>
@@ -1852,6 +1870,55 @@
         let watchedEps     = {};
         let posterUrl = '';
         let bannerUrl = '';
+        let seasonPosters = {}; // { 2: 'https://...', 3: 'https://...' } — per-season posters (Season 1 uses posterUrl)
+
+        // ─── CONTINUE WATCHING — REAL-TIME PROGRESS ───
+        // Har user ke liye alag hai kyunki localStorage per-browser/per-device hota hai.
+        const CW_COMPLETE_PCT   = 60;   // is % ke baad episode "dekha hua" maan lo (outro/credits ka hisaab)
+        const CW_SAVE_THROTTLE  = 4000; // ms — har timeupdate pe likhna zaroori nahi, 4s kaafi hai
+        let cwLastSaveAt   = 0;
+        let cwAdvancedForEp = ''; // 'S1E1' — is episode ke liye "next episode" pointer already advance ho chuka?
+
+        function saveWatchPercent(pct) {
+            try { localStorage.setItem('progress_' + animeSlug, String(Math.round(pct))); } catch(e) {}
+        }
+
+        // 60%+ dekh liya to Continue Watching ka pointer agle episode par bhej do
+        // (Netflix/Crunchyroll jaisa "next up" behaviour — resume karne par aakhri
+        // 40% dobara nahi dikhta, seedha agla episode 0% se shuru hota hai).
+        function advanceContinueWatchingPointer() {
+            const epCount = totalEpisodes[currentSeason] || 1;
+            let nextS = currentSeason, nextE = currentEpisode + 1;
+            if (nextE > epCount) {
+                const seasons = Object.keys(totalEpisodes).map(Number).sort((a,b)=>a-b);
+                const idx = seasons.indexOf(currentSeason);
+                if (idx !== -1 && seasons[idx + 1]) { nextS = seasons[idx + 1]; nextE = 1; }
+                else { nextS = null; } // poora show khatam
+            }
+            try {
+                if (nextS) {
+                    localStorage.setItem('cw_ep_' + animeSlug, JSON.stringify({ s: nextS, e: nextE }));
+                    localStorage.setItem('progress_' + animeSlug, '0');
+                } else {
+                    localStorage.setItem('progress_' + animeSlug, '100'); // poora show finish
+                }
+                let cw = JSON.parse(localStorage.getItem('continue_watching') || '[]');
+                cw = cw.filter(t => t !== animeTitle);
+                cw.unshift(animeTitle);
+                if (cw.length > 10) cw = cw.slice(0, 10);
+                localStorage.setItem('continue_watching', JSON.stringify(cw));
+            } catch(e) {}
+        }
+
+        // ─── BLURRED BACKGROUND POSTER ───
+        function setBgPoster(url) {
+            if (!url) return;
+            const el = document.getElementById('bg-poster');
+            if (!el) return;
+            el.style.backgroundImage =
+                `linear-gradient(180deg, rgba(11,11,15,0.55) 0%, rgba(11,11,15,0.80) 55%, rgba(11,11,15,0.97) 100%), url('${url}')`;
+            el.classList.add('show');
+        }
 
         // Firebase data stores
         // srv1Data['S1']['E1'] = { url, bot, time }
@@ -2207,17 +2274,21 @@
         // ─── RENDER SEASON TABS (poster-card style) ───
         function renderSeasons() {
             const wrap = document.getElementById('season-tabs');
-            wrap.innerHTML = Object.keys(totalEpisodes).sort((a,b)=>a-b).map(s => `
-                <div class="season-card ${parseInt(s) === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
+            wrap.innerHTML = Object.keys(totalEpisodes).sort((a,b)=>a-b).map(s => {
+                const sNum = parseInt(s);
+                const sPoster = sNum === 1 ? posterUrl : (seasonPosters[sNum] || posterUrl);
+                return `
+                <div class="season-card ${sNum === currentSeason ? 'active' : ''}" onclick="selectSeason(${s})">
                     <div class="season-card-poster">
-                        ${posterUrl
-                            ? `<img src="${posterUrl}" loading="lazy" onerror="this.style.display='none'">`
+                        ${sPoster
+                            ? `<img src="${sPoster}" loading="lazy" onerror="this.style.display='none'">`
                             : `<div class="season-card-placeholder"><i class="fas fa-photo-film"></i></div>`
                         }
                         <div class="season-card-badge">Series</div>
                     </div>
                     <div class="season-card-title">Season ${s}</div>
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
 
         function selectSeason(s) {
@@ -2228,6 +2299,7 @@
             renderEpisodes();
             loadVideo();
             updateChips();
+            setBgPoster(currentSeason === 1 ? posterUrl : (seasonPosters[currentSeason] || posterUrl));
         }
 
         // ─── Episode Thumbnails: AniList primary, TMDB fallback ───
@@ -2248,6 +2320,55 @@
             }`;
         const TMDB_KEY = 'eef0f9c16ca61d6c843e7d43ddc5e1d8';
         let tmdbShowId = null;
+
+        // ─── PER-SEASON POSTERS (Season 1 card = posterUrl; Season 2+ often is a
+        // separate AniList/Kitsu entry with its own cover art, e.g. "Attack on
+        // Titan Season 2" — so we look each one up and cache it) ───
+        const ANILIST_POSTER_QUERY = `
+            query ($search: String) {
+                Media(search: $search, type: ANIME) {
+                    coverImage { large }
+                }
+            }`;
+
+        async function fetchSeasonPoster(title, season) {
+            if (season === 1) return posterUrl;
+            if (seasonPosters[season]) return seasonPosters[season];
+            const searchTerm = `${title} Season ${season}`;
+
+            // 1) AniList
+            try {
+                const r = await fetch(ANILIST_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ query: ANILIST_POSTER_QUERY, variables: { search: searchTerm } })
+                });
+                const d = await r.json();
+                const cover = d?.data?.Media?.coverImage?.large;
+                if (cover) { seasonPosters[season] = cover; return cover; }
+            } catch(e) {}
+
+            // 2) Kitsu fallback
+            try {
+                const sr = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(searchTerm)}&page[limit]=1`);
+                const sd = await sr.json();
+                const poster = sd?.data?.[0]?.attributes?.posterImage?.large;
+                if (poster) { seasonPosters[season] = poster; return poster; }
+            } catch(e) {}
+
+            // 3) Give up — reuse the main anime poster so the card isn't blank
+            seasonPosters[season] = posterUrl;
+            return posterUrl;
+        }
+
+        async function loadSeasonPosters() {
+            const seasons = Object.keys(totalEpisodes).map(s => parseInt(s)).sort((a,b)=>a-b);
+            for (const s of seasons) {
+                if (s === 1 || seasonPosters[s]) continue;
+                await fetchSeasonPoster(animeTitle || animeSlug.replace(/-/g,' '), s);
+                renderSeasons(); // update as each one resolves so cards fill in progressively
+            }
+        }
 
         async function fetchAniListSeasonEps(title, season) {
             const searchTerm = season > 1 ? `${title} Season ${season}` : title;
@@ -2963,6 +3084,23 @@
                     if (delta > 0 && delta < 2) wdAccum += delta;
                 }
                 wdLastTimeupdate = video.currentTime;
+
+                // ── Continue Watching: real-time % save (per user, via localStorage) ──
+                const nowTs = Date.now();
+                if (nowTs - cwLastSaveAt > CW_SAVE_THROTTLE) {
+                    cwLastSaveAt = nowTs;
+                    const epKey = 'S' + currentSeason + 'E' + currentEpisode;
+                    if (pct >= CW_COMPLETE_PCT) {
+                        if (!isWatched(currentSeason, currentEpisode)) markWatched(currentSeason, currentEpisode);
+                        if (cwAdvancedForEp !== epKey) {
+                            cwAdvancedForEp = epKey;
+                            advanceContinueWatchingPointer();
+                        }
+                    } else {
+                        saveWatchPercent(pct);
+                        saveContinueWatching();
+                    }
+                }
             };
 
             let seeking = false;
@@ -3086,6 +3224,14 @@
                 stopAmbientMode();
                 clearInterval(wdFlushTimer);
                 wdFlush();
+                // Episode poora ho gaya — Continue Watching turant agle episode par point kare,
+                // timeupdate ke 4s throttle ka wait na kare.
+                markWatched(currentSeason, currentEpisode);
+                const epKey = 'S' + currentSeason + 'E' + currentEpisode;
+                if (cwAdvancedForEp !== epKey) {
+                    cwAdvancedForEp = epKey;
+                    advanceContinueWatchingPointer();
+                }
                 scheduleAutoNext();
             };
 
@@ -3627,7 +3773,7 @@
         // ─── REPORT ───
         function reportIssue() {
             const msg = encodeURIComponent(`Issue with: ${animeTitle} S${currentSeason}E${currentEpisode}`);
-            window.open(`https://t.me/animeverse648?text=${msg}`, '_blank');
+            window.open(`https://t.me/animeversechat745?text=${msg}`, '_blank');
         }
 
         // ─── CLEAR CACHE ───
@@ -3684,6 +3830,7 @@
                     posterImgEl.src = posterUrl;
                     document.getElementById('poster-wrap').style.display = 'flex';
                 }
+                setBgPoster(posterUrl);
                 renderRelated();
                 updateWatchlistBtn();
             }
@@ -3758,6 +3905,7 @@
                         posterImgEl2.src = posterUrl;
                         document.getElementById('poster-wrap').style.display = 'flex';
                     }
+                    setBgPoster(posterUrl);
                 }
                 const genreRowEl = document.getElementById('genre-row');
                 if (genreRowEl && kitsu.genres && kitsu.genres.length) {
@@ -3771,6 +3919,9 @@
             if (descEl.scrollHeight <= descEl.clientHeight + 4) {
                 document.getElementById('desc-toggle').style.display = 'none';
             }
+
+            // Fetch per-season posters (Season 1 card already uses posterUrl)
+            if (Object.keys(totalEpisodes).length > 1) loadSeasonPosters();
 
             // Timeout fallback for skeleton
             setTimeout(() => {
