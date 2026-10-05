@@ -602,6 +602,23 @@
         }
         .p-tag-new { background: var(--accent); }
         .p-tag-dub { background: #1db954; }
+        /* Admin panel ke "Language / Version" field se aane wala tag */
+        .p-tag-lang-hindi_sub { background: #f08a00; }
+        .p-tag-lang-eng_sub   { background: #2d7ff9; }
+        .p-tag-lang-eng_dub   { background: #8b5cf6; }
+        .p-tag-lang-hindi_dub { background: #1db954; }
+        .p-tag-lang-fandub    { background: #e91e8c; }
+        /* Landscape / Added-Today cards ke top-right corner ka language tag */
+        .lang-corner-tag {
+            position: absolute; top: 0; right: 0; z-index: 2;
+            font-size: 7.5px; font-weight: 900; letter-spacing: 0.3px;
+            padding: 3px 6px; color: white; white-space: nowrap;
+        }
+        .lang-corner-tag.p-tag-lang-hindi_sub { background: #f08a00; }
+        .lang-corner-tag.p-tag-lang-eng_sub   { background: #2d7ff9; }
+        .lang-corner-tag.p-tag-lang-eng_dub   { background: #8b5cf6; }
+        .lang-corner-tag.p-tag-lang-hindi_dub { background: #1db954; }
+        .lang-corner-tag.p-tag-lang-fandub    { background: #e91e8c; }
         .l-dub-tag {
             position: absolute;
             top: 0; left: 0;
@@ -2126,6 +2143,7 @@
         <div class="tab-item">New</div>
         <div class="tab-item">Popular</div>
         <div class="tab-item">Genre</div>
+        <div class="tab-item">Language</div>
     </div>
 
     <!-- ─── SEARCH BOX ─── -->
@@ -2782,9 +2800,25 @@
         // pakad kar DUBBED tag laga dega. Bina kisi keyword ke auto-detect
         // possible nahi (site ka apna data hi source of truth hai).
         // ════════════════════════════════
+        // Firebase 'language' field -> poster par chhota tag. Khaali/unknown ho to koi tag nahi.
+        const LANG_TAGS = {
+            hindi_dub: 'HINDI DUB',
+            hindi_sub: 'HINDI SUB',
+            eng_sub:   'ENG SUB',
+            eng_dub:   'ENG DUB',
+            fandub:    'FAN DUB'
+        };
+        function getLangTag(item) {
+            const key = String(item?.language || '').trim().toLowerCase();
+            return LANG_TAGS[key] ? { key, label: LANG_TAGS[key] } : null;
+        }
+
         function isHindiDubbed(title, item) {
             const cat = (item?.category || '').toLowerCase();
-            const lang = (item?.language || item?.audio || item?.lang || '').toLowerCase();
+            let lang = (item?.language || item?.audio || item?.lang || '').toLowerCase();
+            // Naye admin-panel values (hindi_dub / hindi_sub / eng_sub / eng_dub / fandub) ka apna alag tag hai —
+            // inhe purane "DUBBED" check mein mat gino (warna hindi_sub par galti se DUBBED lag jaata)
+            if (LANG_TAGS[lang]) lang = '';
             const t = (title || '').toLowerCase();
             const HINT = /hindi|hin.?dub|\bdubbed\b|\[dub\]|\(dub\)/i;
             return HINT.test(cat) || HINT.test(lang) || HINT.test(t);
@@ -2865,6 +2899,7 @@
                 return;
             }
             if (currentTab === 'genre') { renderGenreView(); return; }
+            if (currentTab === 'language') { renderLanguageView(); return; }
             // filter page visible hai to re-render
             const filterPage = document.getElementById('filter-page');
             if (filterPage && filterPage.style.display !== 'none') {
@@ -3023,6 +3058,7 @@
                     const thumb = info.t || banner || poster;
                     const safeTitle = title.replace(/'/g, "\\'");
                     const epLabel = `S${info.s || 1} E${info.e || 1}`;
+                    const langTag = getLangTag(animeEntry?.item);
 
                     // Time ago calculate karo
                     const ts = info.timestamp ? info.timestamp * 1000 : Date.now();
@@ -3040,6 +3076,7 @@
                         <div class="at-card-img">
                             <img src="${thumb}" loading="lazy" 
                                 onerror="this.src='${poster || `https://placehold.co/300x169/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,10))}`}'">
+                            ${langTag ? `<div class="lang-corner-tag p-tag-lang-${langTag.key}">${langTag.label}</div>` : ''}
                             <div class="at-ep-label">
                                 <span>${epLabel}</span>
                                 <span class="at-new-pill">NEW</span>
@@ -3943,6 +3980,7 @@
             const isNew = lastUpdated > 0 && (Date.now() - lastUpdated) < 7 * 24 * 60 * 60 * 1000; // 7 din ke andar
             const epBadge = lastEp ? `S${lastS||1} E${lastEp}` : null;
             const dubbed = isHindiDubbed(title, item);
+            const langTag = getLangTag(item);
 
             return `
             <div class="p-card" onclick="openInfoModal('${safeTitle}','${slug}','${banner}','${rating}')">
@@ -3952,9 +3990,10 @@
                     <div class="p-card-fav" onclick="event.stopPropagation(); toggleWatchlist('${safeTitle}')">
                         <i class="fa-heart ${isLiked ? 'fa-solid' : 'fa-regular'}" style="color:${isLiked ? 'var(--accent)' : 'white'}; font-size:10px;"></i>
                     </div>
-                    ${(isNew || dubbed) ? `<div class="p-card-tags">
+                    ${(isNew || dubbed || langTag) ? `<div class="p-card-tags">
                         ${isNew ? `<div class="p-tag p-tag-new">NEW</div>` : ''}
                         ${dubbed ? `<div class="p-tag p-tag-dub">DUBBED</div>` : ''}
+                        ${langTag ? `<div class="p-tag p-tag-lang-${langTag.key}">${langTag.label}</div>` : ''}
                     </div>` : ''}
                     ${epBadge ? `<div style="position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.8);color:white;font-size:7.5px;font-weight:800;padding:2px 5px;border-radius:3px;">${epBadge}</div>` : ''}
                 </div>
@@ -3966,6 +4005,7 @@
             const safeTitle = title.replace(/'/g, "\\'");
             const img = banner || `https://placehold.co/400x225/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,10))}`;
             const dubbed = isHindiDubbed(title, item);
+            const langTag = getLangTag(item);
             return `
             <div class="l-card" onclick="openInfoModal('${safeTitle}','${slug}','${banner}','${rating}')">
                 <div class="l-card-img-wrap">
@@ -3974,6 +4014,7 @@
                         <div class="l-card-title">${title}</div>
                     </div>
                     ${dubbed ? `<div class="l-dub-tag">DUBBED</div>` : `<div class="l-ep-badge">NEW</div>`}
+                    ${langTag ? `<div class="lang-corner-tag p-tag-lang-${langTag.key}">${langTag.label}</div>` : ''}
                 </div>
             </div>`;
         }
@@ -4546,13 +4587,17 @@
             filterPage.style.display = '';
 
             // Title
-            const titles = { series:'Series', movies:'Movies', trending:'Trending', new:'New Episodes', popular:'Popular', genre:'Genres' };
+            const titles = { series:'Series', movies:'Movies', trending:'Trending', new:'New Episodes', popular:'Popular', genre:'Genres', language:'Language' };
             document.getElementById('filter-page-title').innerText = titles[tabName] || tabName;
 
             const chipRow = document.getElementById('genre-chip-row');
 
             if (tabName === 'genre') {
                 renderGenreView();
+                return;
+            }
+            if (tabName === 'language') {
+                renderLanguageView();
                 return;
             }
             chipRow.style.display = 'none';
@@ -4647,6 +4692,49 @@
             `).join('');
 
             filterByGenre(selectedGenre);
+        }
+
+        // ════════════════════════════════
+        // 🌐 LANGUAGE TAB — chips + filtered grid (Firebase 'language' field se)
+        // ════════════════════════════════
+        let selectedLang = 'hindi_dub';
+        const LANG_CHIPS = [
+            { key: 'hindi_dub', label: 'Hindi Dubbed' },
+            { key: 'hindi_sub', label: 'Hindi Subbed' },
+            { key: 'eng_sub',   label: 'Eng Subbed' },
+            { key: 'eng_dub',   label: 'Eng Dub' },
+            { key: 'fandub',    label: 'Fan Dub' }
+        ];
+
+        function renderLanguageView() {
+            const chipRow = document.getElementById('genre-chip-row');
+            chipRow.style.display = 'flex';
+            chipRow.innerHTML = LANG_CHIPS.map(l => `
+                <div class="genre-chip ${l.key === selectedLang ? 'active' : ''}" data-key="${l.key}" onclick="filterByLanguage('${l.key}')">${l.label}</div>
+            `).join('');
+            filterByLanguage(selectedLang);
+        }
+
+        function filterByLanguage(langKey) {
+            selectedLang = langKey;
+            document.querySelectorAll('#genre-chip-row .genre-chip').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.key === langKey);
+            });
+
+            const filtered = allAnimeData.filter(a => getLangTag(a.item)?.key === langKey);
+            const label = LANG_CHIPS.find(l => l.key === langKey).label;
+
+            if (filtered.length === 0) {
+                document.getElementById('filter-grid').innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px 0; color:var(--text-dim); font-size:12px; font-weight:800;">No anime found in "${label}"</div>`;
+                document.getElementById('filter-count').innerText = '';
+                document.getElementById('pagination-wrap').innerHTML = '';
+                return;
+            }
+
+            document.getElementById('filter-count').innerText = `${filtered.length} anime`;
+            seeAllAllData = filtered;
+            seeAllCurrentPage = 1;
+            renderSeeAllPage(1);
         }
 
         function filterByGenre(genreName) {
