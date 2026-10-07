@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>(function(s){s.dataset.zone='11953112',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AnimeVerse | Player</title>
@@ -921,6 +920,40 @@
         }
         .ep-thumb-card.active .ep-thumb-label { color: var(--accent); }
 
+
+        /* ─── EPISODE SEARCH + PAGINATION ─── */
+        #player-ambient-wrap { scroll-margin-top: 64px; }
+        .ep-search-row { display:flex; gap:8px; margin-bottom:12px; width:100%; box-sizing:border-box; }
+        .ep-search-wrap {
+            flex:1 1 0; min-width:0; display:flex; align-items:center; gap:8px;
+            background: var(--surface2); border:1px solid var(--border2);
+            border-radius:8px; padding:0 12px; height:38px;
+        }
+        .ep-search-wrap:focus-within { border-color: var(--accent); }
+        .ep-search-wrap i { font-size:12px; color: var(--text-muted); }
+        .ep-search-wrap input {
+            flex:1 1 0; min-width:0; width:100%; background:transparent; border:none; outline:none;
+            color: var(--text); font-family: var(--font-body); font-size:12.5px; font-weight:600;
+        }
+        .ep-search-clear { display:none; cursor:pointer; color: var(--text-muted); font-size:12px; }
+        .ep-search-go {
+            flex-shrink:0; padding:0 16px; height:38px; border:none; border-radius:8px; cursor:pointer;
+            background: var(--accent); color:#fff; font-family: var(--font-body);
+            font-size:12px; font-weight:700; touch-action: manipulation;
+        }
+        .ep-search-go:active { transform: scale(0.96); }
+        .ep-pagination { display:flex; justify-content:center; align-items:center; gap:6px; flex-wrap:wrap; margin-top:12px; }
+        .ep-page-btn {
+            min-width:34px; height:34px; padding:0 8px; border-radius:7px;
+            background: var(--surface2); border:1px solid var(--border2);
+            color: var(--text-muted); font-family: var(--font-body); font-size:12px; font-weight:700;
+            display:flex; align-items:center; justify-content:center; cursor:pointer; touch-action: manipulation;
+        }
+        .ep-page-btn.active { background: var(--accent); border-color: var(--accent); color:#fff; }
+        .ep-page-btn.disabled { opacity:0.3; pointer-events:none; }
+        .ep-page-btn:active { transform: scale(0.93); }
+        .ep-empty { grid-column:1/-1; text-align:center; padding:22px 0; color: var(--text-dim); font-size:12px; font-weight:700; }
+
         /* ─── EP CARD (large) ─── */
         .ep-card {
             display: flex; gap: 12px;
@@ -1498,6 +1531,20 @@
             color: #fff;
             font-family: var(--font-body);
         }
+
+        /* Audio / subtitle menus: lambi list ho to menu ke andar scroll ho */
+        #cv-audio-menu, #cv-cc-menu {
+            max-height: 130px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        }
+        #custom-player-wrap:fullscreen #cv-audio-menu,
+        #custom-player-wrap:fullscreen #cv-cc-menu,
+        #custom-player-wrap:-webkit-full-screen #cv-audio-menu,
+        #custom-player-wrap:-webkit-full-screen #cv-cc-menu { max-height: 60vh; }
+
         /* Center play/pause overlay */
         #cv-center-overlay {
             position: absolute; inset: 0;
@@ -1829,7 +1876,16 @@
                 <div class="section-label">
                     <span class="section-label-left">Episodes</span>
                 </div>
+                <div class="ep-search-row" id="ep-search-row">
+                    <div class="ep-search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="ep-search-input" inputmode="numeric" placeholder="Episode number (e.g. 25)" autocomplete="off">
+                        <span class="ep-search-clear" id="ep-search-clear"><i class="fas fa-times"></i></span>
+                    </div>
+                    <button class="ep-search-go" id="ep-search-go" type="button">Play</button>
+                </div>
                 <div class="ep-grid" id="ep-grid"></div>
+                <div class="ep-pagination" id="ep-pagination"></div>
             </div>
 
             <!-- ── RELATED ── -->
@@ -2019,6 +2075,36 @@
         // Flush whatever's pending if the tab is hidden/closed/navigated away
         document.addEventListener('visibilitychange', () => { if (document.hidden) wdFlush(); });
         window.addEventListener('pagehide', wdFlush);
+
+        // ─── PLAYBACK POSITION (resume + quality/server switch) ───
+        // Pehle sirf % save hota tha, isliye "Resume" asal mein 0:00 se shuru hota tha aur
+        // quality/server badalne par bhi video shuru se chalta tha. Ab har episode ka
+        // exact time (seconds) localStorage mein rehta hai.
+        let cvPosKey = null;          // is waqt chal rahe <video> ka storage key
+        let keepPositionOnce = null;  // quality/server switch par current time yahan rakha jata hai
+        function posKeyFor(s, e) { return `pos_${animeSlug}_S${s}E${e}`; }
+        function getSavedPos(s, e) {
+            try { return parseFloat(localStorage.getItem(posKeyFor(s, e)) || '0') || 0; } catch (err) { return 0; }
+        }
+        function savePlayPos() {
+            const v = document.getElementById('cv-video');
+            if (!v || !cvPosKey) return;
+            const d = v.duration, t = v.currentTime;
+            if (!isFinite(d) || d <= 0 || v.readyState < 1) return;
+            try {
+                if (t >= d - 20) localStorage.removeItem(cvPosKey);       // lagbhag khatam — agli baar shuru se
+                else if (t > 5)  localStorage.setItem(cvPosKey, String(Math.floor(t)));
+            } catch (err) {}
+        }
+        // Custom player chal raha ho to uska current time (quality/server switch ke liye)
+        function captureCurrentTime() {
+            const v = document.getElementById('cv-video');
+            const wrap = document.getElementById('custom-player-wrap');
+            if (v && wrap && wrap.classList.contains('active') && v.currentTime > 1) return v.currentTime;
+            return null;
+        }
+        document.addEventListener('visibilitychange', () => { if (document.hidden) savePlayPos(); });
+        window.addEventListener('pagehide', savePlayPos);
 
         // ─── URL PARAMS ───
         const params = new URLSearchParams(location.search);
@@ -2331,6 +2417,7 @@
         }
 
         function selectServer(n) {
+            keepPositionOnce = captureCurrentTime();
             currentServer = n;
             renderServers();
             renderEpisodes(true); // true = skip scroll
@@ -2338,6 +2425,7 @@
         }
 
         function selectQuality(q) {
+            keepPositionOnce = captureCurrentTime();
             currentQuality = q;
             renderServers();
             loadVideo();
@@ -2366,6 +2454,10 @@
         function selectSeason(s) {
             currentSeason = parseInt(s);
             currentEpisode = 1;
+            epPage = 1;
+            epQuery = '';
+            const _si = document.getElementById('ep-search-input'); if (_si) _si.value = '';
+            const _sc = document.getElementById('ep-search-clear'); if (_sc) _sc.style.display = 'none';
             currentServer = pickBestServer(currentSeason, currentEpisode);
             renderSeasons();
             renderEpisodes();
@@ -2547,6 +2639,53 @@
             epThumbSeasonsDone[cKey] = true;
         }
 
+        // ─── EPISODE PAGINATION + SEARCH STATE ───
+        const EP_PER_PAGE = 12;
+        let epPage = 1;
+        let epQuery = '';
+
+        function epPageOf(e) { return Math.max(1, Math.ceil(e / EP_PER_PAGE)); }
+
+        function getVisibleEpList() {
+            const epCount = totalEpisodes[currentSeason] || 1;
+            const all = Array.from({ length: epCount }, (_, i) => i + 1);
+            const q = epQuery.trim().toLowerCase();
+            if (!q) return all;
+            return all.filter(e => {
+                if (String(e).includes(q)) return true;
+                const name = tmdbEpCache[`S${currentSeason}E${e}`]?.name || '';
+                return name.toLowerCase().includes(q);
+            });
+        }
+
+        function renderEpPagination(totalPages) {
+            const wrap = document.getElementById('ep-pagination');
+            if (!wrap) return;
+            if (totalPages <= 1) { wrap.innerHTML = ''; return; }
+            const btn = (label, page, cls = '') =>
+                `<div class="ep-page-btn ${cls}" onclick="goEpPage(${page})">${label}</div>`;
+            let html = btn('<i class="fas fa-chevron-left" style="font-size:10px;"></i>', epPage - 1, epPage === 1 ? 'disabled' : '');
+            let start = Math.max(1, epPage - 2);
+            let end = Math.min(totalPages, start + 4);
+            start = Math.max(1, end - 4);
+            if (start > 1) {
+                html += btn('1', 1);
+                if (start > 2) html += `<div class="ep-page-btn disabled">…</div>`;
+            }
+            for (let i = start; i <= end; i++) html += btn(i, i, i === epPage ? 'active' : '');
+            if (end < totalPages) {
+                if (end < totalPages - 1) html += `<div class="ep-page-btn disabled">…</div>`;
+                html += btn(totalPages, totalPages);
+            }
+            html += btn('<i class="fas fa-chevron-right" style="font-size:10px;"></i>', epPage + 1, epPage === totalPages ? 'disabled' : '');
+            wrap.innerHTML = html;
+        }
+
+        function goEpPage(p) {
+            epPage = p;
+            renderEpisodes(true);
+        }
+
         // ─── RENDER EPISODES ───
         function renderEpisodes(skipScroll) {
             const epCount = totalEpisodes[currentSeason] || 1;
@@ -2554,9 +2693,18 @@
             const primaryData = currentServer === 1 ? srv1Data : srv2Data;
             const grid = document.getElementById('ep-grid');
 
+            const list = getVisibleEpList();
+            const totalPages = Math.max(1, Math.ceil(list.length / EP_PER_PAGE));
+            if (epPage > totalPages) epPage = totalPages;
+            if (epPage < 1) epPage = 1;
+            const pageList = list.slice((epPage - 1) * EP_PER_PAGE, epPage * EP_PER_PAGE);
+
             // Build cards with placeholders first
             let html = '';
-            for (let e = 1; e <= epCount; e++) {
+            if (pageList.length === 0) {
+                html = `<div class="ep-empty">Is number ka koi episode nahi mila</div>`;
+            }
+            for (const e of pageList) {
                 const eKey = 'E' + e;
                 const hasData = !!(primaryData[sKey]?.[eKey]);
                 const isActive = (e === currentEpisode);
@@ -2582,6 +2730,11 @@
                 </div>`;
             }
             grid.innerHTML = html;
+            renderEpPagination(totalPages);
+
+            // Search bar sirf tab dikhao jab episodes kaafi hon
+            const searchRow = document.getElementById('ep-search-row');
+            if (searchRow) searchRow.style.display = epCount > 1 ? '' : 'none';
 
             setTimeout(() => {
                 if (!skipScroll) {
@@ -2621,11 +2774,56 @@
             currentServer = pickBestServer(currentSeason, currentEpisode);
             saveContinueWatching();
 
+            // Episode jis page par hai wahi page dikhao (search/next-prev ke liye zaroori)
+            const visible = getVisibleEpList();
+            const idx = visible.indexOf(e);
+            if (idx !== -1) epPage = Math.floor(idx / EP_PER_PAGE) + 1;
+
             renderServers();
-            renderEpisodes();
+            renderEpisodes(true);
             loadVideo();
             updateChips();
+            scrollToPlayer();
         }
+
+        // ─── AUTO SCROLL TO VIDEO PLAYER ───
+        function scrollToPlayer() {
+            const el = document.getElementById('player-ambient-wrap');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ─── EPISODE SEARCH ───
+        function playSearchedEpisode() {
+            const input = document.getElementById('ep-search-input');
+            const n = parseInt((input.value || '').trim(), 10);
+            const epCount = totalEpisodes[currentSeason] || 1;
+            if (!n || n < 1 || n > epCount) {
+                showToast(`⚠️ Episode 1 se ${epCount} ke beech number daalo`);
+                return;
+            }
+            input.blur();
+            selectEpisode(n);
+        }
+
+        (function setupEpSearch() {
+            const input = document.getElementById('ep-search-input');
+            const clear = document.getElementById('ep-search-clear');
+            const go    = document.getElementById('ep-search-go');
+            if (!input) return;
+            input.addEventListener('input', () => {
+                epQuery = input.value;
+                clear.style.display = epQuery ? 'block' : 'none';
+                epPage = 1;
+                renderEpisodes(true);
+            });
+            input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') playSearchedEpisode(); });
+            clear.addEventListener('click', () => {
+                input.value = ''; epQuery = ''; clear.style.display = 'none';
+                epPage = epPageOf(currentEpisode);
+                renderEpisodes(true);
+            });
+            go.addEventListener('click', playSearchedEpisode);
+        })();
 
         // ─── UPDATE META CHIPS ───
         function updateChips() {
@@ -2699,6 +2897,11 @@
             wdFlush();
             wdCtx = null;
             clearInterval(wdFlushTimer);
+            savePlayPos(); // jo episode abhi chhod rahe hain uski position (purane key par) save kar do
+
+            // Quality/server badli hai to wahi time; warna is episode ki saved position
+            const resumeAt = (keepPositionOnce != null) ? keepPositionOnce : getSavedPos(currentSeason, currentEpisode);
+            keepPositionOnce = null;
 
             const sKey = 'S' + currentSeason;
             const eKey = 'E' + currentEpisode;
@@ -2831,7 +3034,7 @@
                 iframeFsBtn.style.display = 'none';
                 loading.style.display = 'none';
                 customWrap.classList.add('active');
-                initCustomPlayer(videoUrl, audioTracksData, subsData);
+                initCustomPlayer(videoUrl, audioTracksData, subsData, resumeAt);
             }
 
             // Download link bar
@@ -2993,12 +3196,14 @@
             const video = document.getElementById('cv-video');
             wrap.classList.add('show-controls');
             clearTimeout(cvControlsTimer);
-            if (!video.paused) {
+            const menuOpen = document.getElementById('cv-audio-menu')?.classList.contains('open') ||
+                             document.getElementById('cv-cc-menu')?.classList.contains('open');
+            if (!video.paused && !menuOpen) {
                 cvControlsTimer = setTimeout(() => wrap.classList.remove('show-controls'), 3000);
             }
         }
 
-        function initCustomPlayer(src, audioTracks, subs) {
+        function initCustomPlayer(src, audioTracks, subs, resumeAt) {
             const video    = document.getElementById('cv-video');
             const wrap     = document.getElementById('custom-player-wrap');
             const spinner  = document.getElementById('cv-spinner');
@@ -3010,6 +3215,18 @@
             hideAudioMenu();
             resetAudioBtn();
             stopAmbientMode(); // avoid flashing the previous episode's glow color
+
+            cvPosKey = posKeyFor(currentSeason, currentEpisode);
+            // Property handler (addEventListener nahi) — taaki jaldi-jaldi switch par purana
+            // pending seek naye video par galti se na chal jaye.
+            video.onloadedmetadata = () => {
+                const d = video.duration;
+                if (resumeAt && resumeAt > 3 && isFinite(d) && resumeAt < d - 15) {
+                    video.currentTime = resumeAt;
+                    const m = Math.floor(resumeAt / 60), sec = String(Math.floor(resumeAt % 60)).padStart(2, '0');
+                    showToast(`▶ Resuming from ${m}:${sec}`);
+                }
+            };
 
             const isHls = src.includes('.m3u8');
             const hasSeparateAudioFiles = Array.isArray(audioTracks) && audioTracks.length >= 1;
@@ -3122,7 +3339,7 @@
             btnPlay.onclick = togglePlay;
             tapArea.onclick = togglePlay;
             video.onplay  = () => { updatePlayBtn(); showCvControls(); wdLastTimeupdate = video.currentTime; wdStartTimer(); startAmbientMode(); };
-            video.onpause = () => { updatePlayBtn(); wrap.classList.add('show-controls'); clearTimeout(cvControlsTimer); clearInterval(wdFlushTimer); wdFlush(); stopAmbientMode(); };
+            video.onpause = () => { updatePlayBtn(); wrap.classList.add('show-controls'); clearTimeout(cvControlsTimer); clearInterval(wdFlushTimer); wdFlush(); stopAmbientMode(); savePlayPos(); };
 
             // ─ Seek ─
             const progWrap = document.getElementById('cv-progress-wrap');
@@ -3168,6 +3385,7 @@
                 const nowTs = Date.now();
                 if (nowTs - cwLastSaveAt > CW_SAVE_THROTTLE) {
                     cwLastSaveAt = nowTs;
+                    savePlayPos();
                     const epKey = 'S' + currentSeason + 'E' + currentEpisode;
                     if (pct >= CW_COMPLETE_PCT) {
                         if (!isWatched(currentSeason, currentEpisode)) markWatched(currentSeason, currentEpisode);
@@ -3316,6 +3534,7 @@
                 // Episode poora ho gaya — Continue Watching turant agle episode par point kare,
                 // timeupdate ke 4s throttle ka wait na kare.
                 markWatched(currentSeason, currentEpisode);
+                try { if (cvPosKey) localStorage.removeItem(cvPosKey); } catch (err) {} // poora dekh liya — resume position hata do
                 const epKey = 'S' + currentSeason + 'E' + currentEpisode;
                 if (cwAdvancedForEp !== epKey) {
                     cwAdvancedForEp = epKey;
@@ -3350,12 +3569,26 @@
             }
         }
 
+        // Menu ke andar touch/scroll karte waqt controls band na hon aur click bahar leak na ho
+        ['cv-audio-menu', 'cv-cc-menu'].forEach(id => {
+            const m = document.getElementById(id);
+            if (!m) return;
+            ['touchstart', 'touchmove', 'wheel', 'scroll'].forEach(evt => {
+                m.addEventListener(evt, (e) => {
+                    if (evt !== 'scroll') e.stopPropagation();
+                    showCvControls();
+                }, { passive: true });
+            });
+            m.addEventListener('click', (e) => e.stopPropagation());
+        });
+
         // ─── AUDIO TRACK SUPPORT (multi-audio / dual-audio HLS streams) ───
         let cvAudioOutsideListenerAdded = false;
 
         function hideAudioMenu() {
             const menu = document.getElementById('cv-audio-menu');
             if (menu) menu.classList.remove('open');
+            if (typeof showCvControls === 'function') showCvControls();
         }
 
         function resetAudioBtn() {
@@ -3438,6 +3671,7 @@
         function hideCcMenu() {
             const m = document.getElementById('cv-cc-menu');
             if (m) m.classList.remove('open');
+            if (typeof showCvControls === 'function') showCvControls();
         }
 
         function clearSubtitleTrack(video) {
@@ -4042,6 +4276,8 @@
             // Pehli baar load hote waqt bhi Server 2 ko priority do (agar available ho)
             currentServer = pickBestServer(currentSeason, currentEpisode);
 
+            epPage = epPageOf(currentEpisode);
+
             // Render UI
             renderServers();
             renderSeasons();
@@ -4052,6 +4288,10 @@
             saveContinueWatching();
             loadVideo();
             updateWatchlistBtn();
+
+            // Page khulte hi user ko seedha video player tak scroll karo
+            // (player apni jagah par hi hai — upar nahi le jaya gaya)
+            setTimeout(scrollToPlayer, 300);
 
             // Title from all_anime Firebase (if not cached)
             if (!animeTitle) {

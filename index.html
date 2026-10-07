@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://5gvci.com/act/files/tag.min.js?z=11913947" data-cfasync="false" async></script>
-    <meta name="monetag" content="b23ede51a2a8107e67636ef8561af08b">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -2068,7 +2066,7 @@
 <body>
 
     <!-- ─── TELEGRAM JOIN MODAL ─── -->
-    <div id="telegram-modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+    <div id="telegram-modal-overlay" onclick="if(event.target===this) closeTelegramModal()" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:99999;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
         <div style="background:#1a1a2e;border-radius:16px;padding:28px 24px;max-width:340px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);position:relative;border:1px solid rgba(255,255,255,0.1);">
             <button onclick="closeTelegramModal()" style="position:absolute;top:10px;right:12px;background:none;border:none;color:#aaa;font-size:22px;cursor:pointer;line-height:1;">&times;</button>
             <div style="font-size:48px;margin-bottom:10px;">📢</div>
@@ -2081,25 +2079,52 @@
     <script>
         (function() {
             var STORAGE_KEY = 'tg_modal_dismissed_at';
-            var COOLDOWN = 24 * 60 * 60 * 1000; // 24 hours
+            var COOLDOWN = 3 * 24 * 60 * 60 * 1000; // 3 din — baar baar tang nahi karna
+            var FIRST_DELAY = 30000;                // pehle 30 sec user ko site dekhne do
+            var RETRY_EVERY = 5000;
+            var MAX_RETRIES = 120;                  // ~10 min baad koshish band
 
             function closeTelegramModal() {
                 document.getElementById('telegram-modal-overlay').style.display = 'none';
                 try { localStorage.setItem(STORAGE_KEY, Date.now().toString()); } catch (e) {}
             }
             window.closeTelegramModal = closeTelegramModal;
+            document.addEventListener('keydown', function(e) {
+                var ov = document.getElementById('telegram-modal-overlay');
+                if (e.key === 'Escape' && ov && ov.style.display === 'flex') closeTelegramModal();
+            });
+
+            // User ne sach mein site use ki hai (scroll/tap) tabhi popup dikhao
+            var engaged = false;
+            ['scroll', 'click', 'touchstart'].forEach(function(ev) {
+                window.addEventListener(ev, function() { engaged = true; }, { once: true, passive: true });
+            });
+
+            // Koi aur panel/modal/search khula ho to beech mein popup mat ghusao
+            function somethingElseOpen() {
+                var sb = document.getElementById('search-box');
+                var np = document.getElementById('notif-panel');
+                return document.body.classList.contains('modal-open') ||
+                       (sb && sb.classList.contains('open')) ||
+                       (np && np.classList.contains('open'));
+            }
 
             document.addEventListener('DOMContentLoaded', function() {
                 var lastDismissed = null;
                 try { lastDismissed = localStorage.getItem(STORAGE_KEY); } catch (e) {}
-
                 var shouldShow = !lastDismissed || (Date.now() - parseInt(lastDismissed, 10) > COOLDOWN);
+                if (!shouldShow) return;
 
-                if (shouldShow) {
-                    setTimeout(function() {
-                        document.getElementById('telegram-modal-overlay').style.display = 'flex';
-                    }, 1500);
+                var tries = 0;
+                function tryShow() {
+                    if (++tries > MAX_RETRIES) return;
+                    if (!engaged || document.hidden || somethingElseOpen()) {
+                        setTimeout(tryShow, RETRY_EVERY);
+                        return;
+                    }
+                    document.getElementById('telegram-modal-overlay').style.display = 'flex';
                 }
+                setTimeout(tryShow, FIRST_DELAY);
             });
         })();
     </script>
@@ -2400,7 +2425,7 @@
             <div class="section" style="margin-bottom:30px;">
                 <div class="section-header">
                     <div class="section-title">Random Series <span class="jp">ランダム</span></div>
-                    <div class="see-all" onclick="renderRandomSeries()"><i class="fas fa-shuffle" style="font-size:10px;"></i> Shuffle</div>
+                    <div class="see-all" onclick="renderRandomSeries(true)"><i class="fas fa-shuffle" style="font-size:10px;"></i> Shuffle</div>
                 </div>
                 <div class="h-scroll no-scrollbar" id="random-series-grid"></div>
             </div>
@@ -2950,7 +2975,7 @@
 
             // Koi watch history/watchlist nahi hai — abhi tak jaisa tha waisa hi generic shuffle
             if (seedAnime.length === 0) {
-                return shuffleArray([...allAnimeData]).slice(0, limit);
+                return stableShuffle(allAnimeData).slice(0, limit);
             }
 
             // Seed anime se genre aur type ki frequency nikalo
@@ -2980,9 +3005,9 @@
 
             // Genre/type match wale (score > 0) upar, shuffle karke score se sort —
             // taaki same-score anime ka order har baar thoda badalta rahe (variety)
-            const relevant = shuffleArray(scored.filter(s => s.score > 0)).sort((x, y) => y.score - x.score);
+            const relevant = stableShuffle(scored.filter(s => s.score > 0).map(s => Object.assign(s, { title: s.anime.title }))).sort((x, y) => y.score - x.score);
             // Jinka abhi tak genre meta load nahi hua (score 0) wo end mein filler ke taur par
-            const rest = shuffleArray(scored.filter(s => s.score === 0));
+            const rest = stableShuffle(scored.filter(s => s.score === 0).map(s => Object.assign(s, { title: s.anime.title })));
 
             return [...relevant, ...rest].slice(0, limit).map(s => s.anime);
         }
@@ -2995,6 +3020,11 @@
             if (!carousel || allAnimeData.length === 0) return;
             const ROW_LIMIT = 18;
             const list = buildForYouList(ROW_LIMIT);
+            // Same cards + same images ho to dobara mat banao — warna auto-scroll apni
+            // jagah se wapas 0 par aa jata hai aur user ka scroll/tap kharab hota hai
+            const sig = list.map(a => a.title + '|' + a.banner).join(',');
+            if (carousel._avSig === sig && carousel.children.length > 0) return;
+            carousel._avSig = sig;
             carousel.innerHTML = list.map(({title, slug, poster, banner, rating, item}) =>
                 `<div class="trending-item" style="flex-shrink:0;">` + makeLandscapeCard({title, slug, poster, banner, rating, item}) + `</div>`
             ).join('');
@@ -3002,9 +3032,12 @@
         }
 
         function clearCache() {
-            localStorage.removeItem('av_cache');
-            localStorage.removeItem('av_cache_v');
-            localStorage.removeItem('my_watchlist');
+            // Sirf catalog/poster cache saaf karo — user ka My List, Continue Watching,
+            // ratings aur streak jaisa personal data bilkul nahi chhedna
+            try {
+                localStorage.removeItem('av_cache');
+                localStorage.removeItem('av_cache_v');
+            } catch (e) {}
             showToast('🔄 Refreshing...');
             setTimeout(() => location.reload(), 800);
         }
@@ -3014,6 +3047,20 @@
             t.innerText = msg;
             t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // Session-stable shuffle: har item ko page-load par ek baar random key milti hai,
+        // phir re-render hone par bhi order wahi rehta hai (cards idhar-udhar nahi bhagte).
+        // Naye page load par naya random order milta hai, to variety bhi bani rehti hai.
+        const _avKeyMaps = { main: new Map(), random: new Map() };
+        function stableShuffle(array, mapName = 'main') {
+            const m = _avKeyMaps[mapName];
+            const key = (a) => {
+                const id = a.title || String(a);
+                if (!m.has(id)) m.set(id, Math.random());
+                return m.get(id);
+            };
+            return [...array].sort((x, y) => key(x) - key(y));
         }
 
         function shuffleArray(array) {
@@ -3987,7 +4034,7 @@
                 <div class="p-card-img-wrap">
                     <img src="${poster}" loading="lazy" onerror="this.src='https://placehold.co/500x750/13131a/ff2e43?text=${encodeURIComponent(title.substring(0,10))}'" >
                     <div class="p-card-badge"><i class="fas fa-star"></i> ${rating}</div>
-                    <div class="p-card-fav" onclick="event.stopPropagation(); toggleWatchlist('${safeTitle}')">
+                    <div class="p-card-fav" data-title="${title.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" onclick="event.stopPropagation(); toggleWatchlist('${safeTitle}')">
                         <i class="fa-heart ${isLiked ? 'fa-solid' : 'fa-regular'}" style="color:${isLiked ? 'var(--accent)' : 'white'}; font-size:10px;"></i>
                     </div>
                     ${(isNew || dubbed || langTag) ? `<div class="p-card-tags">
@@ -4038,9 +4085,14 @@
                 if (title) title.textContent = feat.title || '';
                 const r = parseFloat(getMetaFor(feat).score) || parseFloat(feat.rating) || 0;
                 if (rating) rating.textContent = r ? r.toFixed(1) : '—';
-                if (playBtn) playBtn.onclick = () => { window.location.href = feat.slug ? feat.slug + '.html' : '#'; };
+                if (playBtn) playBtn.onclick = (e) => {
+                    e.stopPropagation(); // card ka info-modal click yahan trigger na ho
+                    if (!feat.slug) return;
+                    addToContinueWatching(feat.title);
+                    window.location.href = `player.html?id=${feat.slug}`;
+                };
                 const main = document.getElementById('pc-feat-main');
-                if (main) main.onclick = (e) => { if (e.target !== playBtn) openInfoModal(feat.title, feat.slug, feat.banner, feat.rating, feat); };
+                if (main) main.onclick = () => openInfoModal(feat.title, feat.slug, feat.banner, feat.rating);
             }
 
             // Stats
@@ -4062,35 +4114,34 @@
             const trendList = document.getElementById('pc-trending-list');
             if (trendList) {
                 const top5 = sorted.slice(0, 5);
+                const esc = (v) => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
                 trendList.innerHTML = top5.map((a, i) => {
                     const score = parseFloat(getMetaFor(a).score) || parseFloat(a.rating) || 0;
-                    const safeTitle = (a.title||'').replace(/'/g,"\'");
-                    return `<div class="pc-trending-item" onclick="openInfoModal('${safeTitle}','${a.slug}','${a.banner}','${a.rating}',${JSON.stringify(a).replace(/</g,'\u003c')})">
+                    // Inline onclick mein JSON/apostrophe daalne se attribute toot jata tha —
+                    // ab sirf data-idx rakha hai, click handler neeche JS se lagta hai
+                    return `<div class="pc-trending-item" data-idx="${i}">
                         <div class="pc-trending-num ${i < 3 ? 'top' : ''}">${i + 1}</div>
-                        <img class="pc-trending-thumb" src="${a.poster||''}" onerror="this.src='https://placehold.co/38x52/1c1c26/555566?text=?'">
+                        <img class="pc-trending-thumb" src="${esc(a.poster||'')}" onerror="this.src='https://placehold.co/38x52/1c1c26/555566?text=?'">
                         <div class="pc-trending-info">
-                            <div class="pc-trending-name">${a.title||''}</div>
-                            <div class="pc-trending-sub">${getMetaFor(a).type||'Anime'}</div>
+                            <div class="pc-trending-name">${esc(a.title||'')}</div>
+                            <div class="pc-trending-sub">${esc(getMetaFor(a).type||'Anime')}</div>
                         </div>
                         <div class="pc-trending-rating"><i class="fas fa-star" style="font-size:9px;"></i> ${score ? score.toFixed(1) : '—'}</div>
                     </div>`;
                 }).join('');
+                trendList.querySelectorAll('.pc-trending-item').forEach(el => {
+                    const a = top5[+el.dataset.idx];
+                    el.onclick = () => openInfoModal(a.title, a.slug, a.banner, a.rating);
+                });
             }
         }
 
-                function renderGrids() {
-            const seriesGrid = document.getElementById('series-grid');
-            const moviesGrid = document.getElementById('movies-grid');
-            const carousel = document.getElementById('auto-scroll-container');
+        // ── Watchlist stories row (alag function — heart toggle par poora home re-render nahi karna) ──
+        function renderWatchlistStories() {
             const watchlistArea = document.getElementById('watchlist-items');
-            const cwGrid = document.getElementById('continue-watching-grid');
-            
-            seriesGrid.innerHTML = ''; moviesGrid.innerHTML = ''; carousel.innerHTML = ''; 
-            watchlistArea.innerHTML = ''; cwGrid.innerHTML = '';
-            
+            if (!watchlistArea) return;
             let watchlist = [];
             try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) { watchlist = []; }
-
             // Watchlist stories — array build karke ek hi baar innerHTML set karo
             // (baar baar += se DOM har iteration pe reparse hota tha, badi list pe ye hi lag ka sabse bada karan tha)
             const storyCardsHtml = watchlist.map(t => {
@@ -4117,13 +4168,15 @@
                 </div>`).join('');
 
             watchlistArea.innerHTML = storyCardsHtml + emptySlotsHtml;
+        }
 
-            const shuffledForYou = shuffleArray([...allAnimeData]);
-            // Carousel/preview rows ko ek fixed limit tak rakho — poore catalog ko baar baar
-            // render/clone karna (khaas kar auto-scroll marquee mein) hi asli "laggy" wajah thi.
-            // Poora catalog "See All" pe hamesha available hai.
-            const ROW_LIMIT = 18;
-
+        // ── Continue Watching row ──
+        function renderContinueWatching() {
+            const cwGrid = document.getElementById('continue-watching-grid');
+            const cwSection = document.getElementById('continue-watching-section');
+            if (!cwGrid) return;
+            let watchlist = [];
+            try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) { watchlist = []; }
             // ── CONTINUE WATCHING ──
             let cwList = [];
             try { cwList = JSON.parse(localStorage.getItem('continue_watching') || '[]'); } catch(e) {}
@@ -4154,6 +4207,58 @@
                     </div>`;
                 }).join('');
             }
+            else {
+                // Kuch bacha nahi (jaise "Clear" dabane ke baad) — section chhupao
+                cwGrid.innerHTML = '';
+                if (cwSection) cwSection.style.display = 'none';
+            }
+        }
+
+        // Heart toggle ke baad sirf wahi cheezein update karo jo badli hain
+        function updateWatchlistUI(title) {
+            let list = [];
+            try { list = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
+            const liked = list.includes(title);
+            document.querySelectorAll('.p-card-fav').forEach(el => {
+                if (el.dataset.title !== title) return;
+                const ico = el.querySelector('i');
+                if (!ico) return;
+                ico.classList.toggle('fa-solid', liked);
+                ico.classList.toggle('fa-regular', !liked);
+                ico.style.color = liked ? 'var(--accent)' : 'white';
+            });
+            renderWatchlistStories();
+            renderContinueWatching();
+            const wlStat = document.getElementById('pc-stat-watchlist');
+            if (wlStat) wlStat.textContent = list.length;
+        }
+
+                function renderGrids() {
+            const seriesGrid = document.getElementById('series-grid');
+            const moviesGrid = document.getElementById('movies-grid');
+            const carousel = document.getElementById('auto-scroll-container');
+            const watchlistArea = document.getElementById('watchlist-items');
+            const cwGrid = document.getElementById('continue-watching-grid');
+            
+            // Rows ko pehle khali (innerHTML = '') nahi karte — usse page ki height achanak
+            // gir jati thi aur scroll upar kood jata tha. Seedha naya content replace hota hai,
+            // aur har row ka horizontal scroll position yaad rakh ke wapas laga dete hain.
+            const SCROLL_ROW_IDS = ['stories-row','recent-grid','continue-watching-grid','series-grid','top-rated-grid','movies-grid','random-series-grid'];
+            const savedScroll = {};
+            SCROLL_ROW_IDS.forEach(id => { const el = document.getElementById(id); if (el) savedScroll[id] = el.scrollLeft; });
+
+            let watchlist = [];
+            try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) { watchlist = []; }
+
+            renderWatchlistStories();
+
+            const shuffledForYou = stableShuffle(allAnimeData);
+            // Carousel/preview rows ko ek fixed limit tak rakho — poore catalog ko baar baar
+            // render/clone karna (khaas kar auto-scroll marquee mein) hi asli "laggy" wajah thi.
+            // Poora catalog "See All" pe hamesha available hai.
+            const ROW_LIMIT = 18;
+
+            renderContinueWatching();
 
             // ── HINDI DUBBED — dedicated section hata di gayi hai, lekin isHindiDubbed()
             // function abhi bhi har card (portrait/landscape) par DUBBED tag lagane ke
@@ -4214,11 +4319,15 @@
 
             // ── PC FEATURED STRIP ──
             renderPcStrip();
+
+            // Har row ka horizontal scroll wapas wahi laga do jahan user tha
+            SCROLL_ROW_IDS.forEach(id => { const el = document.getElementById(id); if (el && savedScroll[id]) el.scrollLeft = savedScroll[id]; });
         }
 
         // Sirf "series" (movies exclude) mein se random shuffle karke dikhata hai —
         // header ke "Shuffle" button se bhi dobara call hoti hai naya set dikhane ke liye
-        function renderRandomSeries() {
+        function renderRandomSeries(reroll) {
+            if (reroll === true) _avKeyMaps.random.clear(); // sirf "Shuffle" button naya order laata hai
             const grid = document.getElementById('random-series-grid');
             if (!grid || allAnimeData.length === 0) return;
 
@@ -4232,7 +4341,7 @@
             let watchlist = [];
             try { watchlist = JSON.parse(localStorage.getItem('my_watchlist') || '[]'); } catch(e) {}
 
-            grid.innerHTML = shuffleArray([...pool]).slice(0, 18).map(({title, slug, poster, banner, rating, item}) => {
+            grid.innerHTML = stableShuffle(pool, 'random').slice(0, 18).map(({title, slug, poster, banner, rating, item}) => {
                 const isLiked = watchlist.includes(title);
                 return makePortraitCard({title, slug, poster, banner, rating, isLiked, item});
             }).join('');
@@ -4511,7 +4620,7 @@
                 }
             }
             try { localStorage.setItem('my_watchlist', JSON.stringify(l)); } catch(e) {}
-            renderGrids();
+            updateWatchlistUI(t);
         }
 
         function addToContinueWatching(title) {
@@ -4777,6 +4886,9 @@
                 // Dot hatao jab panel open karo
                 document.getElementById('notif-dot').classList.remove('show');
                 markNotifsRead();
+                // Browser permission tabhi maango jab user khud bell (notifications) khole —
+                // page load par achanak popup aane se log reflex mein "Block" dabate the
+                requestNotifPermission();
             }
         }
 
@@ -4819,7 +4931,7 @@
             document.getElementById('notif-dot').classList.add('show');
 
             // Browser push notification (agar permission ho)
-            if (Notification.permission === 'granted') {
+            if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification(`🎌 ${title}`, {
                     body: `Season ${season} Episode ${episode} is now available!`,
                     icon: thumb || poster || '/Gemini_Generated_Image_u4n26yu4n26yu4n2.png',
@@ -4901,12 +5013,22 @@
                     const data = await res.json();
                     if (!data) return;
                     Object.entries(data).forEach(([name, info]) => {
-                        if (!info.lastEpisode) return;
-                        const slug = name.toLowerCase().replace(/ /g,'_').replace(/[:']/g,'');
+                        if (!info || !info.lastEpisode) return;
+                        // Site ke baaki hisson jaisa hi slug ('-' se) — pehle yahan '_' tha,
+                        // isliye snapshot match nahi hota tha aur har anime "naya" lagta tha
+                        const slug = name.toLowerCase().replace(/ /g,'-').replace(/[:']/g,'');
                         const prev = lastKnownEpisodes[slug];
-                        const currE = info.lastEpisode;
-                        const currS = info.lastSeason || 1;
-                        if (!prev || prev.e < currE || prev.s < currS) {
+                        const currE = parseInt(info.lastEpisode) || 0;
+                        const currS = parseInt(info.lastSeason) || 1;
+
+                        // Pehli baar dikha hua anime — sirf baseline save karo, notification mat bhejo
+                        if (!prev) {
+                            lastKnownEpisodes[slug] = { s: currS, e: currE };
+                            return;
+                        }
+
+                        const isNewer = currS > prev.s || (currS === prev.s && currE > prev.e);
+                        if (isNewer) {
                             // Naya episode!
                             const anime = allAnimeData.find(a => a.title === name);
                             addNotification({
@@ -5226,7 +5348,6 @@
         initApp();
         initFeaturedSwipe();
         initStreak();
-        requestNotifPermission();
         fetchUpcomingAnime();
         if (window.AVAnalytics) window.AVAnalytics.trackPageview('home');
     </script>
