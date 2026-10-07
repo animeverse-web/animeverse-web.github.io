@@ -244,6 +244,7 @@
         /* ─── MULTI AUDIO / LANGUAGE PILL ROW ─── */
         .audio-pill-row {
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             gap: 8px;
             padding: 12px 14px;
@@ -272,6 +273,11 @@
             background: var(--accent);
             border-color: var(--accent);
             color: #fff;
+        }
+        .audio-pill-sel {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--text);
         }
 
         /* ─── AUDIO CODEC WARNING NOTE ─── */
@@ -1463,6 +1469,35 @@
         .cv-audio-opt.selected { color: var(--accent); background: var(--accent-dim); }
         .cv-audio-opt.selected i { display: inline-block; }
         .cv-audio-opt i { font-size: 9px; display: none; }
+        /* Subtitle (CC) selector — audio menu jaisa hi */
+        #cv-cc-wrap { position: relative; display: none; }
+        #cv-cc-wrap.has-tracks { display: inline-flex; }
+        #cv-btn-cc.active-track { color: var(--accent); }
+        #cv-cc-menu {
+            position: absolute;
+            top: 38px; right: 0;
+            background: rgba(20,20,20,0.97);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            padding: 6px;
+            min-width: 140px;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 20;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        #cv-cc-menu.open { display: flex; }
+        #cv-cc-menu .cv-audio-label {
+            font-size: 8px; font-weight: 900; color: var(--text-muted);
+            letter-spacing: 0.5px; text-transform: uppercase;
+            padding: 4px 8px 2px;
+        }
+        #cv-video::cue {
+            background: rgba(0,0,0,0.72);
+            color: #fff;
+            font-family: var(--font-body);
+        }
         /* Center play/pause overlay */
         #cv-center-overlay {
             position: absolute; inset: 0;
@@ -1632,11 +1667,11 @@
         </button>
 
         <!-- ── MULTI AUDIO / LANGUAGE PILLS ── -->
-        <div class="audio-pill-row" id="audio-pill-row">
-            <button class="audio-pill audio-pill-active" id="pill-multi-audio" onclick="document.getElementById('cv-btn-audio').click()">
+        <div class="audio-pill-row" id="audio-pill-row" style="display:none">
+            <button class="audio-pill audio-pill-active" id="pill-multi-audio" style="display:none" onclick="document.getElementById('cv-btn-audio').click()">
                 <i class="fas fa-volume-high"></i> Multi Audio
             </button>
-            <button class="audio-pill" id="pill-lang">हिंदी</button>
+            <div id="audio-lang-pills" style="display:contents"></div>
         </div>
 
         <!-- ── AUDIO CODEC WARNING NOTE ── -->
@@ -1700,6 +1735,15 @@
                             <div id="cv-audio-menu">
                                 <div class="cv-audio-label">Audio</div>
                                 <div id="cv-audio-list"></div>
+                            </div>
+                        </div>
+                        <div id="cv-cc-wrap">
+                            <button class="cv-btn cv-btn-round" id="cv-btn-cc" title="Subtitles">
+                                <i class="fas fa-closed-captioning" style="font-size:13px;"></i>
+                            </button>
+                            <div id="cv-cc-menu">
+                                <div class="cv-audio-label">Subtitles</div>
+                                <div id="cv-cc-list"></div>
                             </div>
                         </div>
                         <select id="cv-speed" title="Playback speed">
@@ -1930,6 +1974,11 @@
         // (encoder bot ka alag Firebase path, anime_links se bilkul door — koi overwrite
         // risk nahi). audioTracksStore[sKey][eKey][quality] = normalized tracks array.
         let audioTracksStore = {};
+        // subtitles/{slug}/S{n}/E{n}/{lang} -> {url, label, lang, format}  (encoder bot ka path)
+        // subtitleStore[sKey][eKey] = [{key, label, lang, url}, ...]
+        let subtitleStore = {};
+        let cvSubCache = {};   // subtitle url -> blob URL (dobara fetch na karna pade)
+        let cvSubReq = 0;      // jaldi-jaldi switch par purana fetch ignore karne ke liye
         let hlsInstance = null;   // active Hls.js instance (for multi-audio HLS streams)
 
         // Firebase Realtime Database arrays ko sequential-numeric-key OBJECT ki tarah
@@ -2086,7 +2135,7 @@
         function loadFirebaseServers() {
             return new Promise((resolve) => {
                 let done = 0;
-                const total = 3;
+                const total = 4;
                 function check() { if (++done === total) resolve(); }
 
                 // SERVER 1 — anime_links/{slug}
@@ -2128,6 +2177,28 @@
                     }
                     check();
                 }, () => { check(); }); // is fetch ka fail hona optional feature hai — video playback ko block nahi karna
+
+                // SUBTITLES — subtitles/{slug} (encoder bot ka alag path)
+                // Structure: S1 > E1 > {lang} > { url, label, lang, format }
+                db.ref('subtitles/' + animeSlug).once('value', snap => {
+                    const data = snap.val();
+                    if (data && typeof data === 'object') {
+                        Object.entries(data).forEach(([sKey, eps]) => {
+                            if (!sKey.startsWith('S') || !eps || typeof eps !== 'object') return;
+                            Object.entries(eps).forEach(([eKey, langs]) => {
+                                if (!eKey.startsWith('E') || !langs || typeof langs !== 'object') return;
+                                const arr = Object.entries(langs)
+                                    .filter(([, v]) => v && typeof v === 'object' && v.url)
+                                    .map(([k, v]) => ({ key: k, label: v.label || v.lang || k, lang: v.lang || k, url: v.url }));
+                                if (arr.length) {
+                                    subtitleStore[sKey] = subtitleStore[sKey] || {};
+                                    subtitleStore[sKey][eKey] = arr;
+                                }
+                            });
+                        });
+                    }
+                    check();
+                }, () => { check(); }); // optional feature — fail ho to video playback na ruke
 
                 // SERVER 2 — server2_links/{slug}
                 // Alag folder hai (anime_links se mix nahi hota). Same structure:
@@ -2646,6 +2717,8 @@
             let dlUrl    = null;
             let metaText = '';
             let audioTracksData = null;
+            // Subtitles episode ke hisaab se (quality se alag). Firebase me nahi to null -> CC button nahi.
+            const subsData = (subtitleStore[sKey] && subtitleStore[sKey][eKey]) || null;
 
             const primaryData = currentServer === 1 ? srv1Data : srv2Data;
             const epData = primaryData[sKey]?.[eKey];
@@ -2658,16 +2731,10 @@
                         dlUrl    = epData[q].dl_link || null;
                         metaText = q + (epData[q].server ? ' · ' + epData[q].server : ' · Server 1');
 
-                        // Agar is quality ke liye alag-alag audio-language files defined
-                        // hain (audio_track_splitter.py se), to default/pehla track hi
-                        // shuru me load karo — switcher se baad me change kar sakte hain.
-                        if (Array.isArray(epData[q].audio_tracks) && epData[q].audio_tracks.length > 1) {
-                            audioTracksData = epData[q].audio_tracks;
-                            const defaultTrack = audioTracksData.find(t => t.default) || audioTracksData[0];
-                            videoUrl = defaultTrack.link;
-                        } else {
-                            audioTracksData = null;
-                        }
+                        // Audio SIRF Firebase 'audio_tracks/' se aata hai. Agar is episode+quality
+                        // ka audio wahan save nahi hai to audioTracksData null rahega aur
+                        // koi audio button/pill nahi dikhega.
+                        audioTracksData = null;
 
                         // NAYA STORE — encoder bot ke 'audio_tracks/' path se (isi quality
                         // ke liye). Ise legacy epData[q].audio_tracks se prefer karte hain
@@ -2678,16 +2745,23 @@
                         // thi), use switcher me mat dikhao — chunne layak nahi hai.
                         const rawAudio = audioTracksStore[sKey]?.[eKey]?.[q];
                         if (Array.isArray(rawAudio) && rawAudio.length) {
+                            // Kisi track par default flag na ho to pehla track default maano
+                            // (default = video ka apna muxed audio, usse alag file nahi chalti).
+                            const isTrue = v => v === true || v === 'true';
+                            const hasDef = rawAudio.some(t => t && isTrue(t.default));
                             const mapped = rawAudio
-                                .map(t => ({
-                                    name: t.name || t.lang || 'Track',
-                                    lang: t.lang || '',
-                                    default: !!t.default,
-                                    link: t.default ? videoUrl : (t.audio_link || null),
-                                    audioOnly: !t.default, // .m4a hai, khud ka video stream nahi hai
-                                }))
+                                .map((t, i) => {
+                                    const isDef = hasDef ? isTrue(t && t.default) : i === 0;
+                                    return {
+                                        name: (t && (t.name || t.lang)) || 'Track',
+                                        lang: (t && t.lang) || '',
+                                        default: isDef,
+                                        link: isDef ? videoUrl : ((t && t.audio_link) || null),
+                                        audioOnly: !isDef, // alag audio file hai, khud ka video stream nahi hai
+                                    };
+                                })
                                 .filter(t => !!t.link);
-                            if (mapped.length > 1) {
+                            if (mapped.length >= 1) {
                                 audioTracksData = mapped;
                                 const defaultTrack = audioTracksData.find(t => t.default) || audioTracksData[0];
                                 videoUrl = defaultTrack.link;
@@ -2757,7 +2831,7 @@
                 iframeFsBtn.style.display = 'none';
                 loading.style.display = 'none';
                 customWrap.classList.add('active');
-                initCustomPlayer(videoUrl, audioTracksData);
+                initCustomPlayer(videoUrl, audioTracksData, subsData);
             }
 
             // Download link bar
@@ -2924,7 +2998,7 @@
             }
         }
 
-        function initCustomPlayer(src, audioTracks) {
+        function initCustomPlayer(src, audioTracks, subs) {
             const video    = document.getElementById('cv-video');
             const wrap     = document.getElementById('custom-player-wrap');
             const spinner  = document.getElementById('cv-spinner');
@@ -2938,7 +3012,7 @@
             stopAmbientMode(); // avoid flashing the previous episode's glow color
 
             const isHls = src.includes('.m3u8');
-            const hasSeparateAudioFiles = Array.isArray(audioTracks) && audioTracks.length > 1;
+            const hasSeparateAudioFiles = Array.isArray(audioTracks) && audioTracks.length >= 1;
 
             if (isHls && window.Hls && Hls.isSupported()) {
                 // ─ HLS.js: exposes multiple audio tracks when present in the manifest ─
@@ -2946,7 +3020,11 @@
                 hlsInstance.loadSource(src);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    setupAudioTracks(hlsInstance);
+                    // Manifest ke andar ke audio tracks ignore — sirf Firebase wale dikhte hain
+                    if (hasSeparateAudioFiles) {
+                        const activeIdx = audioTracks.findIndex(t => t.link === src);
+                        setupSourceSwapAudioTracks(video, audioTracks, activeIdx >= 0 ? activeIdx : 0);
+                    }
                 });
                 hlsInstance.on(Hls.Events.ERROR, (evt, data) => {
                     if (data.fatal) {
@@ -2972,12 +3050,12 @@
                     // Reliable, sab-browser-compatible tareeka — alag file per language
                     const activeIdx = audioTracks.findIndex(t => t.link === src);
                     setupSourceSwapAudioTracks(video, audioTracks, activeIdx >= 0 ? activeIdx : 0);
-                } else {
-                    // Fallback: native video.audioTracks (sirf Safari me kaam karta hai,
-                    // baaki browsers me chupchaap kuch nahi karta — harmless)
-                    video.addEventListener('loadedmetadata', () => setupNativeAudioTracks(video), { once: true });
                 }
+                // Firebase me audio nahi hai to koi audio menu nahi — file ke andar ke
+                // (embedded) tracks jaan-boojh kar nahi dikhaye jaate.
             }
+
+            setupSubtitles(video, subs);
 
             // ─ TIMING DEBUG: prints how long each loading stage takes in the
             // browser console (F12 → Console). Remove once slow-load issue is fixed.
@@ -3141,24 +3219,34 @@
             const muteIcon  = document.getElementById('cv-mute-icon');
             const volWrap   = document.getElementById('cv-vol-wrap');
 
+            // Alag-language audio chal raha ho to awaaz wahi (<audio>) deta hai, video muted rehta hai
+            const audioOut = () => cvExtraAudio || video;
             muteBtn.onclick = () => {
-                video.muted = !video.muted;
+                const o = audioOut();
+                o.muted = !o.muted;
+                if (cvExtraAudio) video.muted = true;
                 updateVolIcon();
                 volWrap.classList.toggle('open');
                 showCvControls();
             };
             volSlider.oninput = () => {
-                video.volume = parseFloat(volSlider.value);
-                video.muted  = video.volume === 0;
+                const v = parseFloat(volSlider.value);
+                const o = audioOut();
+                video.volume = v;
+                o.volume = v;
+                o.muted  = v === 0;
+                if (cvExtraAudio) video.muted = true;
                 updateVolIcon();
                 showCvControls();
             };
             function updateVolIcon() {
-                if (video.muted || video.volume === 0) muteIcon.className = 'fas fa-volume-xmark';
-                else if (video.volume < 0.5)           muteIcon.className = 'fas fa-volume-low';
-                else                                   muteIcon.className = 'fas fa-volume-high';
-                volSlider.value = video.muted ? 0 : video.volume;
+                const o = audioOut();
+                if (o.muted || o.volume === 0) muteIcon.className = 'fas fa-volume-xmark';
+                else if (o.volume < 0.5)       muteIcon.className = 'fas fa-volume-low';
+                else                           muteIcon.className = 'fas fa-volume-high';
+                volSlider.value = o.muted ? 0 : o.volume;
             }
+            video.onvolumechange = updateVolIcon;
 
             // ─ Speed ─
             document.getElementById('cv-speed').onchange = e => {
@@ -3239,7 +3327,14 @@
             // ─ Audio track menu toggle ─
             document.getElementById('cv-btn-audio').onclick = (e) => {
                 e.stopPropagation();
+                hideCcMenu();
                 document.getElementById('cv-audio-menu').classList.toggle('open');
+                showCvControls();
+            };
+            document.getElementById('cv-btn-cc').onclick = (e) => {
+                e.stopPropagation();
+                hideAudioMenu();
+                document.getElementById('cv-cc-menu').classList.toggle('open');
                 showCvControls();
             };
 
@@ -3248,6 +3343,8 @@
                 document.addEventListener('click', (e) => {
                     const wrapEl = document.getElementById('cv-audio-wrap');
                     if (wrapEl && !wrapEl.contains(e.target)) hideAudioMenu();
+                    const ccEl = document.getElementById('cv-cc-wrap');
+                    if (ccEl && !ccEl.contains(e.target)) hideCcMenu();
                 });
                 cvAudioOutsideListenerAdded = true;
             }
@@ -3266,29 +3363,56 @@
             const list = document.getElementById('cv-audio-list');
             if (wrap) wrap.classList.remove('has-tracks');
             if (list) list.innerHTML = '';
+            updateAudioPills(null);   // pill row bhi chhupao (audio nahi hai)
+            resetSubtitles();         // episode badle ya video na ho to CC bhi hata do
             destroyExtraAudio();
             const video = document.getElementById('cv-video');
             if (video) video.muted = false;
         }
 
+        function avEsc(v) {
+            return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function audioLabel(t, i) {
+            return t.name || t.lang || t.label || t.language || `Track ${i + 1}`;
+        }
+
         function renderAudioList(tracks, activeIdx, onSelect) {
             const list = document.getElementById('cv-audio-list');
-            list.innerHTML = tracks.map((t, i) => {
-                const label = t.name || t.lang || t.label || t.language || `Track ${i + 1}`;
-                const isActive = i === activeIdx;
-                return `
-                <button class="cv-audio-opt ${isActive ? 'selected' : ''}" data-idx="${i}">
-                    <span>${label}</span><i class="fas fa-check"></i>
-                </button>`;
-            }).join('');
+            const pick = (idx) => {
+                onSelect(idx);
+                hideAudioMenu();
+                showToast('🔊 Audio: ' + audioLabel(tracks[idx], idx));
+            };
+            list.innerHTML = tracks.map((t, i) => `
+                <button class="cv-audio-opt ${i === activeIdx ? 'selected' : ''}" data-idx="${i}">
+                    <span>${avEsc(audioLabel(t, i))}</span><i class="fas fa-check"></i>
+                </button>`).join('');
             list.querySelectorAll('.cv-audio-opt').forEach(btn => {
-                btn.onclick = () => {
-                    const idx = parseInt(btn.dataset.idx);
-                    const label = tracks[idx].name || tracks[idx].lang || tracks[idx].label || tracks[idx].language || `Track ${idx + 1}`;
-                    onSelect(idx);
-                    hideAudioMenu();
-                    showToast('🔊 Audio: ' + label);
-                };
+                btn.onclick = () => pick(parseInt(btn.dataset.idx));
+            });
+            updateAudioPills(tracks, activeIdx, pick);
+        }
+
+        // Player ke neeche wali pill row — sirf tab dikhti hai jab Firebase me is
+        // episode ka audio ho. Har language ek pill hai, click karke seedha switch.
+        function updateAudioPills(tracks, activeIdx, pick) {
+            const row   = document.getElementById('audio-pill-row');
+            const box   = document.getElementById('audio-lang-pills');
+            const multi = document.getElementById('pill-multi-audio');
+            if (!row || !box) return;
+            if (!tracks || !tracks.length) {
+                row.style.display = 'none';
+                box.innerHTML = '';
+                return;
+            }
+            row.style.display = 'flex';
+            if (multi) multi.style.display = tracks.length > 1 ? 'inline-flex' : 'none';
+            box.innerHTML = tracks.map((t, i) =>
+                `<button class="audio-pill ${i === activeIdx ? 'audio-pill-sel' : ''}" data-idx="${i}">${avEsc(audioLabel(t, i))}</button>`
+            ).join('');
+            box.querySelectorAll('.audio-pill').forEach(btn => {
+                btn.onclick = () => pick(parseInt(btn.dataset.idx));
             });
         }
 
@@ -3308,40 +3432,97 @@
             }, minMs);
         }
 
-        // HLS.js path — used when the .m3u8 manifest contains multiple audio renditions
-        function setupAudioTracks(hls) {
-            const tracks = hls.audioTracks || [];
-            const wrap = document.getElementById('cv-audio-wrap');
+        // ─── SUBTITLES (Firebase 'subtitles/{slug}/S/E/{lang}') ───
+        // Is episode ka subtitle Firebase me ho tabhi CC button dikhta hai. File .vtt hai
+        // (raw.githubusercontent.com se, jahan CORS allowed hai). fetch -> blob -> <track>.
+        function hideCcMenu() {
+            const m = document.getElementById('cv-cc-menu');
+            if (m) m.classList.remove('open');
+        }
+
+        function clearSubtitleTrack(video) {
+            video.querySelectorAll('track').forEach(t => t.remove());
+        }
+
+        function resetSubtitles() {
+            cvSubReq++;
+            const wrap = document.getElementById('cv-cc-wrap');
+            const list = document.getElementById('cv-cc-list');
+            const btn  = document.getElementById('cv-btn-cc');
+            if (wrap) wrap.classList.remove('has-tracks');
+            if (list) list.innerHTML = '';
+            if (btn)  btn.classList.remove('active-track');
+            hideCcMenu();
             const video = document.getElementById('cv-video');
-            if (tracks.length <= 1) { resetAudioBtn(); return; }
-
-            wrap.classList.add('has-tracks');
-            renderAudioList(tracks, hls.audioTrack, (idx) => {
-                runAudioSwitchLoading(video, () => { hls.audioTrack = idx; });
-            });
-
-            hls.on(Hls.Events.AUDIO_TRACK_SWITCHED, (evt, data) => {
-                renderAudioList(hls.audioTracks, data.id, (idx) => {
-                    runAudioSwitchLoading(video, () => { hls.audioTrack = idx; });
-                });
-            });
+            if (video) clearSubtitleTrack(video);
         }
 
-        // Native fallback (e.g. Safari playing HLS natively) — uses the video.audioTracks API
-        function setupNativeAudioTracks(video) {
-            const tracks = video.audioTracks;
-            const wrap = document.getElementById('cv-audio-wrap');
-            if (!tracks || tracks.length <= 1) { resetAudioBtn(); return; }
-
-            wrap.classList.add('has-tracks');
-            const arr = Array.from(tracks);
-            const activeIdx = arr.findIndex(t => t.enabled);
-            renderAudioList(arr, activeIdx, (idx) => {
-                runAudioSwitchLoading(video, () => {
-                    arr.forEach((t, i) => { t.enabled = (i === idx); });
-                });
-            });
+        async function loadSubtitleBlob(url) {
+            if (cvSubCache[url]) return cvSubCache[url];
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const text = await res.text();
+            const blobUrl = URL.createObjectURL(new Blob([text], { type: 'text/vtt' }));
+            cvSubCache[url] = blobUrl;
+            return blobUrl;
         }
+
+        function setupSubtitles(video, subs) {
+            resetSubtitles();
+            const valid = (Array.isArray(subs) ? subs : []).filter(t => t && /^https?:\/\//.test(t.url || ''));
+            if (!valid.length) return;               // Firebase me subtitle nahi -> CC button nahi
+
+            const wrap = document.getElementById('cv-cc-wrap');
+            const list = document.getElementById('cv-cc-list');
+            const btn  = document.getElementById('cv-btn-cc');
+            wrap.classList.add('has-tracks');
+
+            const render = (activeIdx) => {            // activeIdx -1 = Off
+                const items = [{ label: 'Off' }].concat(valid);
+                list.innerHTML = items.map((t, i) => `
+                    <button class="cv-audio-opt ${i === activeIdx + 1 ? 'selected' : ''}" data-idx="${i - 1}">
+                        <span>${avEsc(t.label || t.lang || ('Subtitle ' + i))}</span><i class="fas fa-check"></i>
+                    </button>`).join('');
+                list.querySelectorAll('.cv-audio-opt').forEach(b => {
+                    b.onclick = () => { select(parseInt(b.dataset.idx)); hideCcMenu(); };
+                });
+                btn.classList.toggle('active-track', activeIdx >= 0);
+            };
+
+            const select = async (idx, quiet) => {
+                const req = ++cvSubReq;
+                clearSubtitleTrack(video);
+                render(idx);
+                try { localStorage.setItem('av_sub_lang', idx < 0 ? 'off' : (valid[idx].lang || valid[idx].key || '')); } catch (e) {}
+                if (idx < 0) return;
+                const t = valid[idx];
+                try {
+                    const blobUrl = await loadSubtitleBlob(t.url);
+                    if (req !== cvSubReq) return;      // beech me user ne dusra chun liya
+                    const el = document.createElement('track');
+                    el.kind = 'subtitles';
+                    el.label = t.label || '';
+                    el.srclang = t.lang || 'und';
+                    el.src = blobUrl;
+                    video.appendChild(el);
+                    el.track.mode = 'showing';
+                    if (!quiet) showToast('💬 Subtitle: ' + (t.label || t.lang));
+                } catch (err) {
+                    console.warn('Subtitle load fail:', t.url, err);
+                    if (req === cvSubReq) { render(-1); showToast('⚠️ Subtitle load nahi hua'); }
+                }
+            };
+
+            // Pichli baar jo language chuni thi wahi dobara on karo (pehli baar: Off)
+            let saved = null;
+            try { saved = localStorage.getItem('av_sub_lang'); } catch (e) {}
+            const savedIdx = (saved && saved !== 'off') ? valid.findIndex(t => (t.lang || t.key) === saved) : -1;
+            render(-1);
+            if (savedIdx >= 0) select(savedIdx, true);
+        }
+
+        // (HLS-manifest / native video.audioTracks wale switchers hata diye gaye —
+        //  audio list ab sirf Firebase 'audio_tracks/' se banti hai.)
 
         // Secondary <audio> element jo audio-only tracks (encoder bot ke .m4a files)
         // ko muted <video> ke saath sync me chalata hai — kyunki in files me video
@@ -3377,6 +3558,17 @@
         }
 
         function applyAudioTrack(video, track) {
+            // Default track = video ka apna (muxed) audio. Koi file load nahi karni,
+            // bas secondary <audio> hata ke video ko unmute karna hai (volume/mute state same rahe).
+            if (!track.audioOnly) {
+                const keepVol   = cvExtraAudio ? cvExtraAudio.volume : video.volume;
+                const keepMuted = cvExtraAudio ? cvExtraAudio.muted  : video.muted;
+                destroyExtraAudio();
+                video.volume = keepVol;
+                video.muted  = keepMuted;
+                video.dispatchEvent(new Event('volumechange'));
+                return;
+            }
             const spinner = document.getElementById('cv-spinner');
             const switchStart = Date.now();
             // Audio/video ko properly sync hone ka ehsaas dilane ke liye kam se kam
@@ -3391,23 +3583,6 @@
                     if (spinner) spinner.style.display = 'none';
                     playAction();
                 }, wait);
-            }
-
-            if (!track.audioOnly) {
-                // Poori video hi is language ki hai (legacy alt-video-per-language
-                // system) — seedha video.src swap karo, currentTime/play-state preserve.
-                destroyExtraAudio();
-                video.muted = false;
-                const wasPlaying = !video.paused;
-                const resumeAt   = video.currentTime;
-                if (wasPlaying) video.pause();
-                video.src = track.link;
-                video.load();
-                video.addEventListener('loadedmetadata', () => {
-                    video.currentTime = resumeAt;
-                    finishSwitch(() => { if (wasPlaying) video.play().catch(() => {}); });
-                }, { once: true });
-                return;
             }
 
             // Audio-only track: main video ka apna audio mute karke, ek alag
@@ -3428,6 +3603,8 @@
                 cvExtraAudio = document.createElement('audio');
                 cvExtraAudio.style.display = 'none';
                 cvExtraAudio.preload = 'auto';
+                cvExtraAudio.volume = video.volume;   // user ki volume/mute setting aage le jao
+                cvExtraAudio.muted  = video.muted;
                 document.body.appendChild(cvExtraAudio);
             }
 
@@ -3443,6 +3620,7 @@
                 cvExtraAudio.playbackRate = video.playbackRate;
                 const resumeBoth = () => {
                     video.muted = true;
+                    video.dispatchEvent(new Event('volumechange'));
                     finishSwitch(() => {
                         if (wasPlaying) {
                             cvExtraAudio.play().catch(() => {});
@@ -3481,22 +3659,22 @@
         // audio) ho ya "audio-only" (encoder bot ki alag .m4a file), dono ko
         // seamlessly handle karta hai. MX Player jaisa currentTime/play-state
         // preserve karke switch karta hai.
-        function setupSourceSwapAudioTracks(video, tracks, activeIdx) {
+        function setupSourceSwapAudioTracks(video, tracks, activeIdx, isInitial = true) {
             const wrap = document.getElementById('cv-audio-wrap');
-            if (!Array.isArray(tracks) || tracks.length <= 1) { resetAudioBtn(); return; }
+            if (!Array.isArray(tracks) || tracks.length < 1) { resetAudioBtn(); return; }
 
             wrap.classList.add('has-tracks');
             renderAudioList(tracks, activeIdx, (idx) => {
                 if (idx === activeIdx) return;
                 applyAudioTrack(video, tracks[idx]);
-                setupSourceSwapAudioTracks(video, tracks, idx);
+                setupSourceSwapAudioTracks(video, tracks, idx, false);
             });
 
             // Pehli baar setup hote waqt (ya episode/quality change ke baad), agar
             // shuru me hi active track audio-only hai (default track pehle se load
             // ho chuka video.src use kar raha, isliye usme dubara chhedne ki zaroorat
             // nahi), to turant mute + synced secondary audio chalu karo.
-            if (tracks[activeIdx]?.audioOnly) {
+            if (isInitial && tracks[activeIdx]?.audioOnly) {
                 applyAudioTrack(video, tracks[activeIdx]);
             }
         }
