@@ -2062,9 +2062,31 @@
         let wdLastTimeupdate = null;
         let wdFlushTimer = null;
 
+        // Audio / caption language currently active (for language analytics)
+        let avCurAudio = null;      // e.g. "Hindi"
+        let avCurSub   = null;      // e.g. "English" or "Off"
+        let avLastAudioKey = '', avLastSubKey = '';
+        function avTrackAudio(track, idx, source) {
+            if (!window.AVAnalytics || !track) return;
+            const label = audioLabel(track, idx);
+            avCurAudio = label;
+            const key = `${animeSlug}|${currentSeason}|${currentEpisode}|${label}`;
+            if (source === 'default' && key === avLastAudioKey) return;   // quality/server reload pe dobara na gino
+            avLastAudioKey = key;
+            window.AVAnalytics.trackAudioLang(animeSlug, animeTitle || animeSlug, currentSeason, currentEpisode, label, source);
+        }
+        function avTrackSub(label, source) {
+            if (!window.AVAnalytics) return;
+            avCurSub = label;
+            const key = `${animeSlug}|${currentSeason}|${currentEpisode}|${label}`;
+            if (source === 'default' && key === avLastSubKey) return;
+            avLastSubKey = key;
+            window.AVAnalytics.trackSubtitleLang(animeSlug, animeTitle || animeSlug, currentSeason, currentEpisode, label, source);
+        }
+
         function wdFlush() {
             if (wdCtx && wdAccum > 0.5 && window.AVAnalytics) {
-                window.AVAnalytics.trackWatchDuration(wdCtx.slug, wdCtx.title, wdCtx.season, wdCtx.episode, Math.round(wdAccum));
+                window.AVAnalytics.trackWatchDuration(wdCtx.slug, wdCtx.title, wdCtx.season, wdCtx.episode, Math.round(wdAccum), avCurAudio, avCurSub);
             }
             wdAccum = 0;
         }
@@ -2998,6 +3020,7 @@
             }
             // From here on, any watched seconds belong to this episode
             wdCtx = { slug: animeSlug, title: animeTitle || animeSlug, season: currentSeason, episode: currentEpisode };
+            avCurAudio = null; avCurSub = null;
             wdAccum = 0;
             wdLastTimeupdate = null;
 
@@ -3614,6 +3637,7 @@
             const list = document.getElementById('cv-audio-list');
             const pick = (idx) => {
                 onSelect(idx);
+                if (idx !== activeIdx) avTrackAudio(tracks[idx], idx, 'user');
                 hideAudioMenu();
                 showToast('🔊 Audio: ' + audioLabel(tracks[idx], idx));
             };
@@ -3728,6 +3752,7 @@
                 clearSubtitleTrack(video);
                 render(idx);
                 try { localStorage.setItem('av_sub_lang', idx < 0 ? 'off' : (valid[idx].lang || valid[idx].key || '')); } catch (e) {}
+                avTrackSub(idx < 0 ? 'Off' : (valid[idx].label || valid[idx].lang || 'Unknown'), quiet ? 'default' : 'user');
                 if (idx < 0) return;
                 const t = valid[idx];
                 try {
@@ -3753,6 +3778,7 @@
             const savedIdx = (saved && saved !== 'off') ? valid.findIndex(t => (t.lang || t.key) === saved) : -1;
             render(-1);
             if (savedIdx >= 0) select(savedIdx, true);
+            else avTrackSub('Off', 'default');     // subtitles available par user ne on nahi kiya
         }
 
         // (HLS-manifest / native video.audioTracks wale switchers hata diye gaye —
@@ -3911,6 +3937,7 @@
             if (isInitial && tracks[activeIdx]?.audioOnly) {
                 applyAudioTrack(video, tracks[activeIdx]);
             }
+            if (isInitial) avTrackAudio(tracks[activeIdx], activeIdx, 'default');
         }
 
 

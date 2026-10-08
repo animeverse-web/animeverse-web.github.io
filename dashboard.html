@@ -230,13 +230,15 @@ td.muted{color:var(--text-muted);white-space:nowrap;}
         </div>
     </div>
     <div class="top-right">
-        <div class="live-pill"><span class="live-dot"></span> Live</div>
+        <div class="live-pill"><span class="live-dot"></span> <span id="livePillText">Live</span></div>
         <button class="refresh-btn" id="refreshBtn" title="Refresh"><i class="fas fa-rotate"></i></button>
     </div>
 </div>
 
 <div class="tabbar" id="tabbar">
     <button class="tab-btn active" data-view="today"><i class="fas fa-calendar-day"></i> Today</button>
+    <button class="tab-btn" data-view="audience"><i class="fas fa-users"></i> Audience</button>
+    <button class="tab-btn" data-view="language"><i class="fas fa-language"></i> Language</button>
     <button class="tab-btn" data-view="content"><i class="fas fa-photo-film"></i> Content</button>
     <button class="tab-btn" data-view="health"><i class="fas fa-heart-pulse"></i> Health</button>
     <button class="tab-btn" data-view="activity"><i class="fas fa-bolt"></i> Activity</button>
@@ -244,8 +246,7 @@ td.muted{color:var(--text-muted);white-space:nowrap;}
 
 <div class="main">
 
-    <!-- ═══ TODAY (default) ═══ -->
-    <div class="view active" id="view-today">
+    <div id="dateBarWrap">
         <div class="date-bar">
             <div class="chip-row" id="chipRow">
                 <button class="chip active" data-mode="today">Today</button>
@@ -264,6 +265,10 @@ td.muted{color:var(--text-muted);white-space:nowrap;}
             </div>
             <div class="range-caption" id="rangeCaption">Showing today</div>
         </div>
+    </div>
+
+    <!-- ═══ TODAY (default) ═══ -->
+    <div class="view active" id="view-today">
 
         <div class="kpi-scroll" id="kpiGrid"></div>
 
@@ -276,6 +281,69 @@ td.muted{color:var(--text-muted);white-space:nowrap;}
             <h3>Unique visitors</h3>
             <div class="panel-sub">Distinct devices per day</div>
             <div class="chart-box short"><canvas id="visitorsChart"></canvas></div>
+        </div>
+    </div>
+
+
+    <!-- ═══ AUDIENCE ═══ -->
+    <div class="view" id="view-audience">
+        <div class="view-header"><h2>Audience &amp; bounce</h2><span style="font-size:10.5px;color:var(--text-dim);font-weight:700;" id="audRangeCaption"></span></div>
+        <div class="kpi-scroll" id="audKpis"></div>
+
+        <div class="panel">
+            <h3><span class="live-dot" style="display:inline-block;margin-right:6px;"></span>Live right now</h3>
+            <div class="panel-sub">Users active in the last ~75 seconds (updates in real time)</div>
+            <div class="table-scroll"><table id="liveTable"><thead><tr><th>Page</th><th>Watching</th><th>Device</th><th>Seen</th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+        <div class="panel">
+            <h3>Bounce rate by day</h3>
+            <div class="panel-sub">% of sessions that left without watching, searching, clicking or staying 10s+</div>
+            <div class="chart-box short" id="box_bounce"></div>
+        </div>
+        <div class="grid-3">
+            <div class="panel"><h3>New vs returning</h3><div class="panel-sub">Distinct visitors per day</div><div class="chart-box short" id="box_newret"></div></div>
+            <div class="panel"><h3>Busiest hours</h3><div class="panel-sub">Pageviews by hour of day</div><div class="chart-box short" id="box_hourly"></div></div>
+            <div class="panel"><h3>Devices</h3><div class="panel-sub">Sessions by device</div><div class="chart-box short" id="box_device"></div></div>
+        </div>
+        <div class="grid-3">
+            <div class="panel"><h3>Where visitors come from</h3><div class="panel-sub">Traffic source</div><div class="chart-box" id="box_source"></div></div>
+            <div class="panel"><h3>Browsers</h3><div class="panel-sub">Sessions by browser</div><div class="chart-box" id="box_browser"></div></div>
+            <div class="panel"><h3>Operating system</h3><div class="panel-sub">Sessions by OS</div><div class="chart-box" id="box_os"></div></div>
+        </div>
+        <div class="grid-3">
+            <div class="panel"><h3>Entry pages</h3><div class="panel-sub">Where sessions start</div><div class="table-scroll"><table id="entryTable"><thead><tr><th>Page</th><th>Sessions</th><th>%</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="panel"><h3>Exit pages</h3><div class="panel-sub">Where visitors left the site</div><div class="table-scroll"><table id="exitTable"><thead><tr><th>Page</th><th>Exits</th><th>%</th></tr></thead><tbody></tbody></table></div></div>
+        </div>
+    </div>
+
+    <!-- ═══ LANGUAGE (audio + captions) ═══ -->
+    <div class="view" id="view-language">
+        <div class="view-header"><h2>Audio &amp; caption languages</h2><span style="font-size:10.5px;color:var(--text-dim);font-weight:700;" id="langRangeCaption"></span></div>
+        <div class="kpi-scroll" id="langKpis"></div>
+
+        <div class="grid-3">
+            <div class="panel"><h3>Audio language</h3><div class="panel-sub">Unique people per dub</div><div class="chart-box short" id="box_audio"></div></div>
+            <div class="panel"><h3>Caption language</h3><div class="panel-sub">Unique people per subtitle (incl. Off)</div><div class="chart-box short" id="box_sub"></div></div>
+            <div class="panel"><h3>Captions on vs off</h3><div class="panel-sub">People watching with subtitles</div><div class="chart-box short" id="box_subonoff"></div></div>
+        </div>
+
+        <div class="grid-3">
+            <div class="panel"><h3>Audio summary</h3><div class="panel-sub">People · selections · watch time</div>
+                <div class="table-scroll"><table id="audioSumTable"><thead><tr><th>Audio</th><th>People</th><th>Picks</th><th>Min</th></tr></thead><tbody></tbody></table></div></div>
+            <div class="panel"><h3>Caption summary</h3><div class="panel-sub">People · selections · watch time</div>
+                <div class="table-scroll"><table id="subSumTable"><thead><tr><th>Caption</th><th>People</th><th>Picks</th><th>Min</th></tr></thead><tbody></tbody></table></div></div>
+        </div>
+
+        <div class="panel">
+            <h3>Audio by anime / season / episode</h3>
+            <div class="panel-sub">Which dub is being played on which episode</div>
+            <div class="table-scroll" style="max-height:340px;"><table id="audioEpTable"><thead><tr><th>Anime</th><th>S/E</th><th>Audio</th><th>#</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="panel">
+            <h3>Captions by anime / season / episode</h3>
+            <div class="panel-sub">Which subtitle is on for which episode</div>
+            <div class="table-scroll" style="max-height:340px;"><table id="subEpTable"><thead><tr><th>Anime</th><th>S/E</th><th>Caption</th><th>#</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
 
@@ -351,6 +419,8 @@ td.muted{color:var(--text-muted);white-space:nowrap;}
 
 <div class="bottom-nav" id="bottomNav">
     <button class="bn-item active" data-view="today"><i class="fas fa-calendar-day"></i>Today</button>
+    <button class="bn-item" data-view="audience"><i class="fas fa-users"></i>Audience</button>
+    <button class="bn-item" data-view="language"><i class="fas fa-language"></i>Language</button>
     <button class="bn-item" data-view="content"><i class="fas fa-photo-film"></i>Content</button>
     <button class="bn-item" data-view="health"><i class="fas fa-heart-pulse"></i>Health</button>
     <button class="bn-item" data-view="activity"><i class="fas fa-bolt"></i>Activity</button>
@@ -383,6 +453,8 @@ const EVENT_META = {
     join_click:      { icon:'fa-paper-plane', color:'#229ED9', bg:'rgba(34,158,217,0.12)' },
     broken_link:     { icon:'fa-triangle-exclamation', color:'#ff3d68', bg:'rgba(255,61,104,0.12)' },
     server_error:    { icon:'fa-bug', color:'#ff3d68', bg:'rgba(255,61,104,0.12)' },
+    audio_select:    { icon:'fa-volume-high', color:'#f47521', bg:'rgba(244,117,33,0.12)' },
+    subtitle_select: { icon:'fa-closed-captioning', color:'#8b5cf6', bg:'rgba(139,92,246,0.12)' },
     notif_permission:{ icon:'fa-bell', color:'#f47521', bg:'rgba(244,117,33,0.12)' }
 };
 
@@ -541,6 +613,7 @@ function renderTodayKpis(days){
     const serverErrors = sumMetric(days,'server_errors');
     const notifGranted = sumMetric(days,'notif_granted');
     const notifDenied = sumMetric(days,'notif_denied');
+    const sessionsN = sumMetric(days,'sessions'), bouncesN = sumMetric(days,'bounces');
 
     document.getElementById('kpiGrid').innerHTML = [
         kpiCard('fa-house', '#f47521', 'rgba(244,117,33,0.12)', fmtNum(homeViews), 'Home Views'),
@@ -553,7 +626,8 @@ function renderTodayKpis(days){
         kpiCard('fa-paper-plane', '#229ED9', 'rgba(34,158,217,0.12)', fmtNum(joinClicks), 'Telegram Joins'),
         kpiCard('fa-triangle-exclamation', '#ff3d68', 'rgba(255,61,104,0.12)', fmtNum(brokenLinks), 'Broken Links'),
         kpiCard('fa-bug', '#ff3d68', 'rgba(255,61,104,0.12)', fmtNum(serverErrors), 'Server Errors'),
-        kpiCard('fa-bell', '#f47521', 'rgba(244,117,33,0.12)', fmtNum(notifGranted), 'Notifs Allowed', `${fmtNum(notifDenied)} denied`)
+        kpiCard('fa-bell', '#f47521', 'rgba(244,117,33,0.12)', fmtNum(notifGranted), 'Notifs Allowed', `${fmtNum(notifDenied)} denied`),
+        kpiCard('fa-right-from-bracket', '#ff3d68', 'rgba(255,61,104,0.12)', sessionsN ? pctOf(Math.min(sessionsN,Math.max(0,bouncesN)),sessionsN) : '—', 'Bounce Rate', `${fmtNum(sessionsN)} sessions`)
     ].join('');
 }
 
@@ -731,6 +805,210 @@ function renderHealth(data){
         : `<tr><td colspan="3" class="muted" style="text-align:center;padding:22px;">No server errors logged 🎉</td></tr>`;
 }
 
+
+// ═══════════════════════ SHARED HELPERS (new tabs) ═══════════════════════
+let liveData = {};
+function drawChart(boxId, canvasId, cfg, hasData, emptyMsg){
+    const box = document.getElementById(boxId);
+    if (!box) return;
+    if (charts[boxId]) { charts[boxId].destroy(); charts[boxId] = null; }
+    if (!hasData){ box.innerHTML = `<div class="empty-note"><i class="fas fa-chart-simple"></i>${emptyMsg||'No data for this range yet'}</div>`; return; }
+    box.innerHTML = `<canvas id="${canvasId}"></canvas>`;
+    charts[boxId] = new Chart(document.getElementById(canvasId), cfg);
+}
+const PALETTE = ['#f47521','#8b5cf6','#2ecc71','#ff3d68','#229ED9','#f1c40f','#e67e22','#1abc9c','#9b59b6','#7f8c8d'];
+function mergeMap(days, key){           // daily/{day}/{key}/{name}: n  -> summed {name:n}
+    const out = {};
+    days.forEach(d=>{ const m = dailyAll[d] && dailyAll[d][key]; if (m) Object.entries(m).forEach(([k,v])=>{ out[k] = (out[k]||0) + (typeof v==='object'?(v.count||0):(v||0)); }); });
+    Object.keys(out).forEach(k=>{ if (out[k] < 0) out[k] = 0; });
+    return out;
+}
+function sortedPairs(map, limit){ return Object.entries(map).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]).slice(0, limit||99); }
+function hBar(boxId, canvasId, map, color, limit){
+    const pairs = sortedPairs(map, limit||8);
+    drawChart(boxId, canvasId, {
+        type:'bar',
+        data:{ labels: pairs.map(p=>p[0].length>16?p[0].slice(0,16)+'…':p[0]), datasets:[{ data: pairs.map(p=>p[1]), backgroundColor: color, borderRadius:5, maxBarThickness:16 }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
+            scales:{ x:{ grid:{color:'rgba(255,255,255,0.05)'}, beginAtZero:true, ticks:{precision:0,font:{size:9.5}} }, y:{ grid:{display:false}, ticks:{font:{size:10}} } } }
+    }, pairs.length>0);
+}
+function donut(boxId, canvasId, map, limit){
+    const pairs = sortedPairs(map, limit||8);
+    drawChart(boxId, canvasId, {
+        type:'doughnut',
+        data:{ labels: pairs.map(p=>p[0]), datasets:[{ data: pairs.map(p=>p[1]), backgroundColor: PALETTE, borderWidth:0 }] },
+        options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+            plugins:{ legend:{ position:'right', labels:{ boxWidth:8, boxHeight:8, usePointStyle:true, font:{size:10,weight:700} } } } }
+    }, pairs.length>0);
+}
+function pctOf(n, total){ return total ? (n/total*100).toFixed(1)+'%' : '—'; }
+function fmtDur(sec){ sec = Math.round(sec||0); const m = Math.floor(sec/60), s = sec%60; return m>=60 ? `${Math.floor(m/60)}h ${m%60}m` : `${m}m ${String(s).padStart(2,'0')}s`; }
+function pageLabel(k){ return k==='home' ? 'Home' : k==='player' ? 'Player' : k; }
+function simpleRows(tbodyId, pairs, total, empty){
+    document.querySelector('#'+tbodyId+' tbody').innerHTML = pairs.length ? pairs.map(([k,v])=>
+        `<tr><td>${pageLabel(k)}</td><td><span class="tag violet">${v}</span></td><td class="muted">${pctOf(v,total)}</td></tr>`).join('')
+        : `<tr><td colspan="3" class="muted" style="text-align:center;padding:22px;">${empty||'No data yet'}</td></tr>`;
+}
+
+// ═══════════════════════ AUDIENCE TAB ═══════════════════════
+function renderAudience(){
+    const days = selectedDayKeys();
+    const cap = document.getElementById('audRangeCaption'); if (cap) cap.textContent = rangeCaptionText(days,'');
+    const sessions = sumMetric(days,'sessions');
+    const bounces = Math.min(sessions, Math.max(0, sumMetric(days,'bounces')));
+    const pv = sumMetric(days,'pageviews_home') + sumMetric(days,'pageviews_player');
+    const secs = sumMetric(days,'session_seconds');
+    const newV = sumMetric(days,'new_visitors'), retV = sumMetric(days,'returning_visitors');
+    const liveN = liveUsers().length;
+
+    document.getElementById('audKpis').innerHTML = [
+        kpiCard('fa-satellite-dish','#2ecc71','rgba(46,204,113,0.12)', fmtNum(liveN), 'Live Now'),
+        kpiCard('fa-right-from-bracket','#ff3d68','rgba(255,61,104,0.12)', sessions? pctOf(bounces,sessions):'—', 'Bounce Rate', `${fmtNum(bounces)} of ${fmtNum(sessions)} left fast`),
+        kpiCard('fa-door-open','#f47521','rgba(244,117,33,0.12)', fmtNum(sessions), 'Sessions'),
+        kpiCard('fa-stopwatch','#8b5cf6','rgba(139,92,246,0.12)', sessions? fmtDur(secs/sessions):'—', 'Avg Session'),
+        kpiCard('fa-layer-group','#229ED9','rgba(34,158,217,0.12)', sessions? (pv/sessions).toFixed(1):'—', 'Pages / Session'),
+        kpiCard('fa-user-plus','#2ecc71','rgba(46,204,113,0.12)', fmtNum(newV), 'New Visitors'),
+        kpiCard('fa-user-check','#f47521','rgba(244,117,33,0.12)', fmtNum(retV), 'Returning', (newV+retV)? pctOf(retV,newV+retV)+' of visitors':'')
+    ].join('');
+
+    const labels = days.map(shortLabel);
+    // bounce % per day
+    const bSeries = days.map(d=>{ const sN = (dailyAll[d]&&dailyAll[d].sessions)||0; const b = Math.min(sN, Math.max(0,(dailyAll[d]&&dailyAll[d].bounces)||0)); return sN ? +(b/sN*100).toFixed(1) : null; });
+    drawChart('box_bounce','bounceChart',{
+        type: days.length===1?'bar':'line',
+        data:{ labels, datasets:[{ label:'Bounce %', data:bSeries, borderColor:'#ff3d68', backgroundColor: days.length===1?'#ff3d68':'rgba(255,61,104,0.12)', fill:true, tension:.35, pointRadius:3, borderWidth:2.5, borderRadius:5, maxBarThickness:40, spanGaps:true }] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+            scales:{ x:{grid:{display:false},ticks:{font:{size:9.5},maxRotation:0,autoSkip:true,maxTicksLimit:7}}, y:{grid:{color:'rgba(255,255,255,0.05)'},beginAtZero:true,max:100,ticks:{font:{size:9.5},callback:v=>v+'%'}} } }
+    }, bSeries.some(v=>v!==null), 'No sessions recorded yet — data starts after the new tracker is live');
+
+    // new vs returning
+    const nSeries = days.map(d=>(dailyAll[d]&&dailyAll[d].new_visitors)||0);
+    const rSeries = days.map(d=>(dailyAll[d]&&dailyAll[d].returning_visitors)||0);
+    drawChart('box_newret','newretChart',{
+        type:'bar',
+        data:{ labels, datasets:[ {label:'New',data:nSeries,backgroundColor:'#2ecc71',borderRadius:4,maxBarThickness:24}, {label:'Returning',data:rSeries,backgroundColor:'#f47521',borderRadius:4,maxBarThickness:24} ] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'top',align:'end',labels:{boxWidth:8,boxHeight:8,usePointStyle:true,font:{size:10,weight:700}}}},
+            scales:{ x:{stacked:true,grid:{display:false},ticks:{font:{size:9.5},maxRotation:0,autoSkip:true,maxTicksLimit:6}}, y:{stacked:true,grid:{color:'rgba(255,255,255,0.05)'},beginAtZero:true,ticks:{precision:0,font:{size:9.5}}} } }
+    }, nSeries.some(v=>v>0)||rSeries.some(v=>v>0));
+
+    // hourly
+    const hourly = mergeMap(days,'hourly');
+    const hVals = Array.from({length:24},(_,h)=>hourly[String(h).padStart(2,'0')]||0);
+    drawChart('box_hourly','hourlyChart',{
+        type:'bar',
+        data:{ labels:hVals.map((_,h)=> h===0?'12a': h<12? h+'a' : h===12?'12p' : (h-12)+'p'), datasets:[{data:hVals,backgroundColor:'#8b5cf6',borderRadius:3}] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+            scales:{ x:{grid:{display:false},ticks:{font:{size:8.5},maxRotation:0,autoSkip:true,maxTicksLimit:8}}, y:{grid:{color:'rgba(255,255,255,0.05)'},beginAtZero:true,ticks:{precision:0,font:{size:9.5}}} } }
+    }, hVals.some(v=>v>0));
+
+    donut('box_device','deviceChart', mergeMap(days,'by_device'));
+    hBar('box_source','sourceChart', mergeMap(days,'by_source'), '#229ED9');
+    hBar('box_browser','browserChart', mergeMap(days,'by_browser'), '#f47521');
+    hBar('box_os','osChart', mergeMap(days,'by_os'), '#2ecc71');
+
+    const entry = mergeMap(days,'by_entry'), exits = mergeMap(days,'exit_pages');
+    const sum = o=>Object.values(o).reduce((a,b)=>a+b,0);
+    simpleRows('entryTable', sortedPairs(entry,15), sum(entry), 'No entry data yet');
+    simpleRows('exitTable', sortedPairs(exits,15), sum(exits), 'No exit data yet');
+    renderLiveTable();
+}
+
+function liveUsers(){
+    const now = Date.now();
+    return Object.values(liveData||{}).filter(u=>u && u.ts && now - u.ts < 75000);
+}
+function renderLiveTable(){
+    const users = liveUsers().sort((a,b)=>b.ts-a.ts);
+    const pill = document.getElementById('livePillText');
+    if (pill) pill.textContent = users.length ? `${users.length} live` : 'Live';
+    const tb = document.querySelector('#liveTable tbody');
+    if (!tb) return;
+    tb.innerHTML = users.length ? users.slice(0,30).map(u=>`<tr>
+        <td>${pageLabel(u.page||'—')}</td>
+        <td>${u.title ? `<b>${u.title}</b> <span class="muted">S${u.season??'–'}E${u.episode??'–'}</span>` : '<span class="muted">browsing</span>'}</td>
+        <td class="muted">${u.device||'—'}</td><td class="muted">${fmtTime(u.ts)}</td></tr>`).join('')
+        : `<tr><td colspan="4" class="muted" style="text-align:center;padding:22px;">Nobody online right now</td></tr>`;
+    const k = document.querySelector('#audKpis .kpi .val'); // first KPI = Live Now
+    if (k && initedViews.has('audience')) k.textContent = fmtNum(users.length);
+}
+function listenLive(){
+    db.ref(ROOT + '/live').on('value', snap => { liveData = snap.val() || {}; renderLiveTable(); });
+    setInterval(renderLiveTable, 15000);
+}
+
+// ═══════════════════════ LANGUAGE TAB ═══════════════════════
+function langAgg(days, kind){            // kind: 'audio' | 'sub'
+    const out = {};                       // lang -> {label, people:Set, picks, secs}
+    days.forEach(d=>{
+        const day = dailyAll[d]; if (!day) return;
+        Object.entries(day[kind+'_lang']||{}).forEach(([k,v])=>{
+            const o = out[k] = out[k] || { label:v.label||k, people:new Set(), picks:0, secs:0 };
+            o.picks += (v.count||0); if (v.label) o.label = v.label;
+        });
+        Object.entries(day[kind+'_clients']||{}).forEach(([k,clients])=>{
+            const o = out[k] = out[k] || { label:k, people:new Set(), picks:0, secs:0 };
+            Object.keys(clients||{}).forEach(c=>o.people.add(c));
+        });
+        Object.entries(day[kind+'_secs']||{}).forEach(([k,sec])=>{
+            const o = out[k] = out[k] || { label:k, people:new Set(), picks:0, secs:0 };
+            o.secs += (sec||0);
+        });
+    });
+    return out;
+}
+function epRows(days, kind){
+    const acc = {};
+    days.forEach(d=>{
+        const eps = dailyAll[d] && dailyAll[d][kind+'_eps']; if (!eps) return;
+        Object.entries(eps).forEach(([slug, byEp])=>Object.entries(byEp).forEach(([epKey, byLang])=>Object.entries(byLang).forEach(([lk,v])=>{
+            const key = slug+'|'+epKey+'|'+lk;
+            const cur = acc[key] = acc[key] || { title:v.title||slug, season:v.season, episode:v.episode, label:v.label||lk, count:0 };
+            cur.count += (v.count||0);
+        })));
+    });
+    return Object.values(acc).sort((a,b)=>b.count-a.count).slice(0,80);
+}
+function renderLanguage(){
+    const days = selectedDayKeys();
+    const cap = document.getElementById('langRangeCaption'); if (cap) cap.textContent = rangeCaptionText(days,'');
+    const A = langAgg(days,'audio'), S = langAgg(days,'sub');
+    const peopleMap = agg => Object.fromEntries(Object.values(agg).map(o=>[o.label, o.people.size]));
+    const union = (agg, filter) => { const u = new Set(); Object.entries(agg).forEach(([k,o])=>{ if (!filter || filter(k)) o.people.forEach(c=>u.add(c)); }); return u; };
+
+    const audioPeople = union(A), subOn = union(S, k=>k!=='off'), subOff = union(S, k=>k==='off');
+    const subOffOnly = [...subOff].filter(c=>!subOn.has(c)).length;
+    const topAudio = sortedPairs(peopleMap(A),1)[0], topSub = sortedPairs(peopleMap(Object.fromEntries(Object.entries(S).filter(([k])=>k!=='off'))),1)[0];
+    document.getElementById('langKpis').innerHTML = [
+        kpiCard('fa-volume-high','#f47521','rgba(244,117,33,0.12)', fmtNum(audioPeople.size), 'People on audio tracks'),
+        kpiCard('fa-trophy','#2ecc71','rgba(46,204,113,0.12)', topAudio?topAudio[0]:'—', 'Top audio', topAudio? topAudio[1]+' people':''),
+        kpiCard('fa-closed-captioning','#8b5cf6','rgba(139,92,246,0.12)', fmtNum(subOn.size), 'People using captions'),
+        kpiCard('fa-trophy','#229ED9','rgba(34,158,217,0.12)', topSub?topSub[0]:'—', 'Top caption', topSub? topSub[1]+' people':''),
+        kpiCard('fa-eye-slash','#8a8a9a','rgba(138,138,154,0.12)', fmtNum(subOffOnly), 'Captions off only', 'had subs, kept them off')
+    ].join('');
+
+    donut('box_audio','audioChart', peopleMap(A));
+    donut('box_sub','subChart', peopleMap(S));
+    donut('box_subonoff','subOnOffChart', { 'Captions ON': subOn.size, 'Captions OFF': subOffOnly });
+
+    const sumRows = (tbodyId, agg, empty) => {
+        const rows = Object.values(agg).sort((a,b)=> b.people.size - a.people.size || b.picks - a.picks);
+        document.querySelector('#'+tbodyId+' tbody').innerHTML = rows.length ? rows.map(o=>
+            `<tr><td><b>${o.label}</b></td><td><span class="tag violet">${o.people.size}</span></td><td class="muted">${o.picks}</td><td class="muted">${Math.round(o.secs/60)}</td></tr>`).join('')
+            : `<tr><td colspan="4" class="muted" style="text-align:center;padding:22px;">${empty}</td></tr>`;
+    };
+    sumRows('audioSumTable', A, 'No audio data for this range yet');
+    sumRows('subSumTable', S, 'No caption data for this range yet');
+
+    const epTable = (tbodyId, rows, empty) => {
+        document.querySelector('#'+tbodyId+' tbody').innerHTML = rows.length ? rows.map(r=>
+            `<tr><td>${r.title}</td><td class="muted">S${r.season??'–'}E${r.episode??'–'}</td><td><span class="tag ${r.label==='Off'?'':'violet'}">${r.label}</span></td><td><b>${r.count}</b></td></tr>`).join('')
+            : `<tr><td colspan="4" class="muted" style="text-align:center;padding:22px;">${empty}</td></tr>`;
+    };
+    epTable('audioEpTable', epRows(days,'audio'), 'No audio-track plays recorded for this range');
+    epTable('subEpTable', epRows(days,'sub'), 'No caption data recorded for this range');
+}
+
 // ═══════════════════════ ACTIVITY TAB ═══════════════════════
 function feedLine(ev){
     const meta = EVENT_META[ev.type] || { icon:'fa-circle', color:'#8a8a9a', bg:'rgba(138,138,154,0.12)' };
@@ -747,6 +1025,8 @@ function feedLine(ev){
         case 'join_click': text = `Clicked Telegram join (${ev.location})`; break;
         case 'broken_link': text = `Reported broken link — <b>${ev.title}</b> S${ev.season}E${ev.episode}`; break;
         case 'server_error': text = `Server error — <b>${ev.context}</b>`; break;
+        case 'audio_select': text = `Audio <b>${ev.lang}</b> — ${ev.title} S${ev.season}E${ev.episode}${ev.source==='user'?' (switched)':''}`; break;
+        case 'subtitle_select': text = `Captions <b>${ev.lang}</b> — ${ev.title} S${ev.season}E${ev.episode}${ev.source==='user'?' (switched)':''}`; break;
         case 'notif_permission': text = `Notification permission: <b>${ev.result}</b>`; break;
         default: text = ev.type;
     }
@@ -781,9 +1061,15 @@ async function fetchAllData(){
 function ensureViewLoaded(view){
     if (initedViews.has(view)) return;
     initedViews.add(view);
+    if (view==='audience') renderAudience();
+    if (view==='language') renderLanguage();
     if (view==='content') loadContentCharts(currentContentData());
     if (view==='health') renderHealth(latestData);
     if (view==='activity') listenFeed();
+}
+function refreshNewViews(){
+    if (initedViews.has('audience')) renderAudience();
+    if (initedViews.has('language')) renderLanguage();
 }
 async function refreshAll(){
     const btn = document.getElementById('refreshBtn');
@@ -791,6 +1077,7 @@ async function refreshAll(){
     try{
         await fetchAllData();
         await loadTrafficCharts();
+        refreshNewViews();
         if (initedViews.has('content')) loadContentCharts(currentContentData());
         if (initedViews.has('health')) renderHealth(latestData);
     } catch(e){ console.error('Dashboard load error', e); }
@@ -802,6 +1089,7 @@ function switchView(view){
     document.getElementById('view-'+view).classList.add('active');
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
     document.querySelectorAll('.bn-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+    document.getElementById('dateBarWrap').style.display = ['today','audience','language','content'].includes(view) ? '' : 'none';
     ensureViewLoaded(view);
     Object.values(charts).forEach(c => { if (c) setTimeout(()=>c.resize(), 50); });
 }
@@ -827,12 +1115,14 @@ document.getElementById('chipRow').addEventListener('click', (e)=>{
     } else {
         customBox.classList.remove('show');
         loadTrafficCharts();
+        refreshNewViews();
         if (initedViews.has('content')) loadContentCharts(currentContentData());
     }
 });
 document.getElementById('applyRange').addEventListener('click', ()=>{
     rangeMode='custom';
     loadTrafficCharts();
+    refreshNewViews();
     if (initedViews.has('content')) loadContentCharts(currentContentData());
 });
 document.getElementById('refreshBtn').addEventListener('click', refreshAll);
@@ -843,9 +1133,11 @@ document.getElementById('refreshBtn').addEventListener('click', refreshAll);
     document.getElementById('dateTo').value = today;
     await fetchAllData();
     await loadTrafficCharts();
+    listenLive();
     setInterval(async ()=>{
         await fetchAllData();
         loadTrafficCharts();
+        refreshNewViews();
         if (initedViews.has('content')) loadContentCharts(currentContentData());
         if (initedViews.has('health')) renderHealth(latestData);
     }, 45000);
