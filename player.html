@@ -684,6 +684,11 @@
         }
         .dl-stacked-btn.unavailable .dl-stacked-quality { color: var(--text-dim); background: var(--surface3); border-color: var(--border2); }
 
+        /* ZIP (full season) download button */
+        .dl-zip-btn { border-color: var(--accent-border); background: var(--accent-dim); }
+        .dl-zip-btn .fa-file-zipper { color: var(--accent); }
+        .dl-zip-title { font-family: var(--font-mono); font-size: 9.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+
         /* ─── DESCRIPTION ─── */
         .desc-block {
             padding: 14px 16px;
@@ -2026,6 +2031,8 @@
         // srv2Data['S1']['E1'] = { '1080p': {link, dl_link, server, time}, ... }
         let srv1Data = {};
         let srv2Data = {};
+        // zip_links/{slug}/S{n}/{quality} -> { link, size }   (full-season ZIP downloads)
+        let zipData = {};
         // audio_tracks/{slug}/S{n}/E{n}/{quality} -> { tracks: [...] } se load hota hai
         // (encoder bot ka alag Firebase path, anime_links se bilkul door — koi overwrite
         // risk nahi). audioTracksStore[sKey][eKey][quality] = normalized tracks array.
@@ -2243,7 +2250,7 @@
         function loadFirebaseServers() {
             return new Promise((resolve) => {
                 let done = 0;
-                const total = 4;
+                const total = 5;
                 function check() { if (++done === total) resolve(); }
 
                 // SERVER 1 — anime_links/{slug}
@@ -2307,6 +2314,18 @@
                     }
                     check();
                 }, () => { check(); }); // optional feature — fail ho to video playback na ruke
+
+                // ZIP DOWNLOADS — zip_links/{slug}  (optional feature, fail ho to kuch nahi rukta)
+                // Structure: S1 > { '1080p': {link, size}, '720p': {...}, '480p': {...} }
+                db.ref('zip_links/' + animeSlug).once('value', snap => {
+                    const data = fixLinksDeep(snap.val());
+                    if (data && typeof data === 'object') {
+                        Object.entries(data).forEach(([sKey, qs]) => {
+                            if (sKey.startsWith('S') && qs && typeof qs === 'object') zipData[sKey] = qs;
+                        });
+                    }
+                    check();
+                }, () => { check(); });
 
                 // SERVER 2 — server2_links/{slug}
                 // Alag folder hai (anime_links se mix nahi hota). Same structure:
@@ -2416,6 +2435,18 @@
                     <i class="fas ${url ? 'fa-circle-check dl-tick-ok' : 'fa-circle-xmark dl-tick-no'}"></i>
                 </button>`;
             }).join('');
+
+            // ── ZIP (poora season ek file me) — sirf tab dikhao jab is season ka zip Firebase me ho ──
+            const zipQs = zipData[sKey] || {};
+            const zipHtml = qualities.filter(q => zipQs[q] && zipQs[q].link).map(q => {
+                const z = zipQs[q];
+                return `
+                <button class="dl-stacked-btn dl-zip-btn" onclick='quickDownload(${JSON.stringify(z.link)}, ${JSON.stringify("zip-" + q)})'>
+                    <span><i class="fas fa-file-zipper"></i> Season ${currentSeason} ZIP <b class="dl-stacked-quality">${q}</b>${z.size ? ` <small style="color:var(--text-muted);font-weight:600;">${avEsc(z.size)}</small>` : ''}</span>
+                    <i class="fas fa-circle-check dl-tick-ok"></i>
+                </button>`;
+            }).join('');
+            if (zipHtml) listEl.innerHTML += `<div class="dl-zip-title">All episodes · ZIP</div>` + zipHtml;
         }
 
         // Tapping a v1/v2/v3 button no longer downloads straight away — it opens the
@@ -2482,6 +2513,7 @@
             const _sc = document.getElementById('ep-search-clear'); if (_sc) _sc.style.display = 'none';
             currentServer = pickBestServer(currentSeason, currentEpisode);
             renderSeasons();
+            renderServers(); // download + ZIP buttons naye season ke hisaab se refresh
             renderEpisodes();
             loadVideo();
             updateChips();
@@ -4156,10 +4188,16 @@
                 '720p':  { label: 'Download v2', icon: 'fa-cloud-arrow-down', desc: '720p HD · Medium file' },
                 '480p':  { label: 'Download v3', icon: 'fa-cloud-arrow-down', desc: '480p SD · Data saver' },
             };
-            const meta = qualityMeta[quality] || { label: 'Download', icon: 'fa-cloud-arrow-down', desc: quality };
+            let meta = qualityMeta[quality] || { label: 'Download', icon: 'fa-cloud-arrow-down', desc: quality };
+            let subText = `S${currentSeason} · E${currentEpisode} · ${animeTitle || 'Episode'}`;
+            let shownQ = quality;
+            if (String(quality).startsWith('zip-')) {
+                shownQ = quality.slice(4);
+                meta = { label: `Season ${currentSeason} ZIP`, icon: 'fa-file-zipper', desc: `${shownQ} · All episodes in one ZIP` };
+                subText = `Season ${currentSeason} · ${animeTitle || 'Full Season'}`;
+            }
 
-            document.getElementById('dl-popup-sub').textContent =
-                `S${currentSeason} · E${currentEpisode} · ${animeTitle || 'Episode'}`;
+            document.getElementById('dl-popup-sub').textContent = subText;
 
             const list = document.getElementById('dl-quality-list');
             list.innerHTML = `
@@ -4167,7 +4205,7 @@
                     <div class="dl-quality-header">
                         <div class="dl-quality-icon"><i class="fas ${meta.icon}"></i></div>
                         <div class="dl-quality-info">
-                            <div class="dl-quality-label">${meta.label} · ${quality}</div>
+                            <div class="dl-quality-label">${meta.label} · ${shownQ}</div>
                             <div class="dl-quality-desc">${meta.desc}</div>
                         </div>
                         <i class="fas fa-circle-check dl-tick-ok"></i>
