@@ -1020,7 +1020,7 @@
             border-radius: 4px;
             color: #fff;
         }
-        .rel-badge-lang { background: #fff; }
+        .rel-badge-lang { background: #fff; color: #111; }
         .rel-badge-series { background: var(--accent); }
         .rel-title {
             font-size: 9.5px;
@@ -1308,7 +1308,17 @@
             transition: opacity 0.25s;
             z-index: 10;
         }
-        #cv-controls > * { pointer-events: auto; }
+        /* FIX: rows (esp. #cv-center-row, flex:1) used to cover the whole video and swallowed
+           touches, so swipe / double-tap / pinch never reached #cv-tap-area. Now only the real
+           controls catch touches, and only while the controls are visible. */
+        #cv-controls > * { pointer-events: none; }
+        #cv-controls :is(button, input, select, a, label, #cv-progress-wrap, #cv-time,
+                         #cv-audio-menu, #cv-cc-menu, #cv-more-menu, #cv-vol-wrap, .dd, .dd-menu) { pointer-events: auto; }
+        #custom-player-wrap:not(.show-controls) #cv-controls * { pointer-events: none !important; }
+        @media (hover: hover) and (pointer: fine) {
+            #custom-player-wrap:hover #cv-controls :is(button, input, select, a, label, #cv-progress-wrap, #cv-time,
+                         #cv-audio-menu, #cv-cc-menu, #cv-more-menu, #cv-vol-wrap, .dd, .dd-menu) { pointer-events: auto !important; }
+        }
         #custom-player-wrap.show-controls #cv-controls { opacity: 1; }
         @media (hover: hover) and (pointer: fine) {
             #custom-player-wrap:hover #cv-controls { opacity: 1; }
@@ -1595,6 +1605,141 @@
             transition: background 0.15s;
         }
         #btn-iframe-fs:active { background: rgba(0,0,0,0.8); }
+        /* ═══ MX-STYLE FEATURES ═══ */
+        /* Double-tap seek ripple */
+        .mx-ripple {
+            position: absolute; top: 0; bottom: 0; width: 38%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 4px; color: #fff; font-family: var(--font-body); font-size: 12px; font-weight: 700;
+            background: rgba(255,255,255,0.14);
+            opacity: 0; pointer-events: none; z-index: 7;
+            transition: opacity 0.25s;
+        }
+        .mx-ripple i { font-size: 22px; }
+        .mx-ripple-left  { left: 0;  border-radius: 0 60% 60% 0; }
+        .mx-ripple-right { right: 0; border-radius: 60% 0 0 60%; }
+        .mx-ripple.show { opacity: 1; }
+
+        /* Lock screen */
+        #cv-unlock-btn {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            width: 42px; height: 42px; border-radius: 50%;
+            background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.25);
+            color: #fff; font-size: 16px;
+            display: none; align-items: center; justify-content: center;
+            z-index: 30; cursor: pointer;
+        }
+        #custom-player-wrap.locked #cv-controls { opacity: 0 !important; pointer-events: none !important; }
+        #custom-player-wrap.locked.show-unlock #cv-unlock-btn { display: flex; }
+        #cv-btn-lock.mx-on { color: var(--accent); }
+
+        /* ⋮ Tools menu (loop, A-B repeat, sleep timer, screenshot) */
+        #cv-more-menu {
+            position: absolute; top: 38px; right: 0;
+            background: rgba(20,20,20,0.97);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px; padding: 6px; min-width: 190px;
+            display: none; flex-direction: column; gap: 2px;
+            z-index: 25; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            max-height: 170px; overflow-y: auto; overscroll-behavior: contain;
+            touch-action: pan-y;
+        }
+        #cv-more-menu.open { display: flex; }
+        #cv-more-menu .cv-audio-label { font-size: 8px; font-weight: 900; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; padding: 4px 8px 2px; }
+        #cv-more-menu .cv-audio-opt i.mx-lead { display: inline-block; width: 16px; font-size: 11px; color: var(--text-muted); }
+        #cv-more-menu .cv-audio-opt.selected i.mx-lead { color: var(--accent); }
+        #custom-player-wrap:fullscreen #cv-more-menu,
+        #custom-player-wrap:-webkit-full-screen #cv-more-menu { max-height: 60vh; }
+        #mx-speed-badge {
+            position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.72); color: #fff; padding: 6px 14px; border-radius: 16px;
+            font-family: var(--font-body); font-size: 12px; font-weight: 800;
+            display: none; z-index: 12; pointer-events: none;
+        }
+        #mx-speed-badge.show { display: block; }
+        #mx-speed-badge i { color: var(--accent); margin-right: 5px; }
+
+        /* Swipe gesture indicator (brightness / volume / seek) */
+        #cv-tap-area { touch-action: none; -webkit-user-select: none; user-select: none; }
+        #mx-indicator {
+            position: absolute; top: 14%; left: 50%; transform: translateX(-50%);
+            min-width: 120px; padding: 9px 16px;
+            background: rgba(0,0,0,0.72); border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 10px; color: #fff; text-align: center;
+            font-family: var(--font-body); font-size: 12px; font-weight: 700;
+            display: none; z-index: 12; pointer-events: none;
+        }
+        #mx-indicator.show { display: block; }
+        #mx-indicator .mx-ind-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+        #mx-indicator .mx-ind-row i { font-size: 15px; color: var(--accent); }
+        #mx-indicator .mx-ind-bar { height: 4px; margin-top: 7px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
+        #mx-indicator .mx-ind-fill { height: 100%; width: 0; background: var(--accent); }
+        #mx-indicator .mx-ind-sub { font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 3px; }
+
+        /* ═══ ANIMATED DROPDOWNS (replace native <select> popups) ═══ */
+        select.dd-native { display: none !important; }
+        .dd { position: relative; display: inline-flex; flex-shrink: 0; }
+        .dd-btn {
+            display: inline-flex; align-items: center; justify-content: space-between; gap: 6px;
+            cursor: pointer; text-align: left; outline: none; white-space: nowrap;
+            -webkit-tap-highlight-color: transparent;
+            transition: border-color .18s, background-color .18s, box-shadow .18s, transform .12s;
+        }
+        .dd-btn:active { transform: scale(0.96); }
+        .dd-btn:focus-visible { box-shadow: 0 0 0 2px var(--accent-border, rgba(255,46,67,.45)); }
+        .dd.open .dd-btn { border-color: var(--accent, #ff2e43) !important; }
+        .dd-label { overflow: hidden; text-overflow: ellipsis; }
+        .dd-caret { font-size: 7px; opacity: .7; transition: transform .25s cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+        .dd.open .dd-caret { transform: rotate(180deg); }
+        .dd ~ .fa-chevron-down { transition: transform .25s cubic-bezier(.2,.8,.2,1); }
+        .dd.open ~ .fa-chevron-down { transform: rotate(180deg); }
+
+        .dd-menu {
+            position: fixed; left: 0; top: 0; z-index: 10000;
+            display: flex; flex-direction: column; gap: 2px;
+            padding: 5px; min-width: 110px; max-height: min(60vh, 280px);
+            overflow-y: auto; overscroll-behavior: contain;
+            background: rgba(22,22,28,0.97);
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.55);
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transform: translateY(-8px) scale(.94); transform-origin: top left;
+            transition: opacity .16s ease, transform .22s cubic-bezier(.2,.8,.2,1), visibility 0s linear .22s;
+            scrollbar-width: none;
+        }
+        .dd-menu::-webkit-scrollbar { display: none; }
+        .dd-menu.up { transform: translateY(8px) scale(.94); transform-origin: bottom left; }
+        .dd.open .dd-menu {
+            opacity: 1; visibility: visible; pointer-events: auto;
+            transform: none; transition-delay: 0s;
+        }
+        .dd-item {
+            display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            width: 100%; padding: 8px 10px; border: none; border-radius: 7px;
+            background: transparent; color: #e6e6ea; cursor: pointer; text-align: left;
+            font-family: var(--font-body, inherit); font-size: 12px; font-weight: 700; white-space: nowrap;
+            opacity: 0; transform: translateY(-4px);
+            transition: background .12s, color .12s, opacity .2s ease, transform .22s cubic-bezier(.2,.8,.2,1);
+        }
+        .dd.open .dd-item { opacity: 1; transform: none; transition-delay: 0s, 0s, calc(var(--i, 0) * 22ms + 20ms), calc(var(--i, 0) * 22ms + 20ms); }
+        .dd-menu.mono .dd-item { font-family: var(--font-mono, monospace); font-size: 11px; }
+        .dd-item:hover, .dd-item.kb { background: rgba(255,255,255,0.09); transition-delay: 0s; }
+        .dd-item.sel { color: var(--accent, #ff2e43); }
+        .dd-item.sel::after { content: "\2713"; font-size: 11px; }
+        @media (prefers-reduced-motion: reduce) {
+            .dd-menu, .dd-item, .dd-caret { transition: none !important; }
+        }
+
+        /* Pseudo fullscreen fallback */
+        html.pseudo-fs-lock, html.pseudo-fs-lock body { overflow: hidden !important; }
+        #player-wrap.pseudo-fs-host { z-index: 2147483000 !important; overflow: visible !important; }
+        #custom-player-wrap.pseudo-fs {
+            position: fixed !important; inset: 0 !important;
+            width: 100vw !important; height: 100vh !important; height: 100dvh !important;
+            z-index: 2147483000 !important; border-radius: 0 !important;
+        }
+        #custom-player-wrap.pseudo-fs #cv-audio-menu, #custom-player-wrap.pseudo-fs #cv-cc-menu { max-height: 60vh; }
     </style>
 </head>
 <body>
@@ -1762,6 +1907,17 @@
                 <!-- Center tap area -->
                 <div id="cv-tap-area" style="position:absolute;inset:0;z-index:5;cursor:pointer;"></div>
 
+                <!-- MX: double-tap seek ripples + unlock button -->
+                <div class="mx-ripple mx-ripple-left" id="mx-ripple-left"><i class="fas fa-backward"></i><span id="mx-ripple-left-txt">-10s</span></div>
+                <div class="mx-ripple mx-ripple-right" id="mx-ripple-right"><i class="fas fa-forward"></i><span id="mx-ripple-right-txt">+10s</span></div>
+                <button id="cv-unlock-btn" title="Unlock"><i class="fas fa-lock"></i></button>
+                <div id="mx-speed-badge"><i class="fas fa-forward"></i>2x Speed</div>
+                <div id="mx-indicator">
+                    <div class="mx-ind-row"><i class="fas fa-sun" id="mx-ind-icon"></i><span id="mx-ind-text">0</span></div>
+                    <div class="mx-ind-sub" id="mx-ind-sub" style="display:none;"></div>
+                    <div class="mx-ind-bar" id="mx-ind-bar"><div class="mx-ind-fill" id="mx-ind-fill"></div></div>
+                </div>
+
                 <!-- Center pop icon -->
                 <div id="cv-center-overlay">
                     <div id="cv-center-icon"><i class="fas fa-play" id="cv-center-fa"></i></div>
@@ -1811,6 +1967,21 @@
                             <option value="720p">720p</option>
                             <option value="480p" selected>480p</option>
                         </select>
+                        <div id="cv-more-wrap" style="position:relative;display:inline-flex;">
+                            <button class="cv-btn cv-btn-round" id="cv-btn-more" title="More" style="font-size:13px;">
+                                <i class="fas fa-ellipsis-vertical"></i>
+                            </button>
+                            <div id="cv-more-menu">
+                                <div class="cv-audio-label">Tools</div>
+                                <div id="cv-more-list"></div>
+                            </div>
+                        </div>
+                        <button class="cv-btn cv-btn-round" id="cv-btn-aspect" title="Aspect ratio / zoom" style="font-size:12px;">
+                            <i class="fas fa-crop-simple"></i>
+                        </button>
+                        <button class="cv-btn cv-btn-round" id="cv-btn-lock" title="Lock screen" style="font-size:12px;">
+                            <i class="fas fa-lock-open"></i>
+                        </button>
                         <button class="cv-btn cv-btn-round" id="cv-btn-pip" title="Picture-in-Picture" style="font-size:11px;">
                             <i class="fas fa-window-restore"></i>
                         </button>
@@ -2236,14 +2407,36 @@
         // no matter where it appears in the Firebase data (link, dl_link, url, etc).
         const OLD_BASE_URL = 'https://a65234-cb6f.h.onjrnm.link';
         const NEW_BASE_URL = 'https://proud-moon-7329.ayushkum099766.workers.dev';
-        function fixLinksDeep(obj) {
+        // Server 1 (anime_links) ke liye alag naya base — player + download dono isi se badalte hain.
+        const SERVER1_NEW_BASE_URL = 'https://proud-moon-7329.ayushkum099766.workers.dev/animeverse';
+        function fixLinksDeep(obj, newBase) {
             if (!obj) return obj;
             try {
-                const str = JSON.stringify(obj).split(OLD_BASE_URL).join(NEW_BASE_URL);
+                const str = JSON.stringify(obj).split(OLD_BASE_URL).join(newBase || NEW_BASE_URL);
                 return JSON.parse(str);
             } catch (e) {
                 return obj;
             }
+        }
+        // Server 1 ke liye: Firebase me jo bhi base URL (domain) ho, har http(s) link ka
+        // domain hata kar SERVER1_NEW_BASE_URL laga deta hai; path/query/hash waisa hi rehta hai.
+        function fixLinksAnyBase(obj, newBase) {
+            if (obj == null) return obj;
+            if (typeof obj === 'string') {
+                if (!/^https?:\/\//i.test(obj)) return obj;
+                if (obj === newBase || obj.startsWith(newBase + '/')) return obj;
+                try {
+                    const u = new URL(obj);
+                    return newBase + u.pathname + u.search + u.hash;
+                } catch (e) { return obj; }
+            }
+            if (Array.isArray(obj)) return obj.map(v => fixLinksAnyBase(v, newBase));
+            if (typeof obj === 'object') {
+                const out = {};
+                Object.keys(obj).forEach(k => { out[k] = fixLinksAnyBase(obj[k], newBase); });
+                return out;
+            }
+            return obj;
         }
 
         // ─── LOAD BOTH FIREBASE SERVERS ───
@@ -2256,7 +2449,7 @@
                 // SERVER 1 — anime_links/{slug}
                 // Structure: S1 > E1 > { '1080p': {link, dl_link, server, time}, '720p': {...}, '480p': {...} }
                 db.ref('anime_links/' + animeSlug).once('value', snap => {
-                    const data = fixLinksDeep(snap.val());
+                    const data = fixLinksAnyBase(snap.val(), SERVER1_NEW_BASE_URL);
                     if (data && typeof data === 'object') {
                         Object.entries(data).forEach(([sKey, eps]) => {
                             if (!sKey.startsWith('S') || typeof eps !== 'object') return;
@@ -2610,28 +2803,71 @@
             }
         }
 
-        async function fetchAniListSeasonEps(title, season) {
-            const searchTerm = season > 1 ? `${title} Season ${season}` : title;
+        // Aapke player me ek lambi series (e.g. Naruto Shippuden – 500 ep) 18 "seasons" me bati hoti hai,
+        // lekin AniList/Kitsu/TMDB par wo EK hi entry hoti hai jiske episodes continuous (absolute) number
+        // se chalte hain. Isliye season N ka episode e = pichhle seasons ke episodes + e.
+        // (Pehle "Title Season 18" search karne par base show hi mil jata tha, to har season ke ep 1
+        //  par "Homecoming" jaisa S1 ka title/thumbnail aa jata tha.)
+        function seasonOffset(season) {
+            return Object.keys(totalEpisodes).map(Number).filter(s => s < season)
+                .reduce((a, s) => a + (totalEpisodes[s] || 0), 0);
+        }
+
+        const anilistMediaCache = {}; // search -> { id, eps:[{num,thumb,title}], maxNum } | null
+        async function anilistMedia(search) {
+            if (search in anilistMediaCache) return anilistMediaCache[search];
+            let out = null;
             try {
                 const r = await fetch(ANILIST_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({ query: ANILIST_QUERY, variables: { search: searchTerm } })
+                    body: JSON.stringify({ query: ANILIST_QUERY, variables: { search } })
                 });
                 const d = await r.json();
-                const eps = d?.data?.Media?.streamingEpisodes || [];
-                let found = 0;
-                eps.forEach(ep => {
-                    const m = ep.title && ep.title.match(/Episode\s*(\d+)/i);
-                    const epNum = m ? parseInt(m[1], 10) : null;
-                    if (!epNum || !ep.thumbnail) return; // only count real thumbnails as a hit
-                    const key = `S${season}E${epNum}`;
-                    const cleanName = ep.title.replace(/^Episode\s*\d+\s*[-–:]?\s*/i, '').trim();
-                    tmdbEpCache[key] = { thumb: ep.thumbnail, name: cleanName || `Episode ${epNum}` };
+                const m = d?.data?.Media;
+                if (m) {
+                    const eps = [];
+                    (m.streamingEpisodes || []).forEach(ep => {
+                        const mm = ep.title && ep.title.match(/Episode\s*(\d+)/i);
+                        const num = mm ? parseInt(mm[1], 10) : null;
+                        if (!num || !ep.thumbnail) return;
+                        eps.push({ num, thumb: ep.thumbnail,
+                            name: ep.title.replace(/^Episode\s*\d+\s*[-–:]?\s*/i, '').trim() || `Episode ${num}` });
+                    });
+                    out = { id: m.id, eps, maxNum: eps.reduce((a, e) => Math.max(a, e.num), 0) };
+                }
+            } catch (e) {}
+            anilistMediaCache[search] = out;
+            return out;
+        }
+
+        async function fetchAniListSeasonEps(title, season) {
+            const count = totalEpisodes[season] || 0;
+            const offset = seasonOffset(season);
+            const base = await anilistMedia(title);
+            let found = 0;
+
+            // Lambi single-entry series: base show ke absolute episodes se is season ka hissa nikalo
+            if (base && offset > 0 && base.maxNum >= offset + Math.max(count, 1)) {
+                base.eps.forEach(ep => {
+                    const rel = ep.num - offset;
+                    if (rel < 1 || (count && rel > count)) return;
+                    tmdbEpCache[`S${season}E${rel}`] = { thumb: ep.thumb, name: ep.name };
                     found++;
                 });
                 return found;
-            } catch(e) { return 0; }
+            }
+
+            // Alag-alag entries wali series (e.g. "Title Season 2")
+            const media = season > 1 ? await anilistMedia(`${title} Season ${season}`) : base;
+            if (!media) return 0;
+            // search ne wapas base show hi de diya → ye is season ka data nahi hai, galat title na dikhao
+            if (season > 1 && base && media.id === base.id) return 0;
+            media.eps.forEach(ep => {
+                tmdbEpCache[`S${season}E${ep.num}`] = { thumb: ep.thumb, name: ep.name };
+                found++;
+            });
+            return found;
         }
 
         async function fetchTmdbShowId(title) {
@@ -2644,13 +2880,46 @@
             return null;
         }
 
+        let tmdbShowInfo = null;
         async function fetchTmdbSeasonEps(showId, season) {
+            const count = totalEpisodes[season] || 0;
+            const offset = seasonOffset(season);
             try {
+                if (!tmdbShowInfo) {
+                    const r = await fetch(`https://api.themoviedb.org/3/tv/${showId}?api_key=${TMDB_KEY}&language=en-US`);
+                    tmdbShowInfo = await r.json();
+                }
+                // TMDB ke real seasons ko ek line me jodo (specials / season 0 chhod kar)
+                const tSeasons = (tmdbShowInfo.seasons || []).filter(s => s.season_number > 0)
+                    .sort((a, b) => a.season_number - b.season_number);
+                const total = tSeasons.reduce((a, s) => a + (s.episode_count || 0), 0);
+
+                if (offset > 0 && total >= offset + Math.max(count, 1)) {
+                    // absolute range [offset+1 .. offset+count] ko cover karne wale TMDB seasons fetch karo
+                    let start = 0;
+                    for (const ts of tSeasons) {
+                        const from = start + 1, to = start + (ts.episode_count || 0);
+                        start = to;
+                        if (to <= offset || from > offset + count) continue;
+                        const r = await fetch(`https://api.themoviedb.org/3/tv/${showId}/season/${ts.season_number}?api_key=${TMDB_KEY}&language=en-US`);
+                        const d = await r.json();
+                        (d.episodes || []).forEach(ep => {
+                            const rel = (from - 1) + ep.episode_number - offset;
+                            if (rel < 1 || rel > count) return;
+                            tmdbEpCache[`S${season}E${rel}`] = {
+                                thumb: ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : '',
+                                name: ep.name || `Episode ${rel}`
+                            };
+                        });
+                    }
+                    return;
+                }
+                if (season > tSeasons.length && tSeasons.length) return; // aisa TMDB season hai hi nahi — galat data mat bharo
                 const r = await fetch(`https://api.themoviedb.org/3/tv/${showId}/season/${season}?api_key=${TMDB_KEY}&language=en-US`);
                 const d = await r.json();
                 (d.episodes || []).forEach(ep => {
                     const key = `S${season}E${ep.episode_number}`;
-                    if (tmdbEpCache[key]?.thumb) return; // AniList already covered this one
+                    if (tmdbEpCache[key]?.thumb) return;
                     tmdbEpCache[key] = {
                         thumb: ep.still_path ? `https://image.tmdb.org/t/p/w300${ep.still_path}` : '',
                         name: ep.name || `Episode ${ep.episode_number}`
@@ -2659,20 +2928,49 @@
             } catch(e) {}
         }
 
+        const kitsuAnimeCache = {}; // search -> { id, count } | null
+        async function kitsuAnime(search) {
+            if (search in kitsuAnimeCache) return kitsuAnimeCache[search];
+            let out = null;
+            try {
+                const sr = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(search)}&page[limit]=1`);
+                const sd = await sr.json();
+                const a = sd?.data?.[0];
+                if (a?.id) out = { id: a.id, count: a.attributes?.episodeCount || null };
+            } catch (e) {}
+            kitsuAnimeCache[search] = out;
+            return out;
+        }
+
         async function fetchKitsuSeasonEps(title, season) {
             try {
-                const searchTerm = season > 1 ? `${title} Season ${season}` : title;
-                const sr = await fetch(`https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(searchTerm)}&page[limit]=1`);
-                const sd = await sr.json();
-                const showId = sd?.data?.[0]?.id;
-                if (!showId) return 0;
+                const count = totalEpisodes[season] || 0;
+                const offset = seasonOffset(season);
+                const base = await kitsuAnime(title);
+                if (!base) return 0;
+
+                let showId = base.id, absolute = false;
+                if (offset > 0) {
+                    if (base.count) {
+                        absolute = base.count >= offset + Math.max(count, 1);
+                    } else {
+                        // episodeCount unknown (ongoing) — agar "Season N" search wapas base hi de to wahi single entry hai
+                        const s = await kitsuAnime(`${title} Season ${season}`);
+                        absolute = !!s && s.id === base.id;
+                    }
+                }
+                if (!absolute && season > 1) {
+                    const s = await kitsuAnime(`${title} Season ${season}`);
+                    if (!s || s.id === base.id) return 0; // base hi mila → is season ka data nahi
+                    showId = s.id;
+                }
 
                 let found = 0;
-                let offset = 0;
                 const pageLimit = 20;
-                // Walk up to 5 pages (100 eps) — enough for the vast majority of seasons
-                for (let page = 0; page < 5; page++) {
-                    const er = await fetch(`https://kitsu.io/api/edge/anime/${showId}/episodes?page[limit]=${pageLimit}&page[offset]=${offset}`);
+                const startOffset = absolute ? offset : 0;
+                const maxPages = absolute ? Math.ceil(Math.max(count, 1) / pageLimit) + 1 : 5;
+                for (let page = 0; page < maxPages; page++) {
+                    const er = await fetch(`https://kitsu.io/api/edge/anime/${showId}/episodes?page[limit]=${pageLimit}&page[offset]=${startOffset + page * pageLimit}`);
                     const ed = await er.json();
                     const eps = ed?.data || [];
                     if (!eps.length) break;
@@ -2680,16 +2978,14 @@
                         const num = ep.attributes?.number;
                         const thumb = ep.attributes?.thumbnail?.original || ep.attributes?.thumbnail?.large || '';
                         if (!num || !thumb) return;
-                        const key = `S${season}E${num}`;
-                        if (tmdbEpCache[key]?.thumb) return; // AniList already covered this one
-                        tmdbEpCache[key] = {
-                            thumb,
-                            name: ep.attributes?.canonicalTitle || `Episode ${num}`
-                        };
+                        const rel = absolute ? num - offset : num;
+                        if (rel < 1 || (absolute && count && rel > count)) return;
+                        const key = `S${season}E${rel}`;
+                        if (tmdbEpCache[key]?.thumb) return;
+                        tmdbEpCache[key] = { thumb, name: ep.attributes?.canonicalTitle || `Episode ${rel}` };
                         found++;
                     });
-                    if (eps.length < pageLimit) break; // reached the end
-                    offset += pageLimit;
+                    if (eps.length < pageLimit) break;
                 }
                 return found;
             } catch(e) { return 0; }
@@ -3263,6 +3559,449 @@
             document.getElementById('ambient-glow')?.classList.remove('active');
         }
 
+        // ─── MX PLAYER STYLE HELPERS ───
+        const mxCtx = { lastTap: 0, tapTimer: null, unlockTimer: null, suppressClick: false, togglePlay: null };
+
+        // Seek by delta seconds + ripple feedback (accumulates on rapid double-taps like MX/YouTube)
+        let mxRippleTimer = null, mxRippleAccum = { left: 0, right: 0 };
+        function mxSeekBy(video, delta, side) {
+            if (!video.duration) return;
+            video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + delta));
+            mxRippleAccum[side] += Math.abs(delta);
+            const el  = document.getElementById('mx-ripple-' + side);
+            const txt = document.getElementById('mx-ripple-' + side + '-txt');
+            if (txt) txt.textContent = (side === 'left' ? '-' : '+') + mxRippleAccum[side] + 's';
+            if (el) el.classList.add('show');
+            clearTimeout(mxRippleTimer);
+            mxRippleTimer = setTimeout(() => {
+                document.querySelectorAll('.mx-ripple').forEach(r => r.classList.remove('show'));
+                mxRippleAccum = { left: 0, right: 0 };
+            }, 600);
+        }
+
+        // ── MX swipe gestures: left half ↕ = brightness, right half ↕ = volume, ↔ = seek ──
+        let mxIndTimer = null;
+        function mxShowIndicator(icon, text, pct, sub) {
+            const ind = document.getElementById('mx-indicator');
+            if (!ind) return;
+            document.getElementById('mx-ind-icon').className = 'fas ' + icon;
+            document.getElementById('mx-ind-text').textContent = text;
+            const subEl = document.getElementById('mx-ind-sub');
+            subEl.style.display = sub ? 'block' : 'none';
+            subEl.textContent = sub || '';
+            const bar = document.getElementById('mx-ind-bar');
+            bar.style.display = pct == null ? 'none' : 'block';
+            if (pct != null) document.getElementById('mx-ind-fill').style.width = Math.max(0, Math.min(100, pct)) + '%';
+            ind.classList.add('show');
+            clearTimeout(mxIndTimer);
+            mxIndTimer = setTimeout(() => ind.classList.remove('show'), 700);
+        }
+        function mxFmt(s) {
+            s = Math.max(0, Math.floor(s));
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+            return h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${m}:${String(sec).padStart(2,'0')}`;
+        }
+        mxCtx.brightness = 1;   // 0.2 – 1.6 (CSS filter on <video>)
+        function mxApplyBrightness(video) {
+            video.style.filter = mxCtx.brightness === 1 ? '' : `brightness(${mxCtx.brightness})`;
+        }
+
+        // ── MX aspect ratio / zoom modes ──
+        const MX_ASPECTS = [
+            { label: 'Fit',     fit: 'contain' },
+            { label: 'Fill (Crop)', fit: 'cover' },
+            { label: 'Stretch', fit: 'fill' },
+            { label: '100%',    fit: 'none' }
+        ];
+        mxCtx.aspectIdx = 0;
+        mxCtx.zoom = 1;
+        function mxApplyZoom(video) {
+            video.style.transform = mxCtx.zoom === 1 ? '' : `scale(${mxCtx.zoom})`;
+        }
+        function mxApplyAspect(video) {
+            video.style.objectFit = MX_ASPECTS[mxCtx.aspectIdx].fit;
+        }
+        function mxResetView(video) {
+            mxCtx.aspectIdx = 0; mxCtx.zoom = 1;
+            mxApplyAspect(video); mxApplyZoom(video);
+        }
+        function mxCycleAspect(video) {
+            mxCtx.aspectIdx = (mxCtx.aspectIdx + 1) % MX_ASPECTS.length;
+            mxCtx.zoom = 1;
+            mxApplyAspect(video); mxApplyZoom(video);
+            mxShowIndicator('fa-crop-simple', MX_ASPECTS[mxCtx.aspectIdx].label, null);
+        }
+
+        // ── MX tools menu: Loop, A-B repeat, Sleep timer, Screenshot ──
+        mxCtx.abA = null; mxCtx.abB = null; mxCtx.sleepMin = 0; mxCtx.sleepTimer = null;
+        const MX_SLEEP_STEPS = [0, 15, 30, 45, 60];
+        let mxToolsBound = false;
+
+        // ── Subtitle size / delay ──
+        const MX_SUB_SIZES = [0.75, 1, 1.25, 1.5, 2];
+        mxCtx.subSize = 1; mxCtx.subDelay = 0;
+        function mxApplySubSize() {
+            let st = document.getElementById('mx-sub-style');
+            if (!st) { st = document.createElement('style'); st.id = 'mx-sub-style'; document.head.appendChild(st); }
+            st.textContent = `#cv-video::cue { font-size: ${Math.round(mxCtx.subSize * 100)}%; }`;
+        }
+        function mxApplySubDelay(video) {
+            // Shift the cues of the currently showing subtitle track so it matches the chosen delay
+            for (const tr of video.textTracks) {
+                if (tr.mode !== 'showing' || !tr.cues) continue;
+                const delta = mxCtx.subDelay - (tr._mxShift || 0);
+                if (!delta) continue;
+                for (const cue of Array.from(tr.cues)) {
+                    cue.startTime = Math.max(0, cue.startTime + delta);
+                    cue.endTime   = Math.max(0, cue.endTime + delta);
+                }
+                tr._mxShift = mxCtx.subDelay;
+            }
+        }
+
+        // ── Volume boost up to 200% via Web Audio (opt-in, beta) ──
+        // Caveat: if the video host does not send CORS headers, the browser silences any
+        // audio routed through Web Audio. We detect that and ask for a reload.
+        mxCtx.boost = 1; mxCtx.audioCtx = null; mxCtx.gainNode = null;
+        function mxCycleBoost(video) {
+            if (cvExtraAudio) { showToast('Boost alag-audio track ke saath available nahi'); return; }
+            const steps = [1, 1.5, 2];
+            const next = steps[(steps.indexOf(mxCtx.boost) + 1) % steps.length];
+            try {
+                if (!mxCtx.audioCtx) {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    if (!AC) { showToast('Boost is browser me supported nahi'); return; }
+                    mxCtx.audioCtx = new AC();
+                    const src = mxCtx.audioCtx.createMediaElementSource(video);
+                    mxCtx.gainNode = mxCtx.audioCtx.createGain();
+                    const analyser = mxCtx.audioCtx.createAnalyser();
+                    src.connect(mxCtx.gainNode);
+                    mxCtx.gainNode.connect(analyser);
+                    analyser.connect(mxCtx.audioCtx.destination);
+                    // Silence check: if audio is clearly playing but the graph outputs only zeros, CORS blocked it
+                    const buf = new Uint8Array(analyser.fftSize);
+                    let silentTicks = 0, ticks = 0;
+                    const chk = setInterval(() => {
+                        if (++ticks > 8) { clearInterval(chk); return; }
+                        if (video.paused || video.muted || video.volume === 0) return;
+                        analyser.getByteTimeDomainData(buf);
+                        const flat = buf.every(v => v === 128);
+                        silentTicks = flat ? silentTicks + 1 : 0;
+                        if (silentTicks >= 5) {
+                            clearInterval(chk);
+                            showToast('⚠️ Is video par boost kaam nahi karta — page reload karein');
+                        }
+                    }, 500);
+                }
+                if (mxCtx.audioCtx.state === 'suspended') mxCtx.audioCtx.resume();
+                mxCtx.boost = next;
+                mxCtx.gainNode.gain.value = next;
+                showToast(next > 1 ? `🔊 Volume boost ${Math.round(next * 100)}%` : 'Volume boost off');
+            } catch (err) {
+                showToast('⚠️ Volume boost start nahi ho paya');
+            }
+        }
+
+        // ── Keyboard shortcuts (desktop) ──
+        let mxKeysBound = false;
+        function mxBindKeys(video, wrap) {
+            if (mxKeysBound) return;
+            mxKeysBound = true;
+            document.addEventListener('keydown', (e) => {
+                if (!wrap.classList.contains('active')) return;
+                const tag = (e.target && e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+                if (e.ctrlKey || e.metaKey || e.altKey) return;
+                if (wrap.classList.contains('locked')) return;
+                const k = e.key;
+                const out = () => cvExtraAudio || video;
+                let handled = true;
+                if (k === ' ' || k === 'k' || k === 'K') { if (mxCtx.togglePlay) mxCtx.togglePlay(); }
+                else if (k === 'ArrowLeft'  || k === 'j' || k === 'J') mxSeekBy(video, -10, 'left');
+                else if (k === 'ArrowRight' || k === 'l' || k === 'L') mxSeekBy(video, 10, 'right');
+                else if (k === 'ArrowUp' || k === 'ArrowDown') {
+                    const v = Math.max(0, Math.min(1, out().volume + (k === 'ArrowUp' ? 0.05 : -0.05)));
+                    out().volume = v; video.volume = v; out().muted = v === 0;
+                    if (cvExtraAudio) video.muted = true;
+                    video.dispatchEvent(new Event('volumechange'));
+                    mxShowIndicator(v === 0 ? 'fa-volume-xmark' : 'fa-volume-high', Math.round(v * 100) + '%', v * 100);
+                }
+                else if (k === 'm' || k === 'M') { document.getElementById('cv-btn-mute').click(); }
+                else if (k === 'f' || k === 'F') { document.getElementById('cv-btn-fs').click(); }
+                else if (k === 'a' || k === 'A') { mxCycleAspect(video); }
+                else if (k === 's' || k === 'S') { mxToolAction('shot', video); }
+                else if (k === 'p' || k === 'P') { document.getElementById('cv-btn-pip').click(); }
+                else if (k === ']' || k === '[') {
+                    const r = Math.max(0.25, Math.min(3, Math.round((video.playbackRate + (k === ']' ? 0.25 : -0.25)) * 100) / 100));
+                    video.playbackRate = r;
+                    const sp = document.getElementById('cv-speed');
+                    if (sp) { if (![...sp.options].some(o => parseFloat(o.value) === r)) { const o = new Option(r + '×', r); sp.add(o); } sp.value = String(r); }
+                    mxShowIndicator('fa-gauge-high', r + '×', null);
+                }
+                else if (k === ',' || k === '.') {   // frame step (paused only)
+                    if (video.paused) video.currentTime = Math.max(0, video.currentTime + (k === '.' ? 1 : -1) / 24);
+                    else handled = false;
+                }
+                else if (/^[0-9]$/.test(k)) { if (video.duration) video.currentTime = video.duration * (parseInt(k, 10) / 10); }
+                else if (k === 'N' && e.shiftKey) { navEpisode(1); }
+                else if (k === 'P' && e.shiftKey) { navEpisode(-1); }
+                else handled = false;
+                if (handled) { e.preventDefault(); showCvControls(); }
+            });
+        }
+
+        function mxRenderTools(video) {
+            const list = document.getElementById('cv-more-list');
+            if (!list) return;
+            let abLabel = 'A-B Repeat: Off';
+            if (mxCtx.abA != null && mxCtx.abB == null) abLabel = `A-B Repeat: A=${mxFmt(mxCtx.abA)} → tap to set B`;
+            else if (mxCtx.abA != null) abLabel = `A-B Repeat: ${mxFmt(mxCtx.abA)} – ${mxFmt(mxCtx.abB)}`;
+            const items = [
+                { id: 'loop',  icon: 'fa-repeat',          label: 'Loop: ' + (video.loop ? 'ON' : 'OFF'), on: video.loop },
+                { id: 'ab',    icon: 'fa-arrows-left-right', label: abLabel, on: mxCtx.abA != null },
+                { id: 'sleep', icon: 'fa-moon',            label: 'Sleep Timer: ' + (mxCtx.sleepMin ? mxCtx.sleepMin + ' min' : 'Off'), on: !!mxCtx.sleepMin },
+                { id: 'shot',  icon: 'fa-camera',          label: 'Screenshot', on: false },
+                { id: 'boost', icon: 'fa-volume-high',     label: 'Volume Boost (beta): ' + (mxCtx.boost > 1 ? Math.round(mxCtx.boost * 100) + '%' : 'Off'), on: mxCtx.boost > 1 },
+                { id: 'subsz', icon: 'fa-text-height',     label: 'Subtitle Size: ' + Math.round(mxCtx.subSize * 100) + '%', on: mxCtx.subSize !== 1 },
+                { id: 'subdm', icon: 'fa-angles-left',     label: 'Subtitle Delay −0.5s', on: false },
+                { id: 'subdp', icon: 'fa-angles-right',    label: 'Subtitle Delay +0.5s  (now ' + (mxCtx.subDelay >= 0 ? '+' : '') + mxCtx.subDelay.toFixed(1) + 's)', on: mxCtx.subDelay !== 0 }
+            ];
+            list.innerHTML = items.map(it => `
+                <button class="cv-audio-opt ${it.on ? 'selected' : ''}" data-id="${it.id}">
+                    <span><i class="fas ${it.icon} mx-lead"></i>${avEsc(it.label)}</span>
+                </button>`).join('');
+            list.querySelectorAll('.cv-audio-opt').forEach(b => {
+                b.onclick = () => mxToolAction(b.dataset.id, video);
+            });
+        }
+
+        function mxToolAction(id, video) {
+            if (id === 'loop') {
+                video.loop = !video.loop;
+                showToast('🔁 Loop ' + (video.loop ? 'ON' : 'OFF'));
+            } else if (id === 'ab') {
+                if (mxCtx.abA == null) {
+                    mxCtx.abA = video.currentTime;
+                    showToast('A point set: ' + mxFmt(mxCtx.abA));
+                } else if (mxCtx.abB == null) {
+                    if (video.currentTime <= mxCtx.abA + 1) { showToast('B point A se aage hona chahiye'); return; }
+                    mxCtx.abB = video.currentTime;
+                    showToast('🔁 Repeating ' + mxFmt(mxCtx.abA) + ' – ' + mxFmt(mxCtx.abB));
+                } else {
+                    mxCtx.abA = null; mxCtx.abB = null;
+                    showToast('A-B repeat cleared');
+                }
+            } else if (id === 'sleep') {
+                const i = (MX_SLEEP_STEPS.indexOf(mxCtx.sleepMin) + 1) % MX_SLEEP_STEPS.length;
+                mxCtx.sleepMin = MX_SLEEP_STEPS[i];
+                clearTimeout(mxCtx.sleepTimer);
+                if (mxCtx.sleepMin) {
+                    mxCtx.sleepTimer = setTimeout(() => {
+                        video.pause();
+                        mxCtx.sleepMin = 0;
+                        showToast('😴 Sleep timer: video paused');
+                    }, mxCtx.sleepMin * 60000);
+                    showToast('😴 Sleep timer: ' + mxCtx.sleepMin + ' min');
+                } else showToast('Sleep timer off');
+            } else if (id === 'boost') {
+                mxCycleBoost(video);
+            } else if (id === 'subsz') {
+                const i = (MX_SUB_SIZES.indexOf(mxCtx.subSize) + 1) % MX_SUB_SIZES.length;
+                mxCtx.subSize = MX_SUB_SIZES[i];
+                mxApplySubSize();
+                showToast('💬 Subtitle size ' + Math.round(mxCtx.subSize * 100) + '%');
+            } else if (id === 'subdm' || id === 'subdp') {
+                mxCtx.subDelay = Math.round((mxCtx.subDelay + (id === 'subdp' ? 0.5 : -0.5)) * 10) / 10;
+                mxApplySubDelay(video);
+                showToast('💬 Subtitle delay ' + (mxCtx.subDelay >= 0 ? '+' : '') + mxCtx.subDelay.toFixed(1) + 's');
+            } else if (id === 'shot') {
+                try {
+                    const c = document.createElement('canvas');
+                    c.width = video.videoWidth; c.height = video.videoHeight;
+                    if (!c.width) { showToast('Video abhi load nahi hua'); return; }
+                    c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+                    c.toBlob(blob => {
+                        if (!blob) { showToast('⚠️ Screenshot nahi ban paya'); return; }
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `${animeSlug || 'animeverse'}_S${currentSeason}E${currentEpisode}_${mxFmt(video.currentTime).replace(/:/g,'-')}.png`;
+                        document.body.appendChild(a); a.click(); a.remove();
+                        setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+                        showToast('📸 Screenshot saved');
+                    }, 'image/png');
+                } catch (err) {
+                    showToast('⚠️ Is video ka screenshot allowed nahi (CORS)');
+                }
+            }
+            mxRenderTools(video);
+        }
+
+        function mxSetupTools(video) {
+            // reset per-episode state (loop / A-B); sleep timer intentionally persists
+            video.loop = false; mxCtx.abA = null; mxCtx.abB = null;
+            mxCtx.subDelay = 0;          // new episode = new subtitle file, delay starts at 0
+            mxApplySubSize();
+            mxBindKeys(video, document.getElementById('custom-player-wrap'));
+            mxRenderTools(video);
+            const btn  = document.getElementById('cv-btn-more');
+            const menu = document.getElementById('cv-more-menu');
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                hideAudioMenu(); hideCcMenu();
+                mxApplySubDelay(video);   // re-apply delay in case a different subtitle track was picked
+                mxRenderTools(video);
+                menu.classList.toggle('open');
+                showCvControls();
+            };
+            if (mxToolsBound) return;
+            mxToolsBound = true;
+            video.addEventListener('timeupdate', () => {
+                if (mxCtx.abA != null && mxCtx.abB != null && video.currentTime >= mxCtx.abB) video.currentTime = mxCtx.abA;
+            });
+            document.addEventListener('click', (e) => {
+                const w = document.getElementById('cv-more-wrap');
+                if (w && !w.contains(e.target)) menu.classList.remove('open');
+            });
+            ['touchstart', 'touchmove', 'wheel'].forEach(evt => {
+                menu.addEventListener(evt, (e) => { e.stopPropagation(); showCvControls(); }, { passive: true });
+            });
+            menu.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        let mxGesturesBound = false;
+        function mxSetupGestures(video, wrap, tapArea) {
+            if (mxGesturesBound) return;
+            mxGesturesBound = true;
+            let g = null;
+
+            // ── Long-press = temporary 2x speed (release to go back) ──
+            let lpTimer = null, lpFired = false, lpPrevRate = 1, lpX = 0, lpY = 0;
+            const badge = document.getElementById('mx-speed-badge');
+            const lpEnd = () => {
+                clearTimeout(lpTimer);
+                if (lpFired) {
+                    lpFired = false;
+                    video.playbackRate = lpPrevRate;
+                    if (badge) badge.classList.remove('show');
+                    setTimeout(() => { mxCtx.suppressClick = false; }, 80);
+                }
+            };
+            tapArea.addEventListener('touchstart', (e) => {
+                clearTimeout(lpTimer);
+                // New touch sequence → forget any stale "swallow next click" flag from the previous gesture
+                if (e.touches.length === 1) { mxCtx.suppressClick = false; lpFired = false; }
+                if (wrap.classList.contains('locked') || e.touches.length !== 1) return;
+                lpX = e.touches[0].clientX; lpY = e.touches[0].clientY;
+                lpTimer = setTimeout(() => {
+                    if (video.paused) return;
+                    lpFired = true;
+                    lpPrevRate = video.playbackRate || 1;
+                    video.playbackRate = 2;
+                    mxCtx.suppressClick = true;
+                    clearTimeout(mxCtx.tapTimer);
+                    if (badge) badge.classList.add('show');
+                }, 500);
+            }, { passive: true });
+            tapArea.addEventListener('touchmove', (e) => {
+                if (e.touches.length !== 1) { clearTimeout(lpTimer); return; }
+                if (!lpFired && Math.hypot(e.touches[0].clientX - lpX, e.touches[0].clientY - lpY) > 10) clearTimeout(lpTimer);
+            }, { passive: true });
+            tapArea.addEventListener('touchend', lpEnd, { passive: true });
+            tapArea.addEventListener('touchcancel', lpEnd, { passive: true });
+            tapArea.addEventListener('contextmenu', (e) => e.preventDefault());
+
+            // ── Pinch to zoom (two fingers) ──
+            let pinch = null;
+            const dist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+            tapArea.addEventListener('touchstart', (e) => {
+                if (wrap.classList.contains('locked')) return;
+                if (e.touches.length === 2) {
+                    pinch = { d0: dist(e.touches[0], e.touches[1]), z0: mxCtx.zoom };
+                    g = null;
+                    mxCtx.suppressClick = true;
+                    clearTimeout(mxCtx.tapTimer);
+                }
+            }, { passive: true });
+            tapArea.addEventListener('touchmove', (e) => {
+                if (!pinch || e.touches.length !== 2) return;
+                e.preventDefault();
+                const z = Math.max(0.5, Math.min(4, pinch.z0 * (dist(e.touches[0], e.touches[1]) / pinch.d0)));
+                mxCtx.zoom = z;
+                mxApplyZoom(video);
+                mxShowIndicator('fa-magnifying-glass-plus', Math.round(z * 100) + '%', null);
+            }, { passive: false });
+            tapArea.addEventListener('touchend', (e) => {
+                if (pinch && e.touches.length < 2) {
+                    pinch = null;
+                    setTimeout(() => { mxCtx.suppressClick = false; }, 80);
+                }
+            }, { passive: true });
+
+            tapArea.addEventListener('touchstart', (e) => {
+                if (wrap.classList.contains('locked')) { g = null; return; }
+                if (e.touches.length !== 1) { g = null; return; }   // multi-touch handled by pinch (step 3)
+                const t = e.touches[0];
+                const rect = tapArea.getBoundingClientRect();
+                g = {
+                    x0: t.clientX, y0: t.clientY,
+                    t0: video.currentTime,
+                    zone: (t.clientX - rect.left) < rect.width / 2 ? 'left' : 'right',
+                    mode: null,
+                    vol0: (cvExtraAudio || video).volume,
+                    br0: mxCtx.brightness,
+                    w: rect.width, h: rect.height,
+                    target: null
+                };
+            }, { passive: true });
+
+            tapArea.addEventListener('touchmove', (e) => {
+                if (!g || e.touches.length !== 1) return;
+                const t = e.touches[0];
+                const dx = t.clientX - g.x0, dy = t.clientY - g.y0;
+                if (!g.mode) {
+                    if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+                    g.mode = Math.abs(dx) > Math.abs(dy) ? 'seek' : (g.zone === 'left' ? 'bright' : 'vol');
+                }
+                e.preventDefault();
+                mxCtx.suppressClick = true;
+                clearTimeout(mxCtx.tapTimer);
+
+                if (g.mode === 'seek') {
+                    if (!video.duration) return;
+                    // full-width swipe ≈ 2 minutes, like MX
+                    const delta = (dx / g.w) * 120;
+                    g.target = Math.max(0, Math.min(video.duration, g.t0 + delta));
+                    const diff = g.target - g.t0;
+                    mxShowIndicator(diff >= 0 ? 'fa-forward' : 'fa-backward',
+                        mxFmt(g.target), null,
+                        (diff >= 0 ? '+' : '-') + mxFmt(Math.abs(diff)));
+                } else if (g.mode === 'bright') {
+                    const v = Math.max(0.2, Math.min(1.6, g.br0 - (dy / g.h) * 1.6));
+                    mxCtx.brightness = v;
+                    mxApplyBrightness(video);
+                    mxShowIndicator('fa-sun', Math.round((v / 1.6) * 100) + '%', (v / 1.6) * 100);
+                } else if (g.mode === 'vol') {
+                    const v = Math.max(0, Math.min(1, g.vol0 - (dy / g.h) * 1.2));
+                    const o = cvExtraAudio || video;
+                    o.volume = v; o.muted = v === 0;
+                    video.volume = v;
+                    if (cvExtraAudio) video.muted = true;
+                    video.dispatchEvent(new Event('volumechange'));
+                    mxShowIndicator(v === 0 ? 'fa-volume-xmark' : (v < 0.5 ? 'fa-volume-low' : 'fa-volume-high'),
+                        Math.round(v * 100) + '%', v * 100);
+                }
+            }, { passive: false });
+
+            const end = () => {
+                if (g && g.mode === 'seek' && g.target != null) video.currentTime = g.target;
+                g = null;
+                // click event fires right after touchend — keep suppress flag only if a swipe happened
+                if (mxCtx.suppressClick) setTimeout(() => { mxCtx.suppressClick = false; }, 60);
+            };
+            tapArea.addEventListener('touchend', end, { passive: true });
+            tapArea.addEventListener('touchcancel', () => { g = null; mxCtx.suppressClick = false; }, { passive: true });
+        }
+
         // ─── CUSTOM PLAYER LOGIC ───
         let cvControlsTimer = null;
         let cvListenersAdded = false;
@@ -3274,7 +4013,9 @@
             wrap.classList.add('show-controls');
             clearTimeout(cvControlsTimer);
             const menuOpen = document.getElementById('cv-audio-menu')?.classList.contains('open') ||
-                             document.getElementById('cv-cc-menu')?.classList.contains('open');
+                             document.getElementById('cv-cc-menu')?.classList.contains('open') ||
+                             document.getElementById('cv-more-menu')?.classList.contains('open') ||
+                             !!document.querySelector('#custom-player-wrap .dd.open');
             if (!video.paused && !menuOpen) {
                 cvControlsTimer = setTimeout(() => wrap.classList.remove('show-controls'), 3000);
             }
@@ -3414,7 +4155,61 @@
                 showCvControls();
             }
             btnPlay.onclick = togglePlay;
-            tapArea.onclick = togglePlay;
+            // ── MX: single tap = play/pause, double tap L/R = ∓10s (middle = play/pause) ──
+            // Gestures (swipe/pinch/long-press) are layered on top in later steps via mxGesture hooks.
+            mxCtx.togglePlay = togglePlay;
+            mxSetupGestures(video, wrap, tapArea);
+            tapArea.onclick = (ev) => {
+                if (mxCtx.suppressClick) { mxCtx.suppressClick = false; return; }
+                if (wrap.classList.contains('locked')) {
+                    wrap.classList.toggle('show-unlock');
+                    clearTimeout(mxCtx.unlockTimer);
+                    mxCtx.unlockTimer = setTimeout(() => wrap.classList.remove('show-unlock'), 2500);
+                    return;
+                }
+                const now = Date.now();
+                const rect = tapArea.getBoundingClientRect();
+                const x = (ev.clientX - rect.left) / rect.width;
+                if (now - mxCtx.lastTap < 300) {
+                    clearTimeout(mxCtx.tapTimer);
+                    mxCtx.lastTap = 0;
+                    if (x < 0.35) mxSeekBy(video, -10, 'left');
+                    else if (x > 0.65) mxSeekBy(video, 10, 'right');
+                    else togglePlay();
+                    return;
+                }
+                mxCtx.lastTap = now;
+                clearTimeout(mxCtx.tapTimer);
+                mxCtx.tapTimer = setTimeout(() => { mxCtx.lastTap = 0; togglePlay(); }, 280);
+            };
+
+            // ── MX: tools menu (loop / A-B / sleep / screenshot) ──
+            mxSetupTools(video);
+
+            // ── MX: Aspect ratio / zoom button (view resets for every new episode) ──
+            mxResetView(video);
+            document.getElementById('cv-btn-aspect').onclick = (e) => {
+                e.stopPropagation();
+                mxCycleAspect(video);
+                showCvControls();
+            };
+
+            // ── MX: Lock screen ──
+            document.getElementById('cv-btn-lock').onclick = (e) => {
+                e.stopPropagation();
+                wrap.classList.add('locked');
+                wrap.classList.remove('show-controls');
+                const lb = document.getElementById('cv-btn-lock');
+                lb.classList.add('mx-on');
+                showToast('🔒 Screen locked');
+            };
+            document.getElementById('cv-unlock-btn').onclick = (e) => {
+                e.stopPropagation();
+                wrap.classList.remove('locked', 'show-unlock');
+                document.getElementById('cv-btn-lock').classList.remove('mx-on');
+                showToast('🔓 Screen unlocked');
+                showCvControls();
+            };
             video.onplay  = () => { updatePlayBtn(); showCvControls(); wdLastTimeupdate = video.currentTime; wdStartTimer(); startAmbientMode(); };
             video.onpause = () => { updatePlayBtn(); wrap.classList.add('show-controls'); clearTimeout(cvControlsTimer); clearInterval(wdFlushTimer); wdFlush(); stopAmbientMode(); savePlayPos(); };
 
@@ -3564,18 +4359,56 @@
             const fsBtn  = document.getElementById('cv-btn-fs');
             const fsIcon = document.getElementById('cv-fs-icon');
 
-            fsBtn.onclick = () => {
-                if (!document.fullscreenElement) {
-                    requestFsAndRotate(wrap);
-                } else {
-                    exitFsAndUnlock();
+            // Fallback "pseudo fullscreen": agar browser/WebView/preview real Fullscreen API block kare
+            // (iframe me allow="fullscreen" na ho, in-app WebView, etc.) to player ko CSS se poori screen par failate hain.
+            const playerHost = document.getElementById('player-wrap');
+            function setFsIcon() {
+                const on = !!document.fullscreenElement || wrap.classList.contains('pseudo-fs');
+                fsIcon.className = on ? 'fas fa-compress' : 'fas fa-expand';
+            }
+            function enterPseudoFs() {
+                wrap.classList.add('pseudo-fs');
+                if (playerHost) playerHost.classList.add('pseudo-fs-host');
+                document.documentElement.classList.add('pseudo-fs-lock');
+                lockLandscape();
+                document.querySelectorAll('.dd.open').forEach(d => d.__close && d.__close());
+                setFsIcon(); showCvControls();
+            }
+            function exitPseudoFs() {
+                wrap.classList.remove('pseudo-fs');
+                if (playerHost) playerHost.classList.remove('pseudo-fs-host');
+                document.documentElement.classList.remove('pseudo-fs-lock');
+                unlockOrientation();
+                setFsIcon(); showCvControls();
+            }
+            mxCtx.exitPseudoFs = exitPseudoFs;
+            fsBtn.onclick = async (e) => {
+                if (e) e.stopPropagation();
+                if (wrap.classList.contains('pseudo-fs')) { exitPseudoFs(); return; }
+                if (document.fullscreenElement || document.webkitFullscreenElement) { exitFsAndUnlock(); showCvControls(); return; }
+                const fn = wrap.requestFullscreen || wrap.webkitRequestFullscreen || wrap.mozRequestFullScreen || wrap.msRequestFullscreen;
+                if (!fn) { enterPseudoFs(); return; }
+                try {
+                    const r = fn.call(wrap);
+                    if (r && r.then) await r;
+                    // some embedded browsers resolve without actually entering fullscreen
+                    await new Promise(res => setTimeout(res, 120));
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement) enterPseudoFs();
+                    else lockLandscape();
+                } catch (err) {
+                    enterPseudoFs();
                 }
                 showCvControls();
             };
+            if (!mxCtx.pseudoEscBound) {
+                mxCtx.pseudoEscBound = true;
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && mxCtx.exitPseudoFs && wrap.classList.contains('pseudo-fs')) mxCtx.exitPseudoFs();
+                });
+            }
             document.addEventListener('fullscreenchange', () => {
-                const isFs = !!document.fullscreenElement;
-                fsIcon.className = isFs ? 'fas fa-compress' : 'fas fa-expand';
-                if (!isFs) unlockOrientation();
+                setFsIcon();
+                if (!document.fullscreenElement) unlockOrientation();
                 showCvControls();
             });
 
@@ -4459,6 +5292,230 @@
         initPlayer().then(() => {
             if (window.AVAnalytics) window.AVAnalytics.trackAnimeView(animeSlug, animeTitle || animeSlug);
         });
+    </script>
+    <script>
+    /* ═══ ANIMATED DROPDOWNS ═══
+       Every native <select> is replaced by a custom animated dropdown. The <select> stays in the DOM
+       (hidden) as the single source of truth, so existing code — .value = …, onchange=…, option
+       toggling — keeps working unchanged. */
+    (function () {
+        const valueDesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+        const idxDesc   = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'selectedIndex');
+        let openDD = null;
+
+        function closeAll(except) {
+            document.querySelectorAll('.dd.open').forEach(d => { if (d !== except) d.classList.remove('open'); });
+            if (!except) openDD = null;
+        }
+
+        function enhance(sel) {
+            if (sel.__dd || sel.multiple || sel.size > 1) return;
+            const cs = getComputedStyle(sel);
+
+            const dd = document.createElement('div');
+            dd.className = 'dd';
+            const btn = document.createElement('button');
+            btn.type = 'button'; btn.className = 'dd-btn';
+            if (sel.title) btn.title = sel.title;
+            btn.setAttribute('aria-haspopup', 'listbox');
+            const label = document.createElement('span'); label.className = 'dd-label';
+            btn.appendChild(label);
+
+            // Copy the look of the original select so each context keeps its own styling
+            const copy = ['color','fontFamily','fontSize','fontWeight','letterSpacing','backgroundColor',
+                'borderTopWidth','borderTopStyle','borderTopColor','borderRadius',
+                'paddingTop','paddingRight','paddingBottom','paddingLeft','height','lineHeight'];
+            copy.forEach(k => { btn.style[k] = cs[k]; });
+            if (btn.style.borderTopStyle === 'none') btn.style.borderStyle = 'none';
+            else { btn.style.borderWidth = cs.borderTopWidth; btn.style.borderStyle = cs.borderTopStyle; btn.style.borderColor = cs.borderTopColor; }
+            if (cs.flexGrow !== '0') { dd.style.flex = cs.flex; btn.style.width = '100%'; }
+            const inPlayer = !!sel.closest('#custom-player-wrap');
+            if (inPlayer) btn.style.minWidth = '44px';
+
+            // caret only when the surrounding markup has no chevron of its own
+            const sib = sel.nextElementSibling;
+            const hasChevron = sib && sib.classList && sib.classList.contains('fa-chevron-down');
+            if (!hasChevron) {
+                const c = document.createElement('i'); c.className = 'fas fa-chevron-down dd-caret'; btn.appendChild(c);
+            }
+
+            const menu = document.createElement('div');
+            menu.className = 'dd-menu' + ((cs.fontFamily || '').toLowerCase().includes('mono') ? ' mono' : '');
+            menu.setAttribute('role', 'listbox');
+            dd.appendChild(btn); dd.appendChild(menu);
+            sel.parentNode.insertBefore(dd, sel);
+            sel.classList.add('dd-native');
+            sel.tabIndex = -1;
+            sel.__dd = dd;
+
+            let kbIdx = -1;
+            const visibleOpts = () => Array.from(sel.options).filter(o => !o.hidden && o.style.display !== 'none');
+
+            function sync() {
+                const cur = sel.options[sel.selectedIndex];
+                label.textContent = cur ? cur.textContent.trim() : '';
+                btn.disabled = sel.disabled;
+                menu.textContent = '';
+                visibleOpts().forEach((o, i) => {
+                    const it = document.createElement('button');
+                    it.type = 'button'; it.className = 'dd-item' + (o === cur ? ' sel' : '');
+                    it.style.setProperty('--i', i);
+                    it.setAttribute('role', 'option');
+                    it.setAttribute('aria-selected', o === cur ? 'true' : 'false');
+                    const t = document.createElement('span'); t.textContent = o.textContent.trim();
+                    it.appendChild(t);
+                    it.dataset.value = o.value;
+                    it.addEventListener('click', (e) => { e.stopPropagation(); choose(o); });
+                    menu.appendChild(it);
+                });
+                kbIdx = -1;
+            }
+
+            function choose(o) {
+                const changed = sel.value !== o.value;
+                idxDesc.set.call(sel, o.index);
+                sync();
+                close();
+                btn.focus({ preventScroll: true });
+                if (changed) sel.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            function place() {
+                menu.style.transition = 'none'; menu.style.transform = 'none';
+                menu.style.left = '0px'; menu.style.top = '0px';
+                menu.style.minWidth = Math.max(btn.offsetWidth, 110) + 'px';
+                const b = btn.getBoundingClientRect();
+                const o = menu.getBoundingClientRect();           // origin shift (if a transformed ancestor exists)
+                const mw = menu.offsetWidth, mh = menu.offsetHeight;
+                const vw = window.innerWidth, vh = window.innerHeight;
+                let left = b.left;
+                if (left + mw > vw - 8) left = Math.max(8, b.right - mw);
+                const below = vh - b.bottom - 10, above = b.top - 10;
+                const up = mh > below && above > below;
+                const top = up ? Math.max(8, b.top - mh - 6) : b.bottom + 6;
+                menu.classList.toggle('up', up);
+                menu.style.left = (left - o.left) + 'px';
+                menu.style.top  = (top - o.top) + 'px';
+                void menu.offsetWidth;                            // flush, then re-enable the animation
+                menu.style.transition = ''; menu.style.transform = '';
+                void menu.offsetWidth;
+            }
+
+            function open() {
+                if (sel.disabled) return;
+                closeAll(dd);
+                sync();
+                place();
+                dd.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
+                openDD = dd;
+                const s = menu.querySelector('.sel'); if (s) s.scrollIntoView({ block: 'nearest' });
+            }
+            function close() { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); if (openDD === dd) openDD = null; }
+            dd.__close = close;
+
+            btn.addEventListener('click', (e) => { e.stopPropagation(); dd.classList.contains('open') ? close() : open(); });
+            menu.addEventListener('click', (e) => e.stopPropagation());
+            ['touchstart', 'touchmove', 'wheel', 'pointerdown'].forEach(evt =>
+                dd.addEventListener(evt, (e) => e.stopPropagation(), { passive: true }));
+
+            btn.addEventListener('keydown', (e) => {
+                const items = Array.from(menu.querySelectorAll('.dd-item'));
+                const isOpen = dd.classList.contains('open');
+                if (e.key === 'Escape' && isOpen) { close(); e.stopPropagation(); e.preventDefault(); return; }
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault(); e.stopPropagation();
+                    if (!isOpen) { open(); return; }
+                    kbIdx = kbIdx < 0 ? Math.max(0, items.findIndex(i => i.classList.contains('sel'))) : kbIdx;
+                    kbIdx = (kbIdx + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+                    items.forEach((i, n) => i.classList.toggle('kb', n === kbIdx));
+                    items[kbIdx].scrollIntoView({ block: 'nearest' });
+                } else if ((e.key === 'Enter' || e.key === ' ') && isOpen && kbIdx >= 0) {
+                    e.preventDefault(); e.stopPropagation();
+                    const val = items[kbIdx].dataset.value;
+                    const o = Array.from(sel.options).find(x => x.value === val); if (o) choose(o);
+                }
+            });
+
+            // keep in sync when other code changes the select
+            Object.defineProperty(sel, 'value', { configurable: true,
+                get() { return valueDesc.get.call(this); },
+                set(v) { valueDesc.set.call(this, v); sync(); } });
+            Object.defineProperty(sel, 'selectedIndex', { configurable: true,
+                get() { return idxDesc.get.call(this); },
+                set(v) { idxDesc.set.call(this, v); sync(); } });
+            sel.addEventListener('change', sync);
+            new MutationObserver(sync).observe(sel, { childList: true, subtree: true, attributes: true, characterData: true });
+            sync();
+        }
+
+        function scan(root) { (root.querySelectorAll ? root.querySelectorAll('select') : []).forEach(enhance); }
+
+        document.addEventListener('click', () => closeAll());
+        document.addEventListener('pointerdown', (e) => { if (openDD && !openDD.contains(e.target)) closeAll(); }, true);
+        window.addEventListener('scroll', (e) => { if (openDD && !openDD.contains(e.target)) closeAll(); }, true);
+        window.addEventListener('resize', () => closeAll());
+        document.addEventListener('fullscreenchange', () => closeAll());
+
+        scan(document);
+        // selects rendered later (e.g. quality select inside #server-tabs)
+        new MutationObserver((muts) => {
+            for (const m of muts) m.addedNodes.forEach(n => {
+                if (n.nodeType !== 1) return;
+                if (n.tagName === 'SELECT') enhance(n); else scan(n);
+            });
+        }).observe(document.body, { childList: true, subtree: true });
+    })();
+    </script>
+    <script>
+    /* Player menus (audio / captions / tools): keep them inside the player box.
+       The player is small on phones and clips overflow, so each menu is placed with
+       position:fixed, flipped up/down where there is more room, and given a max-height
+       that fits — extra items scroll inside the menu. */
+    (function () {
+        const pairs = [['cv-audio-menu', 'cv-btn-audio'], ['cv-cc-menu', 'cv-btn-cc'], ['cv-more-menu', 'cv-btn-more']];
+        function place(menu, btn) {
+            const wrap = document.getElementById('custom-player-wrap');
+            if (!wrap || !btn) return;
+            const W = wrap.getBoundingClientRect(), b = btn.getBoundingClientRect(), pad = 8, gap = 6;
+            menu.style.position = 'fixed';
+            menu.style.right = 'auto'; menu.style.bottom = 'auto'; menu.style.top = '0px'; menu.style.left = '0px';
+            menu.style.maxHeight = 'none'; menu.style.overflowY = 'auto';
+            menu.style.maxWidth = Math.max(120, W.width - pad * 2) + 'px';
+            const mw = menu.offsetWidth, mh = menu.scrollHeight + 2;
+            const below = W.bottom - b.bottom - gap - pad;
+            const above = b.top - W.top - gap - pad;
+            const goUp = mh > below && above > below;
+            const avail = Math.max(60, goUp ? above : below);
+            const h = Math.min(mh, avail);
+            menu.style.maxHeight = h + 'px';
+            let left = b.right - mw;
+            left = Math.min(left, W.right - mw - pad);
+            left = Math.max(left, W.left + pad);
+            const top = goUp ? b.top - gap - h : b.bottom + gap;
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
+        }
+        pairs.forEach(([mid, bid]) => {
+            const menu = document.getElementById(mid), btn = document.getElementById(bid);
+            if (!menu || !btn) return;
+            let was = false;
+            new MutationObserver(() => {
+                const now = menu.classList.contains('open');
+                if (now && !was) place(menu, btn);
+                was = now;
+            }).observe(menu, { attributes: true, attributeFilter: ['class'] });
+            // content can change while open (e.g. tools labels) — re-fit
+            new MutationObserver(() => { if (menu.classList.contains('open')) place(menu, btn); })
+                .observe(menu, { childList: true, subtree: true });
+        });
+        const refit = () => pairs.forEach(([mid, bid]) => {
+            const m = document.getElementById(mid);
+            if (m && m.classList.contains('open')) place(m, document.getElementById(bid));
+        });
+        window.addEventListener('resize', refit);
+        document.addEventListener('fullscreenchange', () => setTimeout(refit, 150));
+    })();
     </script>
 </body>
 </html>
